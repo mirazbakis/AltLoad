@@ -23,6 +23,7 @@ struct LibraryView: View {
                         }
                         .padding(.vertical, 4)
                     }
+                    .auroraRow()
                 }
 
                 Section {
@@ -57,9 +58,9 @@ struct LibraryView: View {
                 } footer: {
                     Text("The file marked **This iPhone** is used for installs. Long-press to change it. Files also appear in **Files › On My iPhone › AltLoad**.")
                 }
+                .auroraRow()
             }
-            .scrollContentBackground(.hidden)
-            .background(AuroraBackground())
+            .auroraListBackground()
             .navigationTitle("Library")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

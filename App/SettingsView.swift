@@ -21,6 +21,25 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    HStack(spacing: 16) {
+                        AltLoadMark(size: 64)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("AltLoad")
+                                .font(.title2.bold())
+                                .foregroundStyle(Aurora.frost)
+                            Text("Version \(version)")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            Text("AltStore, installed without a computer")
+                                .font(.caption)
+                                .foregroundStyle(Aurora.lilac.opacity(0.8))
+                        }
+                    }
+                    .padding(.vertical, 10)
+                }
+                .listRowBackground(Color.clear)
+
                 Section("Apple ID") {
                     LabeledContent("Account", value: appleID.isEmpty ? "Not signed in" : appleID)
                     Button("Forget Apple ID and Password", role: .destructive) {
@@ -29,6 +48,7 @@ struct SettingsView: View {
                     }
                     .disabled(appleID.isEmpty)
                 }
+                .auroraRow()
 
                 Section {
                     LabeledContent("Status", value: vpnActive ? "Connected" : "Not connected")
@@ -44,6 +64,7 @@ struct SettingsView: View {
                 } footer: {
                     Text("Installs go through LocalDevVPN, which loops this address back into the iPhone. Only change it if you changed LocalDevVPN's peer IP.")
                 }
+                .auroraRow()
 
                 Section {
                     Picker("Server", selection: $anisetteChoice) {
@@ -77,6 +98,7 @@ struct SettingsView: View {
                 } footer: {
                     Text("Apple requires device-identity headers (\"anisette\") to sign in. The server never sees your password. If sign-in fails, try another server. The list comes from SideStore's community servers.")
                 }
+                .auroraRow()
 
                 Section {
                     TextField("https://…", text: $sourceURL)
@@ -93,6 +115,7 @@ struct SettingsView: View {
                 } footer: {
                     Text("AltLoad installs the newest AltStore listed in this source.")
                 }
+                .auroraRow()
 
                 Section {
                     Toggle("Silent audio", systemImage: "speaker.wave.2", isOn: $pairing.keepAliveAudio)
@@ -102,6 +125,7 @@ struct SettingsView: View {
                 } footer: {
                     Text("Turn one on if the Live Activity doesn't start while you pair from Settings.")
                 }
+                .auroraRow()
 
                 Section {
                     LabeledContent("Version", value: version)
@@ -114,9 +138,9 @@ struct SettingsView: View {
                 } footer: {
                     Text("AltLoad isn't affiliated with AltStore, Riley Testut or Apple. Pairing flow based on StikPair, for non-commercial use only. See LICENSE.")
                 }
+                .auroraRow()
             }
-            .scrollContentBackground(.hidden)
-            .background(AuroraBackground())
+            .auroraListBackground()
             .navigationTitle("Settings")
             .task {
                 await anisette.refresh()

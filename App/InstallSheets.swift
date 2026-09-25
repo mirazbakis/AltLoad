@@ -25,15 +25,16 @@ struct SignInSheet: View {
                 } footer: {
                     Text("Your password goes only to Apple. Apple also requires device-identity headers (\"anisette\"), which AltLoad gets from \(host). You can use a secondary Apple ID if you prefer.")
                 }
+                .auroraRow()
 
                 Section {
                     Toggle("Remember password", isOn: $remember)
                 } footer: {
                     Text("Kept in this iPhone's Keychain so refreshing is one tap. It never syncs to iCloud.")
                 }
+                .auroraRow()
             }
-            .scrollContentBackground(.hidden)
-            .background(AuroraBackground())
+            .auroraListBackground()
             .navigationTitle("Apple ID")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -89,6 +90,7 @@ struct TwoFactorSheet: View {
                         Text(error).foregroundStyle(Aurora.danger)
                     }
                 }
+                .auroraRow()
 
                 Section("Other options") {
                     Button("Send code to my Apple devices") { respond("devices") }
@@ -99,9 +101,9 @@ struct TwoFactorSheet: View {
                         Button("Resend code") { respond("resend") }
                     }
                 }
+                .auroraRow()
             }
-            .scrollContentBackground(.hidden)
-            .background(AuroraBackground())
+            .auroraListBackground()
             .navigationTitle("Verification")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -165,9 +167,9 @@ struct RevokeSheet: View {
                 } footer: {
                     Text("Your Apple ID has reached its limit of development certificates. Choose one to revoke. Apps signed with it by another computer or tool will stop opening until they're signed again.")
                 }
+                .auroraRow()
             }
-            .scrollContentBackground(.hidden)
-            .background(AuroraBackground())
+            .auroraListBackground()
             .navigationTitle("Certificate Limit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -1,10 +1,14 @@
-# AltLoad
+<p align="center">
+  <img src="docs/assets/logo.svg" width="128" height="128" alt="AltLoad logo">
+</p>
 
-**Install AltStore on your iPhone using just your iPhone, with no computer involved.**
+<h1 align="center">AltLoad</h1>
+
+<p align="center"><b>Install AltStore on your iPhone using just your iPhone, with no computer involved.</b></p>
 
 Normally, installing [AltStore](https://altstore.io) requires AltServer running on a Mac or PC. AltLoad does that job on the iPhone itself. It pairs the iPhone with itself, signs AltStore with your Apple ID, and installs it. When the 7-day signature is about to run out, you refresh it in AltLoad with one tap.
 
-Built with SwiftUI for iOS 27, with a dark aurora theme and Liquid Glass.
+Built with SwiftUI for iOS 27, with a dark purple theme and Liquid Glass.
 
 > [!WARNING]
 > **Early preview.** AltLoad hasn't been tested properly yet. Expect bugs, and please [open an issue](https://github.com/mirazbakis/AltLoad/issues) if something doesn't work.

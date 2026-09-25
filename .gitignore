@@ -1,9 +1,55 @@
-rust/target/
-AltLoad.xcodeproj/
-DerivedData/
-*.xcuserstate
+# ---- macOS ----
 .DS_Store
-AltLoadFFI.xcframework/
-build/
-*.ipa*
+.AppleDouble
+.LSOverride
+._*
 
+# ---- Xcode (the project is generated from project.yml by XcodeGen) ----
+AltLoad.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+DerivedData/
+build/
+*.dSYM
+*.dSYM.zip
+*.hmap
+*.moved-aside
+
+# ---- Swift Package Manager ----
+.build/
+.swiftpm/
+
+# ---- Rust ----
+target/
+**/*.rs.bk
+
+# ---- Build outputs ----
+AltLoadFFI.xcframework/
+*.ipa
+Payload/
+
+# ---- Signing material & secrets: never commit these ----
+*.p12
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*.provisionprofile
+*.pem
+*.key
+.env
+.env.*
+CodeSigning.xcconfig
+
+# ---- Device pairing files grant access to a device ----
+rp_pairing_file*.plist
+*.mobiledevicepairing
+*.plist.pairing
+
+# ---- Editors ----
+.idea/
+.vscode/
+*.swp
+*~

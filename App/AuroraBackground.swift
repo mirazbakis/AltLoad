@@ -1,11 +1,16 @@
 import SwiftUI
 
-/// Night sky with slowly drifting aurora bands and a light scatter of stars,
-/// so the Liquid Glass above it has colour to refract.
+/// Dark purple sky, lighter towards the top, with slowly drifting violet
+/// light and a faint scatter of stars, so the Liquid Glass above it has
+/// colour to refract.
 struct AuroraBackground: View {
     var body: some View {
         ZStack {
-            Aurora.night
+            // Base: lit plum at the top, fading to deep purple.
+            LinearGradient(
+                colors: [Aurora.dusk, Aurora.deepBlue, Aurora.night],
+                startPoint: .top,
+                endPoint: .bottom)
 
             TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
                 MeshGradient(
@@ -13,24 +18,32 @@ struct AuroraBackground: View {
                     height: 3,
                     points: points(at: context.date),
                     colors: [
-                        Aurora.deepBlue, Aurora.indigo, Aurora.deepBlue,
-                        Aurora.indigo.opacity(0.9), Aurora.violet.opacity(0.75), Aurora.lilac.opacity(0.35),
-                        Aurora.night, Aurora.deepBlue, Aurora.night
+                        Aurora.indigo.opacity(0.9), Aurora.violet.opacity(0.55), Aurora.indigo.opacity(0.8),
+                        Aurora.deepBlue.opacity(0.6), Aurora.orchid.opacity(0.35), Aurora.violet.opacity(0.4),
+                        Aurora.night.opacity(0.0), Aurora.deepBlue.opacity(0.4), Aurora.night.opacity(0.0)
                     ]
                 )
-                .opacity(0.9)
+                .blendMode(.plusLighter)
+                .opacity(0.75)
             }
 
             StarField()
                 .blendMode(.screen)
-                .opacity(0.55)
+                .opacity(0.35)
 
-            // Soft white glow near the top edge, like light on the horizon.
+            // Soft light spilling down from the top edge.
             RadialGradient(
-                colors: [Aurora.frost.opacity(0.18), .clear],
-                center: .init(x: 0.5, y: -0.05),
-                startRadius: 10,
-                endRadius: 420)
+                colors: [Aurora.lilac.opacity(0.22), .clear],
+                center: .init(x: 0.5, y: -0.1),
+                startRadius: 20,
+                endRadius: 480)
+
+            // Gentle vignette to keep the edges calm.
+            RadialGradient(
+                colors: [.clear, Aurora.night.opacity(0.55)],
+                center: .center,
+                startRadius: 260,
+                endRadius: 720)
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
@@ -38,10 +51,10 @@ struct AuroraBackground: View {
 
     private func points(at date: Date) -> [SIMD2<Float>] {
         let t = Float(date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 10_000))
-        let center = SIMD2<Float>(0.5 + 0.2 * sin(t * 0.21), 0.42 + 0.12 * cos(t * 0.17))
-        let left = SIMD2<Float>(0, 0.5 + 0.12 * sin(t * 0.13))
-        let right = SIMD2<Float>(1, 0.45 + 0.14 * cos(t * 0.19))
-        let top = SIMD2<Float>(0.5 + 0.15 * cos(t * 0.11), 0)
+        let center = SIMD2<Float>(0.5 + 0.18 * sin(t * 0.19), 0.38 + 0.1 * cos(t * 0.15))
+        let left = SIMD2<Float>(0, 0.45 + 0.1 * sin(t * 0.12))
+        let right = SIMD2<Float>(1, 0.4 + 0.12 * cos(t * 0.17))
+        let top = SIMD2<Float>(0.5 + 0.14 * cos(t * 0.1), 0)
         return [
             SIMD2(0, 0), top, SIMD2(1, 0),
             left, center, right,
@@ -56,8 +69,8 @@ private struct StarField: View {
 
     private static let stars: [Star] = {
         var rng = SplitMix(seed: 0xA17_10AD)
-        return (0..<90).map { _ in
-            Star(x: rng.next(), y: rng.next() * 0.7, r: 0.4 + rng.next() * 1.1, a: 0.25 + rng.next() * 0.6)
+        return (0..<60).map { _ in
+            Star(x: rng.next(), y: rng.next() * 0.6, r: 0.4 + rng.next() * 0.9, a: 0.2 + rng.next() * 0.5)
         }
     }()
 

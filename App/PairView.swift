@@ -36,9 +36,16 @@ struct PairView: View {
 
     private var header: some View {
         VStack(spacing: 14) {
-            GlassBadge(systemImage: headerSymbol, tint: headerTint, size: 100)
-                .contentTransition(.symbolEffect(.replace))
-                .symbolEffect(.pulse, isActive: isWorking)
+            Group {
+                if case .idle = controller.phase {
+                    AltLoadMark(size: 100)
+                } else {
+                    GlassBadge(systemImage: headerSymbol, tint: headerTint, size: 100)
+                        .contentTransition(.symbolEffect(.replace))
+                        .symbolEffect(.pulse, isActive: isWorking)
+                }
+            }
+            .padding(.vertical, 6)
 
             Text(subtitle)
                 .font(.subheadline)
@@ -64,8 +71,11 @@ struct PairView: View {
                 }
 
                 if let latest = store.items.first {
-                    lastPairingCard(latest)
-                        .padding(.top, 8)
+                    VStack(spacing: 10) {
+                        SectionLabel(title: "Recent")
+                        lastPairingCard(latest)
+                    }
+                    .padding(.top, 10)
                 }
             }
 

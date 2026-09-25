@@ -23,7 +23,10 @@ struct InstallView: View {
                         .transition(.blurReplace.combined(with: .scale(0.97)))
                 }
 
-                checklist
+                VStack(spacing: 10) {
+                    SectionLabel(title: "Setup", trailing: "\(readyCount) of 4 ready")
+                    checklist
+                }
 
                 Text("AltLoad signs AltStore with your Apple ID and installs it straight onto this iPhone, no computer needed. With a free Apple ID, apps last 7 days. AltLoad reminds you the day before.")
                     .font(.caption)
@@ -101,31 +104,43 @@ struct InstallView: View {
     // MARK: - Hero
 
     private var hero: some View {
-        VStack(spacing: 14) {
-            AsyncImage(url: controller.latest?.iconURL) { image in
-                image.resizable().scaledToFit()
-            } placeholder: {
-                Image(systemName: "square.stack.3d.up.fill")
-                    .font(.system(size: 40, weight: .semibold))
-                    .foregroundStyle(Aurora.accentGradient)
+        GlassCard(padding: 24) {
+            VStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(Aurora.violet.opacity(0.55))
+                        .frame(width: 120, height: 120)
+                        .blur(radius: 38)
+                    AsyncImage(url: controller.latest?.iconURL) { image in
+                        image.resizable().scaledToFit()
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            .fill(Aurora.accentGradient)
+                            .overlay {
+                                Image(systemName: "square.stack.3d.up.fill")
+                                    .font(.system(size: 36, weight: .semibold))
+                                    .foregroundStyle(Aurora.frost)
+                            }
+                    }
+                    .frame(width: 96, height: 96)
+                    .clipShape(.rect(cornerRadius: 22, style: .continuous))
+                    .shadow(color: .black.opacity(0.35), radius: 14, y: 8)
+                }
+
+                VStack(spacing: 4) {
+                    Text("AltStore")
+                        .font(.title.bold())
+                        .foregroundStyle(Aurora.frost)
+                    Text(versionLine)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+
+                statusChip
             }
-            .frame(width: 84, height: 84)
-            .clipShape(.rect(cornerRadius: 20))
-            .padding(10)
-            .glassEffect(.regular.tint(Aurora.violet.opacity(0.35)).interactive(), in: .rect(cornerRadius: 30))
-
-            Text("AltStore")
-                .font(.largeTitle.bold())
-                .foregroundStyle(Aurora.frost)
-
-            Text(versionLine)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-
-            statusChip
+            .frame(maxWidth: .infinity)
         }
-        .padding(.top, 4)
     }
 
     private var versionLine: String {
@@ -188,22 +203,25 @@ struct InstallView: View {
 
         case .checking:
             GlassCard {
-                HStack(spacing: 12) {
-                    ProgressView()
-                    Text("Getting ready…").foregroundStyle(.secondary)
+                HStack(spacing: 16) {
+                    ProgressRing(value: nil, lineWidth: 6, size: 44)
+                    Text("Getting ready…")
+                        .font(.headline)
                 }
             }
 
         case .downloading(let fraction):
             GlassCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Downloading AltStore \(controller.latest?.version ?? "")")
-                        .font(.headline)
-                    ProgressView(value: fraction)
-                        .tint(Aurora.lilac)
-                    Text(fraction.formatted(.percent.precision(.fractionLength(0))))
-                        .font(.caption.monospacedDigit())
-                        .foregroundStyle(.secondary)
+                HStack(spacing: 16) {
+                    ProgressRing(value: fraction, size: 64)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Downloading")
+                            .font(.headline)
+                        Text("AltStore \(controller.latest?.version ?? "")")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer(minLength: 0)
                 }
             }
 
@@ -241,23 +259,21 @@ struct InstallView: View {
         case .working(let stage, let fraction):
             VStack(spacing: 14) {
                 GlassCard {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack(spacing: 12) {
-                            if fraction == nil { ProgressView() }
+                    HStack(spacing: 16) {
+                        ProgressRing(value: fraction, size: 64)
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(stage)
                                 .font(.headline)
                                 .contentTransition(.opacity)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Text("Keep AltLoad open until this finishes.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                        if let fraction {
-                            ProgressView(value: fraction)
-                                .tint(Aurora.lilac)
-                        }
-                        Text("Keep AltLoad open until this finishes.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Spacer(minLength: 0)
                     }
                 }
-                GlassActionButton(title: "Cancel") { controller.cancel() }
+                GlassActionButton(title: "Cancel", systemImage: "xmark") { controller.cancel() }
             }
 
         case .success(let app):
@@ -336,6 +352,15 @@ struct InstallView: View {
                     state: controller.installed == nil ? .pending : (controller.installed!.isExpired ? .attention : .done))
             }
         }
+    }
+
+    private var readyCount: Int {
+        var n = 0
+        if pairings.selfPairing != nil { n += 1 }
+        if vpnActive { n += 1 }
+        if !AppleIDStore.email.isEmpty { n += 1 }
+        if let app = controller.installed, !app.isExpired { n += 1 }
+        return n
     }
 
     private var installedDetail: String {
