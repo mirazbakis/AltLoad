@@ -76,9 +76,28 @@ jobs:
           name: AltLoad-unsigned
           path: AltLoad.ipa
           if-no-files-found: error
+          retention-days: 90
 
       - name: Attach IPA to release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v3
         with:
           files: AltLoad.ipa
+
+      # Keeps a public "Nightly build" release pointing at the newest main build,
+      # so anyone can download the IPA without a GitHub account.
+      - name: Publish nightly build
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git tag -f nightly
+          git push -f origin refs/tags/nightly
+          NOTES="Latest unsigned build of \`main\` (commit ${GITHUB_SHA::7}). Updated automatically on every push. Sign it with your own tool before installing. For stable builds, use the versioned releases."
+          if gh release view nightly >/dev/null 2>&1; then
+            gh release edit nightly --prerelease --title "Nightly build" --notes "$NOTES"
+          else
+            gh release create nightly --prerelease --title "Nightly build" --notes "$NOTES"
+          fi
+          gh release upload nightly AltLoad.ipa --clobber

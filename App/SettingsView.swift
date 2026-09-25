@@ -136,7 +136,15 @@ struct SettingsView: View {
                 } header: {
                     Text("About")
                 } footer: {
-                    Text("AltLoad isn't affiliated with AltStore, Riley Testut or Apple. Pairing flow based on StikPair, for non-commercial use only. See LICENSE.")
+                    Text("AltLoad isn't affiliated with AltStore, Riley Testut or Apple. Pairing flow based on StikPair.")
+                }
+                .auroraRow()
+
+                Section("Legal") {
+                    Link("Terms of Service", destination: URL(string: "https://mirazbakis.github.io/terms.html")!)
+                    Link("AltLoad License", destination: URL(string: "https://github.com/mirazbakis/AltLoad/blob/main/LICENSE")!)
+                    Link("Third-Party Notices", destination: URL(string: "https://github.com/mirazbakis/AltLoad/blob/main/THIRD_PARTY_NOTICES.md")!)
+                    Link("Security Policy", destination: URL(string: "https://github.com/mirazbakis/AltLoad/blob/main/SECURITY.md")!)
                 }
                 .auroraRow()
             }

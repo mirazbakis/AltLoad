@@ -1,25 +1,102 @@
-StikPair License (MIT, Non-Commercial)
+AltLoad License
+Version 1.0, September 2026
 
-Copyright (c) 2026 StephenDev0
+Copyright (c) 2026 mirazbakis and AltLoad contributors
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software for NON-COMMERCIAL purposes, including without limitation the rights
-to use, copy, modify, merge, publish, and distribute copies of the Software, and
-to permit persons to whom the Software is furnished to do so, subject to the
-following conditions:
+AltLoad contains code derived from other projects. Those portions stay under
+their original licenses, which are reproduced in THIRD_PARTY_NOTICES.md:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  - StikPair, Copyright (c) 2026 StephenDev0, StikPair License (MIT,
+    Non-Commercial). AltLoad's pairing flow (App/PairingController.swift,
+    App/KeepAlive.swift, App/LocalNetworkAuthorization.swift,
+    App/AppleTVDiscovery.swift, rust/src/lib.rs and the build scripts)
+    is derived from it.
+  - idevice, Copyright 2026 Jackson Coxson, MIT License. rust/src/lib.rs is
+    derived from its ffi/src/pairable_host.rs.
 
-COMMERCIAL USE of the Software — including, without limitation, selling it,
-bundling it into a paid product or service, or otherwise using it to generate
-revenue — is NOT permitted without prior written permission from the copyright
-holder. For a commercial license, contact StephenDev0@outlook.com.
+Nothing in this license grants more rights to those portions than their
+original licenses do.
+
+-------------------------------------------------------------------------------
+1. Definitions
+-------------------------------------------------------------------------------
+
+"Software" means the AltLoad source code, documentation, artwork (including
+the AltLoad name and logo) and any builds made from them.
+
+"Non-Commercial" means not primarily intended for or directed towards
+commercial advantage or monetary compensation. The following are Commercial,
+and therefore NOT permitted under this license:
+
+  a. selling the Software, or builds of it, or charging for access to them;
+  b. including the Software in a paid product, subscription, paid signing
+     service, paid "certificate" or sideloading service, or paid app store;
+  c. distributing the Software, or builds of it, in a way that earns money,
+     for example behind ad walls, link shorteners, paid downloads or
+     donation-gated downloads;
+  d. using the Software to provide a service to others for payment.
+
+Personal use, study, modification, and sharing the Software for free are
+Non-Commercial.
+
+-------------------------------------------------------------------------------
+2. Permissions
+-------------------------------------------------------------------------------
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of the Software to use, copy, modify, merge, publish and distribute the
+Software for Non-Commercial purposes, and to permit persons to whom the
+Software is furnished to do so, subject to the conditions in section 3.
+
+-------------------------------------------------------------------------------
+3. Conditions
+-------------------------------------------------------------------------------
+
+3.1 Notices. This license, the copyright notices above and
+    THIRD_PARTY_NOTICES.md must be included in all copies or substantial
+    portions of the Software, including builds (for example in an "About"
+    or "Licenses" screen, or a file shipped alongside the build).
+
+3.2 Modified versions. If you distribute a modified version, you must state
+    clearly that it is modified and must not present it as the official
+    AltLoad. You may say it is "based on AltLoad".
+
+3.3 Name and logo. The AltLoad name and logo identify the official project.
+    You may use them to refer to AltLoad accurately. You may not use them as
+    the name or icon of a modified version, or in a way that suggests
+    endorsement by the AltLoad authors, without written permission.
+
+3.4 Lawful use. You may not use the Software to install, distribute or
+    facilitate apps you do not have the right to use, such as pirated or
+    cracked apps, or to access devices or accounts you are not authorized to
+    access.
+
+3.5 Non-Commercial only. Any Commercial use requires prior written
+    permission from the AltLoad authors. For the StikPair-derived portions,
+    it also requires permission from StephenDev0
+    (StephenDev0@outlook.com), as required by the StikPair License.
+
+If you break any of these conditions, your rights under this license end
+automatically. They are restored if you fix the breach within 30 days of
+becoming aware of it.
+
+-------------------------------------------------------------------------------
+4. No affiliation
+-------------------------------------------------------------------------------
+
+AltLoad is an independent project. It is not affiliated with, endorsed by or
+sponsored by Apple Inc., AltStore, Riley Testut, SideStore or StikDebug.
+All trademarks belong to their respective owners.
+
+-------------------------------------------------------------------------------
+5. Disclaimer of warranty and limitation of liability
+-------------------------------------------------------------------------------
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
-AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE, INCLUDING ANY LOSS OF DATA, LOSS OF ACCESS TO AN APPLE ACCOUNT, OR
+REVOKED CERTIFICATES OR APPS.

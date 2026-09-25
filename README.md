@@ -30,7 +30,8 @@ Built with SwiftUI for iOS 27, with a dark purple theme and Liquid Glass.
 AltLoad is a sideloaded app, so you install the `.ipa` the same way as any other sideloaded app.
 
 1. Download **`AltLoad.ipa`**:
-   - the latest stable build is on the [**Releases**](https://github.com/mirazbakis/AltLoad/releases) page, or
+   - the latest stable build is on the [**Releases**](https://github.com/mirazbakis/AltLoad/releases) page,
+   - the newest build of `main` is always at [**Nightly build**](https://github.com/mirazbakis/AltLoad/releases/tag/nightly), which needs no GitHub account, or
    - the newest development build is on the [**Actions**](https://github.com/mirazbakis/AltLoad/actions) page. Open the latest green run and download **AltLoad-unsigned** from **Artifacts**. You need to be signed in to GitHub for this.
 2. Sign and install it with whatever you already use to sideload: AltStore, SideStore, Sideloadly, Xcode or another signing tool.
 3. If iOS says the developer isn't trusted, go to **Settings › General › VPN & Device Management**, tap your Apple ID and choose **Trust**.
@@ -142,8 +143,12 @@ AltLoad is built on the work of:
 - [**LocalDevVPN**](https://github.com/jkcoxson/LocalDevVPN) by jkcoxson and Stossy11: the loopback VPN.
 - [**AltStore**](https://altstore.io) by Riley Testut and Shane Gill. AltLoad downloads AltStore from its official source at install time and does not redistribute it.
 
-## License
+## License and terms
 
-AltLoad keeps StikPair's **non-commercial MIT license**. See [LICENSE](LICENSE). Copyright (c) 2026 StephenDev0.
+AltLoad is released under the **[AltLoad License](LICENSE)**. You may use, modify and share it for free, for **non-commercial** purposes. Selling it, bundling it into a paid product or service, or distributing it for money requires written permission. Forks must say they're modified and can't use the AltLoad name or logo as their own.
 
-You may use, modify and share AltLoad for **non-commercial** purposes. Selling it or including it in a paid product requires written permission from the original author.
+Parts of AltLoad come from [StikPair](https://github.com/StephenDev0/StikPair) (non-commercial MIT) and [idevice](https://github.com/jkcoxson/idevice) (MIT). Those parts stay under their original licenses, which are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+Using AltLoad means you agree to the **[Terms of Service](https://mirazbakis.github.io/terms.html)**.
+
+Found a security problem? See **[SECURITY.md](SECURITY.md)**. Please don't report it in a public issue.
