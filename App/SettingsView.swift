@@ -3,6 +3,9 @@ import SwiftUI
 struct SettingsView: View {
     @StateObject private var pairing = PairingController.shared
     @StateObject private var install = InstallController.shared
+    @StateObject private var anisette = AnisetteServers.shared
+    @State private var anisetteChoice = ""
+    private static let customTag = "custom"
     @State private var appleID = AppleIDStore.email
     @State private var targetIP = LocalDevVPN.targetIP
     @State private var vpnActive = LocalDevVPN.isActive
@@ -43,18 +46,36 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    TextField("https://…", text: $install.anisetteURL)
-                        .keyboardType(.URL)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    Button("Use Default Server") {
-                        install.anisetteURL = InstallController.defaultAnisette
+                    Picker("Server", selection: $anisetteChoice) {
+                        ForEach(anisette.servers) { server in
+                            Text(server.name).tag(server.address)
+                        }
+                        Text("Custom…").tag(Self.customTag)
                     }
-                    .disabled(install.anisetteURL == InstallController.defaultAnisette)
+                    .pickerStyle(.navigationLink)
+                    .onChange(of: anisetteChoice) { _, choice in
+                        if choice != Self.customTag { install.anisetteURL = choice }
+                    }
+
+                    if anisetteChoice == Self.customTag {
+                        TextField("https://…", text: $install.anisetteURL)
+                            .keyboardType(.URL)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                    } else {
+                        LabeledContent("Address") {
+                            Text(install.anisetteURL)
+                                .font(.footnote.monospaced())
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 } header: {
-                    Text("Anisette server")
+                    HStack {
+                        Text("Anisette server")
+                        if anisette.isLoading { ProgressView().controlSize(.mini) }
+                    }
                 } footer: {
-                    Text("Apple requires device-identity headers (\"anisette\") to sign in. AltLoad gets them from this server. You can host your own, for example with anisette-v3-server.")
+                    Text("Apple requires device-identity headers (\"anisette\") to sign in. The server never sees your password. If sign-in fails, try another server. The list comes from SideStore's community servers.")
                 }
 
                 Section {
@@ -97,11 +118,21 @@ struct SettingsView: View {
             .scrollContentBackground(.hidden)
             .background(AuroraBackground())
             .navigationTitle("Settings")
+            .task {
+                await anisette.refresh()
+                syncAnisetteChoice()
+            }
             .onAppear {
+                syncAnisetteChoice()
                 appleID = AppleIDStore.email
                 vpnActive = LocalDevVPN.isActive
             }
         }
+    }
+
+    private func syncAnisetteChoice() {
+        anisetteChoice = anisette.servers.contains { $0.address == install.anisetteURL }
+            ? install.anisetteURL : Self.customTag
     }
 
     private func saveSource() {

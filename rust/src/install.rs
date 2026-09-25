@@ -199,7 +199,7 @@ impl Config {
         Ok(Self {
             apple_id: req(c.apple_id, "Apple ID")?,
             password: req(c.password, "password")?,
-            anisette_url: opt(c.anisette_url, "https://ani.stikstore.app"),
+            anisette_url: opt(c.anisette_url, "https://ani.sidestore.io"),
             pairing_file_path: req(c.pairing_file_path, "pairing file")?,
             host_name: opt(c.host_name, "AltLoad"),
             endpoints,

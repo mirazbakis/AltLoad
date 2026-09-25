@@ -50,7 +50,7 @@ This is the same path StikDebug uses (`tunnel_create_rppairing` to `10.7.0.1:491
 
 This comes from isideload's `AppleAccount`.
 
-- **Anisette:** Apple's servers require `X-Apple-I-MD`, `X-Apple-I-MD-M` and related machine-identity headers. `RemoteV3AnisetteProvider` provisions a virtual machine identity through an anisette v3 server over a websocket, then caches the state. The default is `https://ani.stikstore.app`, and you can change it in Settings.
+- **Anisette:** Apple's servers require `X-Apple-I-MD`, `X-Apple-I-MD-M` and related machine-identity headers. `RemoteV3AnisetteProvider` provisions a virtual machine identity through an anisette v3 server over a websocket, then caches the state. The default is SideStore's `https://ani.sidestore.io`. Settings offers a picker built from `https://servers.sidestore.io/servers.json` (HTTPS entries only, merged with a built-in list) plus a custom URL. If sign-in fails with an anisette error, the error message suggests switching servers.
 - **GrandSlam (GSA):** the SRP-6a login to `gsa.apple.com`, which never sends the password in plaintext.
 - **2FA:** trusted-device push or SMS. Rust calls `AltLoadPromptCb(kind: 1, json)`. Swift shows `TwoFactorSheet` and answers with `altload_install_session_respond("code:123456" | "sms:<id>" | "devices" | "resend" | "abort")`.
 

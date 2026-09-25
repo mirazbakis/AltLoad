@@ -80,7 +80,7 @@ final class InstallController: ObservableObject {
         didSet { UserDefaults.standard.set(anisetteURL, forKey: "anisette.url") }
     }
 
-    static let defaultAnisette = "https://ani.stikstore.app"
+    static let defaultAnisette = "https://ani.sidestore.io"
 
     private var session: OpaquePointer?
     /// Install parked at `.needsVPN`, with the IPA already downloaded.
@@ -241,7 +241,13 @@ final class InstallController: ObservableObject {
             scheduleExpiryReminder(for: app)
             phase = .success(app)
         case .failed(let message):
-            phase = message == "Cancelled." ? .idle : .failed(message)
+            if message == "Cancelled." {
+                phase = .idle
+            } else if message.localizedCaseInsensitiveContains("anisette") {
+                phase = .failed(message + "\n\nThe anisette server may be down. Pick another one in Settings › Anisette server and try again.")
+            } else {
+                phase = .failed(message)
+            }
         }
     }
 
