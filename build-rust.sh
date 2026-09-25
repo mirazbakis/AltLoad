@@ -3,7 +3,7 @@
 # repackages AltLoadFFI.xcframework. Run this whenever rust/ changes.
 set -euo pipefail
 
-export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode-beta.app/Contents/Developer}"
+export DEVELOPER_DIR="${DEVELOPER_DIR:-$(xcode-select -p)}"
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT/rust"
 
