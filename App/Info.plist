@@ -40,14 +40,28 @@
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
+    <!-- altload:// lets LocalDevVPN hand control back after switching the VPN on. -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>altload</string>
+            </array>
+        </dict>
+    </array>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>localdevvpn</string>
+    </array>
     <key>NSLocalNetworkUsageDescription</key>
     <string>AltLoad uses your local network to discover devices and complete pairing.</string>
     <key>NSBonjourServices</key>
     <array>
         <string>_remotepairing-pairable-host._tcp</string>
         <string>_remotepairing-manual-pairing._tcp</string>
-        <!-- This iPhone's own RemotePairing service, used to tunnel to itself for installs. -->
-        <string>_remotepairing._tcp</string>
         <!-- Throwaway type used only to trigger the Local Network prompt. -->
         <string>_altloadprobe._tcp</string>
     </array>

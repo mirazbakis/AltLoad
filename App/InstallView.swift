@@ -9,6 +9,8 @@ struct InstallView: View {
     @State private var showImporter = false
     @State private var pendingIPA: URL?
     @State private var importError: String?
+    @State private var vpnActive = LocalDevVPN.isActive
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         NavigationStack {
@@ -43,6 +45,12 @@ struct InstallView: View {
             }
             .task {
                 if controller.latest == nil { await controller.loadCatalog() }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active else { return }
+                vpnActive = LocalDevVPN.isActive
+                // Back from LocalDevVPN with the VPN on: carry on automatically.
+                controller.resumeWhenVPNReady()
             }
             .sheet(isPresented: $showSignIn) {
                 SignInSheet(anisetteURL: controller.anisetteURL) { credentials, remember in
@@ -199,6 +207,37 @@ struct InstallView: View {
                 }
             }
 
+        case .needsVPN:
+            VStack(spacing: 14) {
+                GlassCard(tint: Aurora.violet) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("Turn on LocalDevVPN", systemImage: "network.badge.shield.half.filled")
+                            .font(.headline)
+                        Text("LocalDevVPN loops traffic for \(LocalDevVPN.targetIP) back into this iPhone, so AltLoad can reach it like a computer would. It only carries that one address, and your normal internet traffic isn't affected.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        if !LocalDevVPN.isInstalled {
+                            Text("It's free on the App Store. Install it, open it once to add the VPN configuration, then come back here.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                GlassActionButton(
+                    title: LocalDevVPN.isInstalled ? "Turn On LocalDevVPN" : "Get LocalDevVPN",
+                    systemImage: LocalDevVPN.isInstalled ? "power" : "arrow.down.app",
+                    prominent: true
+                ) {
+                    LocalDevVPN.turnOn()
+                }
+                GlassActionButton(title: "It's On, Continue", systemImage: "arrow.right") {
+                    controller.resumeAfterVPN(skipCheck: true)
+                }
+                Button("Cancel") { controller.reset() }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
         case .working(let stage, let fraction):
             VStack(spacing: 14) {
                 GlassCard {
@@ -283,6 +322,11 @@ struct InstallView: View {
                         ?? "Create one in the Pair tab",
                     state: pairings.selfPairing == nil ? .attention : .done)
                 StatusRow(
+                    title: "LocalDevVPN",
+                    detail: vpnActive ? "Connected, reaching this iPhone at \(LocalDevVPN.targetIP)"
+                        : (LocalDevVPN.isInstalled ? "Installed but off. AltLoad will ask you to turn it on" : "Needed for installs. It's free on the App Store"),
+                    state: vpnActive ? .done : .pending)
+                StatusRow(
                     title: "Apple ID",
                     detail: AppleIDStore.email.isEmpty ? "You'll sign in when you install" : AppleIDStore.email,
                     state: AppleIDStore.email.isEmpty ? .pending : .done)
@@ -304,6 +348,7 @@ struct InstallView: View {
         case .idle: "idle"
         case .checking: "checking"
         case .downloading: "downloading"
+        case .needsVPN: "vpn"
         case .working: "working"
         case .success: "success"
         case .failed: "failed"

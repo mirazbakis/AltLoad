@@ -11,7 +11,8 @@ This document describes each stage of the install, with the protocol, the librar
 | FFI | A C header plus a Rust static library packaged as `AltLoadFFI.xcframework` | `rust/include/altload.h`, `rust/src/*.rs` |
 | Device protocols | [`idevice`](https://github.com/jkcoxson/idevice) (git `d32c818`): `remote_pairing`, `rsd`, `tunnel_tcp_stack`, `afc`, `installation_proxy` | `rust/src/lib.rs`, `rust/src/install.rs` |
 | Apple ID + signing | [`isideload`](https://github.com/nab138/isideload) 0.4 (uses idevice, a fork of apple-codesign, rcgen, keyring) | `rust/src/install.rs` |
-| Discovery | `NetServiceBrowser` / `NetService` (mDNSResponder), so no multicast entitlement is needed | `App/SelfDiscovery.swift`, `App/AppleTVDiscovery.swift` |
+| Discovery | `NetServiceBrowser` / `NetService` (mDNSResponder), used for pairing and Apple TV, so no multicast entitlement is needed | `App/PairingController.swift`, `App/AppleTVDiscovery.swift` |
+| Loopback | [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN): detection via `getifaddrs`, and control via `localdevvpn://` and `altload://` URLs | `App/LocalDevVPN.swift` |
 | Catalog | AltStore source JSON (`https://apps.altstore.io`), `URLSession` download with progress, IPA cache in Application Support | `App/AltStoreCatalog.swift` |
 | Secrets | Keychain (`kSecClassGenericPassword`, `WhenUnlockedThisDeviceOnly`) for the Apple ID password. isideload's `KeyringStorage` for the certificate key and anisette state | `App/AppleIDStore.swift` |
 
@@ -30,14 +31,20 @@ Apple TV uses the reverse direction: AltLoad is the client for the TV's `_remote
 
 ## 2. Tunnel to this iPhone (Install, step 1)
 
-AltLoad talks to the phone it's running on, the same way a Mac does over Wi-Fi.
+AltLoad has to talk to the phone it's running on, the same way a Mac does over Wi-Fi. An app can't simply connect to its own device's address, because iOS delivers that connection over loopback and the device services don't treat it like a connection from another machine. **LocalDevVPN** solves this without a computer:
 
-1. **Discover:** `SelfDiscovery` browses `_remotepairing._tcp` for about 4 seconds and passes each `(host, port, identifier, authTag)` to Rust.
-2. **Match:** Rust checks `PeerDevice::validate_auth_tag(altIRK, identifier, authTag)`, which is SipHash-2-4 of the identifier keyed by the device's `altIRK`. Endpoints that verify are tried first.
-3. **Pair-verify:** `RemotePairingClient::attempt_pair_verify` and `validate_pairing` run with the saved file. AltLoad never falls back to a new pair-setup here. If verification fails, the user is sent back to the Pair tab.
-4. **Tunnel:** `create_tcp_listener` asks remotepairingd for a tunnel port. AltLoad connects to it and runs `connect_tls_psk_tunnel_native`, a TLS 1.2 PSK tunnel keyed with the pair-verify session key. This is the CoreDevice "CDTunnel" handshake, which returns client and server IPv6 addresses, the MTU and the RSD port.
-5. **User-space TCP:** the tunnel carries raw IPv6 packets, so `idevice::tcp::adapter::Adapter` (jktcp) runs a TCP stack over it. That means no VPN or `NEPacketTunnelProvider` is needed.
-6. **RSD:** `RsdHandshake` lists the device's services and properties. AltLoad reads `UniqueDeviceID` from those properties.
+- LocalDevVPN is a `NEPacketTunnelProvider` that routes only `10.7.0.1/32`, with the interface at `10.7.1.1`. Your normal traffic doesn't go through it.
+- For every IPv4 packet it reads, it swaps the source and destination addresses and writes the packet straight back. When AltLoad opens `10.7.1.1 → 10.7.0.1:49152`, the phone's network stack receives it as `10.7.0.1 → 10.7.1.1:49152`, an inbound connection to its own RemotePairing service (port 49152) from an "external" peer. Replies are reflected back the same way.
+
+The steps:
+
+1. **VPN check:** `LocalDevVPN.isActive` uses `getifaddrs` to look for a `utun*` interface with a `10.7.x.x` address. If there isn't one, the install pauses at `.needsVPN` and AltLoad opens `localdevvpn://enable?scheme=altload`. LocalDevVPN turns the VPN on and reopens AltLoad via `altload://`. AltLoad polls for the interface for up to 6 s, then resumes.
+2. **Pair-verify:** AltLoad connects to `10.7.0.1:49152` (the address can be changed in Settings) and runs `RemotePairingClient::attempt_pair_verify` and `validate_pairing` with the saved RPPairing file. It never falls back to a new pair-setup. If verification fails, the user is sent back to the Pair tab.
+3. **Tunnel:** `create_tcp_listener` asks remotepairingd for a tunnel port. AltLoad connects to `10.7.0.1:<port>`, also through the VPN, and runs `connect_tls_psk_tunnel_native`. That is a TLS 1.2 PSK tunnel keyed with the pair-verify session key, and it performs the CoreDevice "CDTunnel" handshake, which returns client and server IPv6 addresses, the MTU and the RSD port.
+4. **User-space TCP:** the tunnel carries raw IPv6 packets, so `idevice::tcp::adapter::Adapter` (jktcp) runs a TCP stack over it. AltLoad needs no VPN entitlement of its own. The only VPN involved is LocalDevVPN's simple reflector.
+5. **RSD:** `RsdHandshake` lists the device's services and properties. AltLoad reads `UniqueDeviceID` from those properties.
+
+This is the same path StikDebug uses (`tunnel_create_rppairing` to `10.7.0.1:49152`) with pairing files from StikPair.
 
 ## 3. Apple ID sign-in (Install, step 2)
 
@@ -102,7 +109,7 @@ void    altload_install_session_cancel(session);
 
 ## Known limitations
 
-- Needs iOS 27+ (RPPairing host mode) and Wi-Fi, because the tunnel goes to the device's own LAN address.
+- Needs iOS 27+ (RPPairing host mode), Wi-Fi for pairing, and LocalDevVPN switched on during installs.
 - Free Apple IDs are limited to 3 sideloaded apps, 10 App IDs per 7 days, and 7-day signatures.
 - The anisette server is a third party. Self-host one if you'd rather not depend on it.
 - The install pipeline hasn't been compiled or tested on a device yet. The first build may need small API fixes against the pinned idevice and isideload versions.

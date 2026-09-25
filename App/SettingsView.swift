@@ -4,6 +4,8 @@ struct SettingsView: View {
     @StateObject private var pairing = PairingController.shared
     @StateObject private var install = InstallController.shared
     @State private var appleID = AppleIDStore.email
+    @State private var targetIP = LocalDevVPN.targetIP
+    @State private var vpnActive = LocalDevVPN.isActive
     @State private var sourceURL = UserDefaults.standard.string(forKey: "altstore.sourceURL")
         ?? AltStoreCatalog.defaultSourceURL.absoluteString
 
@@ -23,6 +25,21 @@ struct SettingsView: View {
                         appleID = ""
                     }
                     .disabled(appleID.isEmpty)
+                }
+
+                Section {
+                    LabeledContent("Status", value: vpnActive ? "Connected" : "Not connected")
+                    TextField("10.7.0.1", text: $targetIP)
+                        .keyboardType(.numbersAndPunctuation)
+                        .autocorrectionDisabled()
+                        .onChange(of: targetIP) { _, value in LocalDevVPN.targetIP = value }
+                    Button(LocalDevVPN.isInstalled ? "Turn On LocalDevVPN" : "Get LocalDevVPN") {
+                        LocalDevVPN.turnOn()
+                    }
+                } header: {
+                    Text("LocalDevVPN")
+                } footer: {
+                    Text("Installs go through LocalDevVPN, which loops this address back into the iPhone. Only change it if you changed LocalDevVPN's peer IP.")
                 }
 
                 Section {
@@ -70,6 +87,7 @@ struct SettingsView: View {
                     Link("idevice by jkcoxson", destination: URL(string: "https://github.com/jkcoxson/idevice")!)
                     Link("isideload by nab138", destination: URL(string: "https://github.com/nab138/isideload")!)
                     Link("StikPair by StephenDev0", destination: URL(string: "https://github.com/StephenDev0/StikPair")!)
+                    Link("LocalDevVPN", destination: URL(string: "https://github.com/jkcoxson/LocalDevVPN")!)
                 } header: {
                     Text("About")
                 } footer: {
@@ -79,7 +97,10 @@ struct SettingsView: View {
             .scrollContentBackground(.hidden)
             .background(AuroraBackground())
             .navigationTitle("Settings")
-            .onAppear { appleID = AppleIDStore.email }
+            .onAppear {
+                appleID = AppleIDStore.email
+                vpnActive = LocalDevVPN.isActive
+            }
         }
     }
 

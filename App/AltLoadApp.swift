@@ -39,5 +39,11 @@ struct RootView: View {
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .onOpenURL { url in
+            // LocalDevVPN returns here via altload:// after switching the VPN on.
+            guard url.scheme == "altload" else { return }
+            tab = .install
+            InstallController.shared.resumeWhenVPNReady()
+        }
     }
 }

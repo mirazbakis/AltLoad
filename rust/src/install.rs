@@ -1,8 +1,9 @@
 // On-device sideloading for AltLoad.
 //
 // This is the on-device version of what AltServer does from a computer:
-//   1. Open a tunnel to *this* iPhone: connect to its own `_remotepairing._tcp`
-//      service with the RPPairing file created in the Pair tab, pair-verify, ask
+//   1. Open a tunnel to *this* iPhone: through LocalDevVPN (which reflects packets
+//      sent to 10.7.0.1 back into the device), connect to its own RemotePairing
+//      service on port 49152 with the RPPairing file from the Pair tab, pair-verify, ask
 //      it for a TCP listener, wrap that in the TLS-PSK "CDTunnel", run a
 //      userspace TCP stack over it and do the RemoteServiceDiscovery handshake.
 //   2. Sign in to the user's Apple ID (GrandSlam SRP + anisette headers).
@@ -523,9 +524,7 @@ async fn open_tunnel(cfg: &Config) -> Result<(AdapterHandle, RsdHandshake), Stri
         endpoints.sort_by_key(|ep| !PeerDevice::validate_auth_tag(&irk, &ep.identifier, &ep.auth_tag));
     }
     if endpoints.is_empty() {
-        return Err("This iPhone's pairing service wasn't found on the local network. \
-                    Check that Wi-Fi is on and Developer Mode is enabled, then try again."
-            .into());
+        return Err("No address to reach this iPhone was given.".into());
     }
 
     let mut last_error = String::new();
@@ -535,7 +534,10 @@ async fn open_tunnel(cfg: &Config) -> Result<(AdapterHandle, RsdHandshake), Stri
             Err(e) => last_error = format!("{}:{}: {e}", ep.host, ep.port),
         }
     }
-    Err(format!("Couldn't open a tunnel to this device ({last_error})."))
+    Err(format!(
+        "Couldn't open a tunnel to this device ({last_error}). Make sure LocalDevVPN is connected \
+         and Developer Mode is on."
+    ))
 }
 
 async fn connect_endpoint(

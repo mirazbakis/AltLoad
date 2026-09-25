@@ -4,6 +4,12 @@ import UIKit
 import UserNotifications
 
 /// An app AltLoad signed and installed.
+/// Where to reach this iPhone's RemotePairing service (via LocalDevVPN).
+struct SelfEndpoint: Sendable {
+    let host: String
+    let port: Int
+}
+
 struct InstalledApp: Codable, Equatable {
     let bundleID: String
     let name: String
@@ -46,8 +52,8 @@ struct RevokePrompt: Identifiable, Equatable {
     let certificates: [Certificate]
 }
 
-/// Drives the on-device AltStore install: fetch → download → find this iPhone →
-/// Rust (tunnel, Apple ID, sign, install) → remember the result.
+/// Drives the on-device AltStore install: fetch → download → check LocalDevVPN →
+/// Rust (tunnel via 10.7.0.1, Apple ID, sign, install) → remember the result.
 @MainActor
 final class InstallController: ObservableObject {
     static let shared = InstallController()
@@ -56,6 +62,8 @@ final class InstallController: ObservableObject {
         case idle
         case checking
         case downloading(Double)
+        /// Waiting for LocalDevVPN to be switched on. The install resumes from here.
+        case needsVPN
         case working(String, Double?)
         case success(InstalledApp)
         case failed(String)
@@ -75,8 +83,8 @@ final class InstallController: ObservableObject {
     static let defaultAnisette = "https://ani.stikstore.app"
 
     private var session: OpaquePointer?
-    private let discovery = SelfDiscovery()
-    private let localNetwork = LocalNetworkAuthorization()
+    /// Install parked at `.needsVPN`, with the IPA already downloaded.
+    private var pending: (credentials: AppleIDCredentials, ipa: URL)?
     private let installedKey = "installed.altstore"
 
     var isBusy: Bool {
@@ -132,7 +140,31 @@ final class InstallController: ObservableObject {
 
     func reset() {
         guard !isBusy else { return }
+        pending = nil
         phase = .idle
+    }
+
+    /// Waits up to ~6 s for the VPN interface to come up (LocalDevVPN hands control
+    /// back before the tunnel is fully configured), then resumes.
+    func resumeWhenVPNReady() {
+        guard case .needsVPN = phase else { return }
+        Task {
+            for _ in 0..<12 {
+                if LocalDevVPN.isActive {
+                    resumeAfterVPN()
+                    return
+                }
+                try? await Task.sleep(for: .milliseconds(500))
+            }
+        }
+    }
+
+    /// Continue an install parked at `.needsVPN`, e.g. when LocalDevVPN sends
+    /// the user back via `altload://`.
+    func resumeAfterVPN(skipCheck: Bool = false) {
+        guard case .needsVPN = phase, let pending else { return }
+        self.pending = nil
+        Task { await run(pending.credentials, ipaOverride: pending.ipa, skipVPNCheck: skipCheck) }
     }
 
     func respond(_ response: String) {
@@ -148,7 +180,7 @@ final class InstallController: ObservableObject {
         if let session { altload_install_session_cancel(session) }
     }
 
-    private func run(_ credentials: AppleIDCredentials, ipaOverride: URL?) async {
+    private func run(_ credentials: AppleIDCredentials, ipaOverride: URL?, skipVPNCheck: Bool = false) async {
         guard let pairing = PairingStore.shared.selfPairing else {
             phase = .failed("There's no pairing file for this iPhone yet. Create one in the Pair tab first.")
             return
@@ -184,18 +216,13 @@ final class InstallController: ObservableObject {
             }
         }
 
-        // 2. Find this iPhone's RemotePairing service.
-        phase = .working("Checking Local Network access…", nil)
-        guard await localNetwork.request() else {
-            phase = .failed("Local Network permission is required. Enable it in Settings › AltLoad › Local Network, then try again.")
+        // 2. LocalDevVPN has to be on so 10.7.0.1 loops back into this iPhone.
+        if !skipVPNCheck && !LocalDevVPN.isActive {
+            pending = (credentials, ipa)
+            phase = .needsVPN
             return
         }
-        phase = .working("Looking for this iPhone on the network…", nil)
-        let endpoints = await discovery.discover()
-        guard !endpoints.isEmpty else {
-            phase = .failed("This iPhone's pairing service didn't show up on the network. Make sure Wi-Fi is on and Developer Mode is enabled, then try again.")
-            return
-        }
+        let endpoints = [SelfEndpoint(host: LocalDevVPN.targetIP, port: LocalDevVPN.remotePairingPort)]
 
         // 3. Rust does the rest.
         phase = .working("Connecting to this device…", nil)
@@ -226,7 +253,7 @@ final class InstallController: ObservableObject {
     private func runSession(
         credentials: AppleIDCredentials,
         pairingPath: String,
-        endpoints: [SelfDiscovery.Endpoint],
+        endpoints: [SelfEndpoint],
         ipa: URL
     ) async -> Outcome {
         guard let session = altload_install_session_new() else {
@@ -258,8 +285,8 @@ final class InstallController: ObservableObject {
                     endpointBuffer[i] = AltLoadEndpoint(
                         host: c(e.host),
                         port: UInt16(clamping: e.port),
-                        identifier: c(e.identifier),
-                        auth_tag: c(e.authTag))
+                        identifier: nil,
+                        auth_tag: nil)
                 }
 
                 var config = AltLoadInstallConfig(
