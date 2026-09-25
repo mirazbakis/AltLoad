@@ -7,7 +7,7 @@ Normally, installing [AltStore](https://altstore.io) requires AltServer running 
 Built with SwiftUI for iOS 27, with a dark aurora theme and Liquid Glass.
 
 > [!WARNING]
-> **Early preview.** AltLoad hasn't been tested on real devices yet. Expect bugs, and please [open an issue](https://github.com/mirazbakis/AltLoad/issues) if something doesn't work.
+> **Early preview.** AltLoad hasn't been tested properly yet. Expect bugs, and please [open an issue](https://github.com/mirazbakis/AltLoad/issues) if something doesn't work.
 
 > AltLoad is an independent project. It is not affiliated with AltStore, Riley Testut, SideStore or Apple.
 
