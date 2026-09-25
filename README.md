@@ -68,7 +68,7 @@ Set your signing team, change `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` to yo
 ## Privacy and security
 
 - Your Apple ID password is sent only to Apple. If you choose to remember it, it's stored in the Keychain as `WhenUnlockedThisDeviceOnly`, which never syncs.
-- Apple requires *anisette* headers, a machine identity, to sign in. AltLoad fetches them from a remote anisette server, `https://ani.stikstore.app` by default. You can change or self-host this in Settings. The anisette server never sees your password.
+- Apple requires *anisette* headers, a machine identity, to sign in. AltLoad fetches them from a remote anisette server, SideStore's `https://ani.sidestore.io` by default. In Settings you can pick another server from SideStore's community list or enter your own. The anisette server never sees your password.
 - The development certificate's private key and the anisette state are stored in the Keychain.
 - Pairing files grant access to your device, so only share them with tools you trust.
 
