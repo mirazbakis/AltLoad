@@ -1,0 +1,4 @@
+module AltLoadFFI {
+    header "altload.h"
+    export *
+}

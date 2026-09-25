@@ -1,0 +1,9 @@
+rust/target/
+AltLoad.xcodeproj/
+DerivedData/
+*.xcuserstate
+.DS_Store
+AltLoadFFI.xcframework/
+build/
+*.ipa*
+

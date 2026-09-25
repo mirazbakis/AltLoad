@@ -1,0 +1,69 @@
+{
+  "features": [
+    "refractivity",
+    "specular-location"
+  ],
+  "fill": {
+    "linear-gradient": [
+      "display-p3:0.05500,0.09000,0.29000,1.00000",
+      "display-p3:0.49000,0.34000,0.99000,1.00000"
+    ]
+  },
+  "groups": [
+    {
+      "blur-material": 0.4,
+      "layers": [
+        {
+          "image-name": "Arrow.svg",
+          "name": "Arrow",
+          "position": {
+            "scale": 1.2,
+            "translation-in-points": [
+              0,
+              -70
+            ]
+          }
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "specular": "inside",
+      "translucency": {
+        "enabled": true,
+        "value": 0.35
+      }
+    },
+    {
+      "blur-material": 0.3,
+      "layers": [
+        {
+          "image-name": "Tray.svg",
+          "name": "Tray",
+          "position": {
+            "scale": 1.2,
+            "translation-in-points": [
+              0,
+              200
+            ]
+          }
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.6
+      }
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

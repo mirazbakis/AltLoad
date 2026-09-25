@@ -1,0 +1,38 @@
+[package]
+name = "altload_ffi"
+version = "0.2.0"
+edition = "2021"
+description = "C FFI for AltLoad: iOS 27 wireless pairing (idevice) + on-device sideloading (isideload)"
+
+[lib]
+name = "altload_ffi"
+crate-type = ["staticlib"]
+
+[dependencies]
+# Device side: pairing host, RPPairing tunnel to this device, AFC + installation_proxy over RSD.
+idevice = { version = "0.1.61", default-features = false, features = [
+  "remote_pairing",
+  "rsd",
+  "tunnel_tcp_stack",
+  "afc",
+  "installation_proxy",
+  "tcp",
+  "ring",
+] }
+# Apple ID sign-in (GSA + anisette), developer portal (cert, device, App IDs, profiles), code signing.
+isideload = { version = "0.4.0", default-features = false, features = ["install", "keyring-storage", "tokio-mt"] }
+rootcause = "0.12.0"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "macros", "fs", "time", "sync"] }
+serde_json = "1"
+plist = "1.8"
+zip = { version = "8.3", default-features = false, features = ["deflate"] }
+
+# isideload pulls idevice from crates.io; pin both to the same recent git revision so
+# the tunnel types we build (AdapterHandle / RsdHandshake) are the ones it accepts.
+[patch.crates-io]
+idevice = { git = "https://github.com/jkcoxson/idevice.git", rev = "d32c8189c51c2789496b0768039419c3705498c3" }
+
+[profile.release]
+opt-level = 3
+lto = "thin"

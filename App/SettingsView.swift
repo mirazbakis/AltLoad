@@ -1,0 +1,95 @@
+import SwiftUI
+
+struct SettingsView: View {
+    @StateObject private var pairing = PairingController.shared
+    @StateObject private var install = InstallController.shared
+    @State private var appleID = AppleIDStore.email
+    @State private var sourceURL = UserDefaults.standard.string(forKey: "altstore.sourceURL")
+        ?? AltStoreCatalog.defaultSourceURL.absoluteString
+
+    private var version: String {
+        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "–"
+        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "–"
+        return "\(v) (\(b))"
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Apple ID") {
+                    LabeledContent("Account", value: appleID.isEmpty ? "Not signed in" : appleID)
+                    Button("Forget Apple ID and Password", role: .destructive) {
+                        AppleIDStore.forgetAll()
+                        appleID = ""
+                    }
+                    .disabled(appleID.isEmpty)
+                }
+
+                Section {
+                    TextField("https://…", text: $install.anisetteURL)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    Button("Use Default Server") {
+                        install.anisetteURL = InstallController.defaultAnisette
+                    }
+                    .disabled(install.anisetteURL == InstallController.defaultAnisette)
+                } header: {
+                    Text("Anisette server")
+                } footer: {
+                    Text("Apple requires device-identity headers (\"anisette\") to sign in. AltLoad gets them from this server. You can host your own, for example with anisette-v3-server.")
+                }
+
+                Section {
+                    TextField("https://…", text: $sourceURL)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .onSubmit(saveSource)
+                    Button("Use Official Source") {
+                        sourceURL = AltStoreCatalog.defaultSourceURL.absoluteString
+                        saveSource()
+                    }
+                } header: {
+                    Text("AltStore source")
+                } footer: {
+                    Text("AltLoad installs the newest AltStore listed in this source.")
+                }
+
+                Section {
+                    Toggle("Silent audio", systemImage: "speaker.wave.2", isOn: $pairing.keepAliveAudio)
+                    Toggle("Location", systemImage: "location", isOn: $pairing.keepAliveLocation)
+                } header: {
+                    Text("Background keep-alive")
+                } footer: {
+                    Text("Turn one on if the Live Activity doesn't start while you pair from Settings.")
+                }
+
+                Section {
+                    LabeledContent("Version", value: version)
+                    Link("idevice by jkcoxson", destination: URL(string: "https://github.com/jkcoxson/idevice")!)
+                    Link("isideload by nab138", destination: URL(string: "https://github.com/nab138/isideload")!)
+                    Link("StikPair by StephenDev0", destination: URL(string: "https://github.com/StephenDev0/StikPair")!)
+                } header: {
+                    Text("About")
+                } footer: {
+                    Text("AltLoad isn't affiliated with AltStore, Riley Testut or Apple. Pairing flow based on StikPair, for non-commercial use only. See LICENSE.")
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(AuroraBackground())
+            .navigationTitle("Settings")
+            .onAppear { appleID = AppleIDStore.email }
+        }
+    }
+
+    private func saveSource() {
+        let trimmed = sourceURL.trimmingCharacters(in: .whitespaces)
+        if trimmed == AltStoreCatalog.defaultSourceURL.absoluteString || trimmed.isEmpty {
+            UserDefaults.standard.removeObject(forKey: "altstore.sourceURL")
+        } else {
+            UserDefaults.standard.set(trimmed, forKey: "altstore.sourceURL")
+        }
+        Task { await install.loadCatalog() }
+    }
+}
