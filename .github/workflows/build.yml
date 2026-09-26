@@ -1,4 +1,4 @@
-name: Build unsigned IPA
+name: Build IPA
 
 on:
   push:
@@ -67,7 +67,10 @@ jobs:
           mkdir -p build/Payload
           cp -R "$APP" build/Payload/
           find build/Payload -name '.DS_Store' -delete
-          (cd build && zip -qr ../AltLoad.ipa Payload)
+          # Ad-hoc ("fake") sign so sideload signers accept the IPA; they re-sign it anyway.
+          codesign --force --sign - --timestamp=none --generate-entitlement-der build/Payload/AltLoad.app
+          codesign --verify --verbose build/Payload/AltLoad.app
+          (cd build && zip -qry -X ../AltLoad.ipa Payload)
           ls -lh AltLoad.ipa
 
       - name: Upload IPA artifact
