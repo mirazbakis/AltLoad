@@ -32,10 +32,10 @@ final class PairingController: ObservableObject {
     @Published var phase: Phase = .idle
     @Published private(set) var appleTVs: [AppleTVDevice] = []
 
-    @Published var keepAliveAudio: Bool = Self.defaultOn("keepAlive.audio") {
+    @Published var keepAliveAudio: Bool = PairingController.defaultOn("keepAlive.audio") {
         didSet { UserDefaults.standard.set(keepAliveAudio, forKey: "keepAlive.audio") }
     }
-    @Published var keepAliveLocation: Bool = Self.defaultOn("keepAlive.location") {
+    @Published var keepAliveLocation: Bool = PairingController.defaultOn("keepAlive.location") {
         didSet { UserDefaults.standard.set(keepAliveLocation, forKey: "keepAlive.location") }
     }
 
