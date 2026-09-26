@@ -95,9 +95,6 @@ jobs:
           git tag -f nightly
           git push -f origin refs/tags/nightly
           NOTES="Latest unsigned build of \`main\` (commit ${GITHUB_SHA::7}). Updated automatically on every push. Sign it with your own tool before installing. For stable builds, use the versioned releases."
-          if gh release view nightly >/dev/null 2>&1; then
-            gh release edit nightly --prerelease --title "Nightly build" --notes "$NOTES"
-          else
-            gh release create nightly --prerelease --title "Nightly build" --notes "$NOTES"
-          fi
-          gh release upload nightly AltLoad.ipa --clobber
+          # Recreate the release each time so its date shows when this build was made.
+          gh release delete nightly --yes >/dev/null 2>&1 || true
+          gh release create nightly AltLoad.ipa --prerelease --title "Nightly build" --notes "$NOTES"
