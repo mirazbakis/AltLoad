@@ -59,7 +59,7 @@ jobs:
             CODE_SIGN_ENTITLEMENTS="" \
             build
 
-      - name: Package unsigned IPA
+      - name: Package IPA
         run: |
           set -euo pipefail
           APP="build/dd/Build/Products/Release-iphoneos/AltLoad.app"
@@ -72,6 +72,22 @@ jobs:
           codesign --verify --verbose build/Payload/AltLoad.app
           (cd build && zip -qry -X ../AltLoad.ipa Payload)
           ls -lh AltLoad.ipa
+
+      - name: Check the IPA
+        run: |
+          set -euo pipefail
+          unzip -tq AltLoad.ipa
+          rm -rf build/check && mkdir -p build/check
+          unzip -q AltLoad.ipa -d build/check
+          APP=build/check/Payload/AltLoad.app
+          test -d "$APP"
+          for key in CFBundleIdentifier CFBundleExecutable CFBundleVersion CFBundleShortVersionString MinimumOSVersion; do
+            echo "$key = $(/usr/libexec/PlistBuddy -c "Print :$key" "$APP/Info.plist")"
+          done
+          EXE="$APP/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist")"
+          test -x "$EXE"
+          lipo -info "$EXE"
+          codesign --verify --verbose "$APP"
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v7

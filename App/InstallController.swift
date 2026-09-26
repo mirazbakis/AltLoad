@@ -402,7 +402,7 @@ final class InstallController: ObservableObject {
                 identifier: "altload.expiry",
                 content: content,
                 trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: false))
-            center.add(request)
+            UNUserNotificationCenter.current().add(request)
         }
     }
 }
