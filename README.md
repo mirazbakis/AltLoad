@@ -51,6 +51,7 @@ AltLoad is a sideloaded app, so you install the `.ipa` the same way as any other
 | Tab | What it does |
 |---|---|
 | **Install** | Installs, refreshes or updates AltStore, always the newest version from the official AltStore source. It can also install an `.ipa` file you pick. |
+| **Certificates** | Revoke, view, and manage certificates tied to your Apple ID. | 
 | **Pair** | Creates pairing files on the device, for this iPhone, another iPhone or iPad, or an Apple TV. |
 | **Library** | Your saved pairing files (also in **Files › On My iPhone › AltLoad**) and AltStore's expiry date. |
 | **Settings** | Apple ID, anisette server, AltStore source, LocalDevVPN and background options. |
