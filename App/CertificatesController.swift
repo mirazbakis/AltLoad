@@ -202,7 +202,7 @@ final class CertificatesController: ObservableObject {
                     phase = overview == nil ? .signedOut : .loaded
                 } else {
                     phase = .failed(message)
-                    if message.localizedCaseInsensitiveContains("sign-in failed") { credentials = nil }
+                    if message.localizedCaseInsensitiveContains("sign-in failed") { self.credentials = nil }
                 }
             }
         }
