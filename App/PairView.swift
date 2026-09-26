@@ -1,3 +1,4 @@
+import CoreLocation
 import SwiftUI
 
 /// Creates a pairing file on-device (StikPair's mechanism) for this iPhone,
@@ -96,7 +97,8 @@ struct PairView: View {
                         GuideStep(number: 4, text: "Scroll down and tap **Pair with AltLoad**")
                     }
                 }
-                footnote("If **Pair with AltLoad** doesn't show up, close the app and try again. No Live Activity? Turn on a background keep-alive in Settings.")
+                locationGuidance
+                footnote("If **Pair with AltLoad** doesn't show up, close the app and try again.")
             }
 
         case .showPin(let pin):
@@ -220,6 +222,44 @@ struct PairView: View {
                     controller.reset()
                 }
             }
+        }
+    }
+
+    /// Tells the user which Location button to tap so AltLoad keeps running in
+    /// the background while they're in Settings — no need to enable anything there.
+    @ViewBuilder
+    private var locationGuidance: some View {
+        switch controller.locationAuthorization {
+        case .notDetermined:
+            GlassCard(tint: Aurora.violet) {
+                HStack(spacing: 12) {
+                    Image(systemName: "location.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(Aurora.violet)
+                    Text("When iOS asks, tap **Allow While Using App** so pairing keeps running while you're in Settings.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        case .authorizedWhenInUse:
+            GlassCard(tint: Aurora.violet) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("For the most reliable pairing, allow location **Always**.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Button("Allow Always") { controller.requestLocationAuthorization() }
+                        .buttonStyle(.glass)
+                        .controlSize(.regular)
+                }
+            }
+        case .denied, .restricted:
+            GlassCard(tint: Aurora.danger) {
+                Text("Location is off, so background keep-alive can't run. If **Pair with AltLoad** doesn't appear, turn on **Silent audio** in Settings, or allow Location for AltLoad.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        default:
+            EmptyView()
         }
     }
 

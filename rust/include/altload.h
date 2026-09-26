@@ -111,6 +111,24 @@ void altload_install_session_cancel(AltLoadInstallSession *session);
 void altload_install_session_free(AltLoadInstallSession *session);
 void altload_install_result_free(AltLoadInstallResult *r);
 
+
+/* ---- Certificate manager: your own Apple ID (rust/src/install.rs) ---- */
+
+/* Runs {"op":"overview"} or {"op":"revoke","serials":[...]} against the Apple
+   ID's own team. Reuses an AltLoadInstallSession for 2FA prompts and cancel.
+   Returns 0 with overview JSON in *out_json, or 1 with an error message.
+   Free *out_json with altload_string_free. Blocking. */
+int32_t altload_account_session_run(AltLoadInstallSession *session,
+                                    const char *apple_id,
+                                    const char *password,
+                                    const char *anisette_url,
+                                    const char *request_json,
+                                    AltLoadProgressCb progress_cb,
+                                    AltLoadPromptCb prompt_cb,
+                                    void *ctx,
+                                    char **out_json);
+void altload_string_free(char *s);
+
 #ifdef __cplusplus
 }
 #endif

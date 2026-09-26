@@ -1,5 +1,6 @@
 // Pairing flow adapted from StikPair (c) 2026 StephenDev0 — see LICENSE.
 import BackgroundTasks
+import CoreLocation
 import Combine
 import Foundation
 import AltLoadFFI
@@ -31,11 +32,20 @@ final class PairingController: ObservableObject {
     @Published var phase: Phase = .idle
     @Published private(set) var appleTVs: [AppleTVDevice] = []
 
-    @Published var keepAliveAudio: Bool = UserDefaults.standard.bool(forKey: "keepAlive.audio") {
+    @Published var keepAliveAudio: Bool = Self.defaultOn("keepAlive.audio") {
         didSet { UserDefaults.standard.set(keepAliveAudio, forKey: "keepAlive.audio") }
     }
-    @Published var keepAliveLocation: Bool = UserDefaults.standard.bool(forKey: "keepAlive.location") {
+    @Published var keepAliveLocation: Bool = Self.defaultOn("keepAlive.location") {
         didSet { UserDefaults.standard.set(keepAliveLocation, forKey: "keepAlive.location") }
+    }
+
+    /// Current Location permission, so the UI can guide the user to the right button.
+    @Published var locationAuthorization: CLAuthorizationStatus = CLLocationManager().authorizationStatus
+
+    /// Defaults a keep-alive toggle to ON the first time (before the user has set it).
+    private static func defaultOn(_ key: String) -> Bool {
+        if UserDefaults.standard.object(forKey: key) == nil { return true }
+        return UserDefaults.standard.bool(forKey: key)
     }
 
     private let bindAddress = "0.0.0.0"
@@ -89,6 +99,9 @@ final class PairingController: ObservableObject {
 
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
 
+        // Start the keep-alives right away so leaving for Settings doesn't
+        // suspend us. Location is requested in-app (no Settings trip needed);
+        // the Pair screen tells the user which button to tap.
         if keepAliveAudio { keepAlive.startAudio() }
         if keepAliveLocation { keepAlive.startLocation() }
 
@@ -100,6 +113,17 @@ final class PairingController: ObservableObject {
             }
             submitBackgroundTask()
         }
+    }
+
+    /// Called by KeepAlive when the Location permission changes.
+    func locationAuthorizationChanged(_ status: CLAuthorizationStatus) {
+        locationAuthorization = status
+    }
+
+    /// Ask for Location again (e.g. from the guidance card). A second request
+    /// once "While Using" is granted surfaces the "Always Allow" option.
+    func requestLocationAuthorization() {
+        keepAlive.requestLocationAuthorization()
     }
 
     // MARK: - Apple TV

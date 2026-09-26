@@ -15,7 +15,7 @@ struct AltLoadApp: App {
 }
 
 enum AppTab: Hashable {
-    case install, pair, library, settings
+    case install, pair, certificates, library, settings
 }
 
 struct RootView: View {
@@ -29,6 +29,9 @@ struct RootView: View {
             }
             Tab("Pair", systemImage: "antenna.radiowaves.left.and.right", value: AppTab.pair) {
                 PairView()
+            }
+            Tab("Certificates", systemImage: "checkmark.seal.fill", value: AppTab.certificates) {
+                CertificatesView()
             }
             Tab("Library", systemImage: "tray.full.fill", value: AppTab.library) {
                 LibraryView()
