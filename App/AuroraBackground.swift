@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Pitch-black background with one small, dark purple light that drifts slowly
+/// Pitch-black background with one faint #6D40CC glow (like Catalyst's splash) that drifts slowly
 /// near the top, so the Liquid Glass above it still has a little colour to catch.
 struct AuroraBackground: View {
     var body: some View {
@@ -15,8 +15,8 @@ struct AuroraBackground: View {
                         .fill(
                             RadialGradient(
                                 colors: [
-                                    Color(red: 0.30, green: 0.14, blue: 0.55).opacity(0.55),
-                                    Color(red: 0.18, green: 0.07, blue: 0.36).opacity(0.25),
+                                    Color(red: 0.427, green: 0.251, blue: 0.800).opacity(0.32),
+                                    Color(red: 0.20, green: 0.10, blue: 0.40).opacity(0.16),
                                     .clear
                                 ],
                                 center: .center,

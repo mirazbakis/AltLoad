@@ -15,6 +15,9 @@
 //   5. Upload the signed .app to PublicStaging over AFC and ask
 //      installation_proxy to install it. Both go through the RSD tunnel.
 //
+// Catalyst (a SideStore fork, com.mirazbakis.Catalyst) gets the same step-4 keys
+// that isideload adds for AltStore and SideStore; see `inject_store_keys`.
+//
 // Steps 2-5 come from `isideload` (nab138, MIT). Step 1 uses `idevice` (jkcoxson, MIT).
 
 use std::ffi::{c_char, c_void, CStr, CString};
@@ -41,10 +44,13 @@ use isideload::dev::device_type::DeveloperDeviceType;
 use isideload::dev::devices::DevicesApi;
 use isideload::dev::teams::{DeveloperTeam, TeamsApi};
 use isideload::sideload::builder::MaxCertsBehavior;
+use isideload::sideload::cert_identity::CertificateIdentity;
 use isideload::sideload::{SideloaderBuilder, TeamSelection};
 use isideload::util::keyring_storage::KeyringStorage;
 use tokio::net::TcpStream;
 use tokio::sync::{mpsc, Mutex as AsyncMutex};
+
+mod device;
 
 // MARK: - C types
 
@@ -437,7 +443,7 @@ async fn sign_and_install(
 
     let mut sideloader = SideloaderBuilder::new(dev_session, cfg.apple_id.clone())
         .team_selection(TeamSelection::First)
-        .max_certs_behavior(MaxCertsBehavior::Prompt(revoke_prompt))
+        .max_certs_behavior(MaxCertsBehavior::Prompt(revoke_prompt.clone()))
         .storage(Box::new(KeyringStorage::new("AltLoad".to_string())))
         .machine_name(cfg.machine_name.clone())
         .delete_app_after_install(false)
@@ -455,6 +461,26 @@ async fn sign_and_install(
         .await
         .map_err(|e| err("Couldn't register this device", e))?;
     check()?;
+
+    // 4b. isideload only recognises AltStore/SideStore by their original bundle IDs.
+    // Catalyst has its own, so give it the same keys here: the certificate (so it
+    // refreshes apps with it instead of making a new one) and its app group.
+    if bundle_id_of(&app_dir) == CATALYST_BUNDLE_ID {
+        cbs.progress("Preparing Catalyst…", -1.0);
+        let storage = KeyringStorage::new("AltLoad".to_string());
+        let cert = CertificateIdentity::retrieve(
+            &cfg.machine_name,
+            &cfg.apple_id,
+            sideloader.get_dev_session(),
+            &team,
+            &storage,
+            &MaxCertsBehavior::Prompt(revoke_prompt.clone()),
+        )
+        .await
+        .map_err(|e| err("Couldn't get a signing certificate", e))?;
+        inject_store_keys(&app_dir, &team.team_id, &cert).await?;
+        check()?;
+    }
 
     // 5. Certificates, App IDs, profiles, signing.
     cbs.progress("Signing…", 0.0);
@@ -528,12 +554,20 @@ async fn sign_in(
 // MARK: - Tunnel
 
 async fn open_tunnel(cfg: &Config) -> Result<(AdapterHandle, RsdHandshake), String> {
-    let mut rpf = RpPairingFile::read_from_file(&cfg.pairing_file_path)
+    open_tunnel_to(&cfg.pairing_file_path, &cfg.host_name, &cfg.endpoints).await
+}
+
+async fn open_tunnel_to(
+    pairing_file_path: &str,
+    host_name: &str,
+    endpoints: &[Endpoint],
+) -> Result<(AdapterHandle, RsdHandshake), String> {
+    let mut rpf = RpPairingFile::read_from_file(pairing_file_path)
         .await
         .map_err(|e| err("Couldn't read the pairing file", e))?;
 
     // Try advertisements that prove they belong to the paired device first.
-    let mut endpoints = cfg.endpoints.clone();
+    let mut endpoints = endpoints.to_vec();
     if let Some(irk) = rpf.alt_irk().map(<[u8]>::to_vec) {
         endpoints.sort_by_key(|ep| !PeerDevice::validate_auth_tag(&irk, &ep.identifier, &ep.auth_tag));
     }
@@ -543,7 +577,7 @@ async fn open_tunnel(cfg: &Config) -> Result<(AdapterHandle, RsdHandshake), Stri
 
     let mut last_error = String::new();
     for ep in endpoints {
-        match connect_endpoint(&ep, &cfg.host_name, &mut rpf).await {
+        match connect_endpoint(&ep, host_name, &mut rpf).await {
             Ok(tunnel) => return Ok(tunnel),
             Err(e) => last_error = format!("{}:{}: {e}", ep.host, ep.port),
         }
@@ -668,6 +702,43 @@ fn prepare_app(ipa_path: &str, udid: &str, server_id: &str) -> Result<(PathBuf, 
     plist::to_file_binary(&info_path, &info).map_err(|e| err("Couldn't write Info.plist", e))?;
 
     Ok((work, app_dir))
+}
+
+const CATALYST_BUNDLE_ID: &str = "com.mirazbakis.Catalyst";
+
+fn bundle_id_of(app: &Path) -> String {
+    plist::from_file::<_, plist::Dictionary>(app.join("Info.plist"))
+        .ok()
+        .and_then(|info| info.get("CFBundleIdentifier").and_then(|v| v.as_string()).map(str::to_string))
+        .unwrap_or_default()
+}
+
+/// What isideload's `apply_special_app_behavior` writes for AltStore/SideStore:
+/// ALTAppGroups (the group isideload registers, `group.<bundle id>.<team>`),
+/// ALTCertificateID and ALTCertificate.p12 (password: the certificate's machine ID).
+/// Runs before `sign_app`, which reads the bundle from disk, so it all gets signed.
+async fn inject_store_keys(app: &Path, team_id: &str, cert: &CertificateIdentity) -> Result<(), String> {
+    let info_path = app.join("Info.plist");
+    let mut info: plist::Dictionary =
+        plist::from_file(&info_path).map_err(|e| err("Couldn't read Info.plist", e))?;
+    let group = format!("group.{CATALYST_BUNDLE_ID}.{team_id}");
+    info.insert(
+        "ALTAppGroups".into(),
+        plist::Value::Array(vec![plist::Value::String(group)]),
+    );
+    info.insert(
+        "ALTCertificateID".into(),
+        plist::Value::String(cert.get_serial_number()),
+    );
+    plist::to_file_binary(&info_path, &info).map_err(|e| err("Couldn't write Info.plist", e))?;
+
+    let p12 = cert
+        .as_p12(&cert.machine_id)
+        .await
+        .map_err(|e| err("Couldn't export the certificate", e))?;
+    std::fs::write(app.join("ALTCertificate.p12"), p12)
+        .map_err(|e| err("Couldn't write ALTCertificate.p12", e))?;
+    Ok(())
 }
 
 fn read_installed(app: &Path) -> Installed {

@@ -9,8 +9,10 @@ struct SettingsView: View {
     @State private var appleID = AppleIDStore.email
     @State private var targetIP = LocalDevVPN.targetIP
     @State private var vpnActive = LocalDevVPN.isActive
-    @State private var sourceURL = UserDefaults.standard.string(forKey: "altstore.sourceURL")
-        ?? AltStoreCatalog.defaultSourceURL.absoluteString
+    @AppStorage(StoreApp.defaultsKey) private var selectedStore = StoreApp.altstore.rawValue
+    @State private var sourceURLs: [StoreApp: String] = Dictionary(uniqueKeysWithValues: StoreApp.allCases.map {
+        ($0, UserDefaults.standard.string(forKey: $0.sourceDefaultsKey) ?? $0.defaultSourceURL.absoluteString)
+    })
 
     private var version: String {
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "–"
@@ -31,7 +33,7 @@ struct SettingsView: View {
                             Text("Version \(version)")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
-                            Text("AltStore, installed without a computer")
+                            Text("AltStore, Catalyst and your IPAs, installed without a computer")
                                 .font(.caption)
                                 .foregroundStyle(Aurora.lilac.opacity(0.8))
                         }
@@ -101,19 +103,35 @@ struct SettingsView: View {
                 .auroraRow()
 
                 Section {
-                    TextField("https://…", text: $sourceURL)
-                        .keyboardType(.URL)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .onSubmit(saveSource)
-                    Button("Use Official Source") {
-                        sourceURL = AltStoreCatalog.defaultSourceURL.absoluteString
-                        saveSource()
+                    Picker("Store", selection: $selectedStore) {
+                        ForEach(StoreApp.allCases) { store in
+                            Text(store == .altstore ? "\(store.name) (default)" : store.name).tag(store.rawValue)
+                        }
+                    }
+                    ForEach(StoreApp.allCases) { store in
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("\(store.name) source")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(Aurora.secondaryText)
+                            TextField("https://…", text: sourceBinding(store))
+                                .font(.footnote.monospaced())
+                                .keyboardType(.URL)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .onSubmit { saveSource(store) }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                    Button("Use Official Sources") {
+                        for store in StoreApp.allCases {
+                            sourceURLs[store] = store.defaultSourceURL.absoluteString
+                            saveSource(store)
+                        }
                     }
                 } header: {
-                    Text("AltStore source")
+                    Text("Stores")
                 } footer: {
-                    Text("AltLoad installs the newest AltStore listed in this source.")
+                    Text("The Install tab shows the store picked here. AltLoad installs the newest version listed in each source.")
                 }
                 .auroraRow()
 
@@ -136,7 +154,7 @@ struct SettingsView: View {
                 } header: {
                     Text("About")
                 } footer: {
-                    Text("AltLoad isn't affiliated with AltStore, Riley Testut or Apple. Pairing flow based on StikPair.")
+                    Text("AltLoad isn't affiliated with AltStore, Riley Testut, SideStore or Apple. Pairing flow based on StikPair.")
                 }
                 .auroraRow()
 
@@ -167,13 +185,17 @@ struct SettingsView: View {
             ? install.anisetteURL : Self.customTag
     }
 
-    private func saveSource() {
-        let trimmed = sourceURL.trimmingCharacters(in: .whitespaces)
-        if trimmed == AltStoreCatalog.defaultSourceURL.absoluteString || trimmed.isEmpty {
-            UserDefaults.standard.removeObject(forKey: "altstore.sourceURL")
+    private func sourceBinding(_ store: StoreApp) -> Binding<String> {
+        Binding(get: { sourceURLs[store] ?? "" }, set: { sourceURLs[store] = $0 })
+    }
+
+    private func saveSource(_ store: StoreApp) {
+        let trimmed = (sourceURLs[store] ?? "").trimmingCharacters(in: .whitespaces)
+        if trimmed == store.defaultSourceURL.absoluteString || trimmed.isEmpty {
+            UserDefaults.standard.removeObject(forKey: store.sourceDefaultsKey)
         } else {
-            UserDefaults.standard.set(trimmed, forKey: "altstore.sourceURL")
+            UserDefaults.standard.set(trimmed, forKey: store.sourceDefaultsKey)
         }
-        Task { await install.loadCatalog() }
+        Task { await install.loadCatalog(store) }
     }
 }

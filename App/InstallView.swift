@@ -1,26 +1,56 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
+/// Pick a store (AltStore by default, or Catalyst), install or refresh it, or sign
+/// any IPA with your own Apple ID. The install itself runs in InstallFlowView.
 struct InstallView: View {
     @Binding var selectedTab: AppTab
     @StateObject private var controller = InstallController.shared
     @StateObject private var pairings = PairingStore.shared
-    @State private var showSignIn = false
+    @AppStorage(StoreApp.defaultsKey) private var selectedRaw = StoreApp.altstore.rawValue
     @State private var showImporter = false
-    @State private var pendingIPA: URL?
     @State private var importError: String?
     @State private var vpnActive = LocalDevVPN.isActive
     @Environment(\.scenePhase) private var scenePhase
 
+    private var store: StoreApp { StoreApp(rawValue: selectedRaw) ?? .altstore }
+
     var body: some View {
         NavigationStack {
             AuroraScreen {
+                VStack(spacing: 10) {
+                    SectionLabel(title: "Store")
+                    storePicker
+                }
+
                 hero
 
-                GlassEffectContainer(spacing: 16) {
-                    phaseContent
-                        .id(phaseKey)
-                        .transition(.blurReplace.combined(with: .scale(0.97)))
+                GlassEffectContainer(spacing: 14) {
+                    VStack(spacing: 12) {
+                        if pairings.selfPairing == nil {
+                            GlassCard(tint: Aurora.danger) {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Label("Pair this iPhone first", systemImage: "link.badge.plus")
+                                        .font(.headline)
+                                    Text("AltLoad needs this iPhone's pairing file to talk to it, the way a computer would.")
+                                        .font(.subheadline)
+                                        .foregroundStyle(Aurora.secondaryText)
+                                }
+                            }
+                            GlassActionButton(title: "Go to Pair", systemImage: "antenna.radiowaves.left.and.right", prominent: true) {
+                                RootView.openPair(tab: $selectedTab)
+                            }
+                        } else {
+                            GlassActionButton(title: LocalizedStringKey(primaryTitle), systemImage: primarySymbol, prominent: true) {
+                                controller.begin(.store(store))
+                            }
+                        }
+                    }
+                }
+
+                VStack(spacing: 10) {
+                    SectionLabel(title: "Your Own Apps")
+                    customIPACard
                 }
 
                 VStack(spacing: 10) {
@@ -28,9 +58,9 @@ struct InstallView: View {
                     checklist
                 }
 
-                Text("AltLoad signs AltStore with your Apple ID and installs it straight onto this iPhone, no computer needed. With a free Apple ID, apps last 7 days. AltLoad reminds you the day before.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text("AltLoad signs apps with your Apple ID and installs them straight onto this iPhone, no computer needed. With a free Apple ID, apps last 7 days. AltLoad reminds you the day before.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Aurora.secondaryText)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 8)
             }
@@ -39,7 +69,7 @@ struct InstallView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        Task { await controller.loadCatalog() }
+                        Task { await controller.loadCatalogs() }
                     } label: {
                         Label("Check for updates", systemImage: "arrow.clockwise")
                     }
@@ -47,27 +77,10 @@ struct InstallView: View {
                 }
             }
             .task {
-                if controller.latest == nil { await controller.loadCatalog() }
+                if controller.releases.count < StoreApp.allCases.count { await controller.loadCatalogs() }
             }
             .onChange(of: scenePhase) { _, phase in
-                guard phase == .active else { return }
-                vpnActive = LocalDevVPN.isActive
-                // Back from LocalDevVPN with the VPN on: carry on automatically.
-                controller.resumeWhenVPNReady()
-            }
-            .sheet(isPresented: $showSignIn) {
-                SignInSheet(anisetteURL: controller.anisetteURL) { credentials, remember in
-                    controller.install(with: credentials, remember: remember, ipa: pendingIPA)
-                    pendingIPA = nil
-                }
-            }
-            .sheet(item: $controller.twoFactor) { prompt in
-                TwoFactorSheet(prompt: prompt) { controller.respond($0) }
-                    .interactiveDismissDisabled()
-            }
-            .sheet(item: $controller.revoke) { prompt in
-                RevokeSheet(prompt: prompt) { controller.respond($0) }
-                    .interactiveDismissDisabled()
+                if phase == .active { vpnActive = LocalDevVPN.isActive }
             }
             .fileImporter(
                 isPresented: $showImporter,
@@ -76,8 +89,7 @@ struct InstallView: View {
                 switch result {
                 case .success(let url):
                     do {
-                        pendingIPA = try AltStoreCatalog.importIPA(from: url)
-                        showSignIn = true
+                        controller.begin(.ipa(try StoreCatalog.importIPA(from: url)))
                     } catch {
                         importError = error.localizedDescription
                     }
@@ -91,14 +103,64 @@ struct InstallView: View {
                 Text(importError ?? "")
             }
         }
-        .animation(.spring(duration: 0.5, bounce: 0.2), value: controller.phase)
-        .sensoryFeedback(trigger: controller.phase) { _, newPhase in
-            switch newPhase {
-            case .success: return .success
-            case .failed: return .error
-            default: return nil
+        .animation(.spring(duration: 0.45, bounce: 0.2), value: selectedRaw)
+    }
+
+    // MARK: - Store picker
+
+    private var storePicker: some View {
+        GlassEffectContainer(spacing: 10) {
+            HStack(spacing: 10) {
+                ForEach(StoreApp.allCases) { option in
+                    storeTile(option)
+                }
             }
         }
+    }
+
+    private func storeTile(_ option: StoreApp) -> some View {
+        let isSelected = option == store
+        return Button {
+            selectedRaw = option.rawValue
+        } label: {
+            HStack(spacing: 10) {
+                AppIconView(url: controller.releases[option]?.iconURL, symbol: option.fallbackSymbol, size: 40)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(option.name)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(Aurora.frost)
+                    Text(tileDetail(option))
+                        .font(.caption2)
+                        .foregroundStyle(Aurora.secondaryText)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(isSelected ? Aurora.frost : Aurora.secondaryText)
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity)
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .glassEffect(
+            .regular.tint(isSelected ? Aurora.violet.opacity(0.55) : Aurora.card.opacity(0.6)).interactive(),
+            in: .rect(cornerRadius: 18))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(isSelected ? Aurora.violet.opacity(0.7) : Aurora.hairline, lineWidth: 1)
+        }
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityLabel(option.name)
+    }
+
+    private func tileDetail(_ option: StoreApp) -> String {
+        if let app = controller.installed(option) {
+            return controller.updateAvailable(option) ? "Update available" : "Installed \(app.version)"
+        }
+        if option == .altstore { return "Default" }
+        return controller.releases[option].map { "v\($0.version)" } ?? "Not installed"
     }
 
     // MARK: - Hero
@@ -108,43 +170,37 @@ struct InstallView: View {
             VStack(spacing: 16) {
                 ZStack {
                     Circle()
-                        .fill(Aurora.violet.opacity(0.55))
+                        .fill(Aurora.violet.opacity(0.5))
                         .frame(width: 120, height: 120)
                         .blur(radius: 38)
-                    AsyncImage(url: controller.latest?.iconURL) { image in
-                        image.resizable().scaledToFit()
-                    } placeholder: {
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .fill(Aurora.accentGradient)
-                            .overlay {
-                                Image(systemName: "square.stack.3d.up.fill")
-                                    .font(.system(size: 36, weight: .semibold))
-                                    .foregroundStyle(Aurora.frost)
-                            }
-                    }
-                    .frame(width: 96, height: 96)
-                    .clipShape(.rect(cornerRadius: 22, style: .continuous))
-                    .shadow(color: .black.opacity(0.35), radius: 14, y: 8)
+                    AppIconView(url: controller.releases[store]?.iconURL, symbol: store.fallbackSymbol, size: 96)
+                        .shadow(color: .black.opacity(0.35), radius: 14, y: 8)
                 }
 
                 VStack(spacing: 4) {
-                    Text("AltStore")
+                    Text(store.name)
                         .font(.title.bold())
                         .foregroundStyle(Aurora.frost)
+                    Text(store.tagline)
+                        .font(.footnote)
+                        .foregroundStyle(Aurora.lilac.opacity(0.85))
+                        .multilineTextAlignment(.center)
                     Text(versionLine)
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Aurora.secondaryText)
                         .multilineTextAlignment(.center)
                 }
 
                 statusChip
             }
             .frame(maxWidth: .infinity)
+            .id(store)
+            .transition(.blurReplace)
         }
     }
 
     private var versionLine: String {
-        if let release = controller.latest {
+        if let release = controller.releases[store] {
             var line = "Latest \(release.version)"
             if let date = release.date.flatMap(Self.parseDate) {
                 line += " · \(date.formatted(date: .abbreviated, time: .omitted))"
@@ -152,12 +208,12 @@ struct InstallView: View {
             if let min = release.minOSVersion { line += " · iOS \(min)+" }
             return line
         }
-        return controller.catalogError ?? "Checking the AltStore source…"
+        return controller.catalogErrors[store] ?? "Checking the \(store.name) source…"
     }
 
     @ViewBuilder
     private var statusChip: some View {
-        if let app = controller.installed {
+        if let app = controller.installed(store) {
             if app.isExpired {
                 GlassChip(text: "Expired, refresh to reopen", systemImage: "exclamationmark.triangle.fill", tint: Aurora.danger)
             } else if let days = app.daysLeft {
@@ -170,161 +226,55 @@ struct InstallView: View {
         }
     }
 
-    // MARK: - Phase content
-
-    @ViewBuilder
-    private var phaseContent: some View {
-        switch controller.phase {
-        case .idle:
-            VStack(spacing: 14) {
-                if pairings.selfPairing == nil {
-                    GlassCard(tint: Aurora.danger) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Label("Pair this iPhone first", systemImage: "link.badge.plus")
-                                .font(.headline)
-                            Text("AltLoad needs this iPhone's pairing file to talk to it, the way a computer would.")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    GlassActionButton(title: "Go to Pair", systemImage: "antenna.radiowaves.left.and.right", prominent: true) {
-                        selectedTab = .pair
-                    }
-                } else {
-                    GlassActionButton(title: LocalizedStringKey(primaryTitle), systemImage: primarySymbol, prominent: true) {
-                        pendingIPA = nil
-                        showSignIn = true
-                    }
-                    GlassActionButton(title: "Install from IPA File…", systemImage: "doc.badge.plus") {
-                        showImporter = true
-                    }
-                }
-            }
-
-        case .checking:
-            GlassCard {
-                HStack(spacing: 16) {
-                    ProgressRing(value: nil, lineWidth: 6, size: 44)
-                    Text("Getting ready…")
-                        .font(.headline)
-                }
-            }
-
-        case .downloading(let fraction):
-            GlassCard {
-                HStack(spacing: 16) {
-                    ProgressRing(value: fraction, size: 64)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Downloading")
-                            .font(.headline)
-                        Text("AltStore \(controller.latest?.version ?? "")")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer(minLength: 0)
-                }
-            }
-
-        case .needsVPN:
-            VStack(spacing: 14) {
-                GlassCard(tint: Aurora.violet) {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Label("Turn on LocalDevVPN", systemImage: "network.badge.shield.half.filled")
-                            .font(.headline)
-                        Text("LocalDevVPN loops traffic for \(LocalDevVPN.targetIP) back into this iPhone, so AltLoad can reach it like a computer would. It only carries that one address, and your normal internet traffic isn't affected.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        if !LocalDevVPN.isInstalled {
-                            Text("It's free on the App Store. Install it, open it once to add the VPN configuration, then come back here.")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                GlassActionButton(
-                    title: LocalDevVPN.isInstalled ? "Turn On LocalDevVPN" : "Get LocalDevVPN",
-                    systemImage: LocalDevVPN.isInstalled ? "power" : "arrow.down.app",
-                    prominent: true
-                ) {
-                    LocalDevVPN.turnOn()
-                }
-                GlassActionButton(title: "It's On, Continue", systemImage: "arrow.right") {
-                    controller.resumeAfterVPN(skipCheck: true)
-                }
-                Button("Cancel") { controller.reset() }
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-        case .working(let stage, let fraction):
-            VStack(spacing: 14) {
-                GlassCard {
-                    HStack(spacing: 16) {
-                        ProgressRing(value: fraction, size: 64)
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(stage)
-                                .font(.headline)
-                                .contentTransition(.opacity)
-                                .fixedSize(horizontal: false, vertical: true)
-                            Text("Keep AltLoad open until this finishes.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer(minLength: 0)
-                    }
-                }
-                GlassActionButton(title: "Cancel", systemImage: "xmark") { controller.cancel() }
-            }
-
-        case .success(let app):
-            VStack(spacing: 14) {
-                GlassCard(tint: Aurora.success) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("\(app.name) \(app.version) installed", systemImage: "checkmark.seal.fill")
-                            .font(.title3.bold())
-                            .foregroundStyle(Aurora.success)
-                        if let expiration = app.expiration {
-                            Text("Signed until \(expiration.formatted(date: .abbreviated, time: .shortened))")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        Text("First launch: if iOS says the developer isn't trusted, open **Settings › General › VPN & Device Management**, tap your Apple ID and choose **Trust**.")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                GlassActionButton(title: "Done") { controller.reset() }
-            }
-
-        case .failed(let message):
-            VStack(spacing: 14) {
-                GlassCard(tint: Aurora.danger) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("Install failed", systemImage: "xmark.octagon.fill")
-                            .font(.title3.bold())
-                            .foregroundStyle(Aurora.danger)
-                        Text(message)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .textSelection(.enabled)
-                    }
-                }
-                GlassActionButton(title: "Try Again", systemImage: "arrow.clockwise", prominent: true) {
-                    controller.reset()
-                }
-            }
-        }
-    }
-
     private var primaryTitle: String {
-        let latest = controller.latest?.version ?? ""
-        guard controller.installed != nil else { return "Install AltStore \(latest)" }
-        return controller.updateAvailable ? "Update to AltStore \(latest)" : "Refresh AltStore"
+        let latest = controller.releases[store]?.version ?? ""
+        guard controller.installed(store) != nil else { return "Install \(store.name) \(latest)" }
+        return controller.updateAvailable(store) ? "Update to \(store.name) \(latest)" : "Refresh \(store.name)"
     }
 
     private var primarySymbol: String {
-        guard controller.installed != nil else { return "arrow.down.circle.fill" }
-        return controller.updateAvailable ? "sparkles" : "arrow.triangle.2.circlepath"
+        guard controller.installed(store) != nil else { return "arrow.down.circle.fill" }
+        return controller.updateAvailable(store) ? "sparkles" : "arrow.triangle.2.circlepath"
+    }
+
+    // MARK: - Custom IPA
+
+    private var customIPACard: some View {
+        Button {
+            showImporter = true
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: "doc.badge.plus")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(Aurora.frost)
+                    .frame(width: 44, height: 44)
+                    .glassEffect(.regular.tint(Aurora.violet.opacity(0.5)), in: .circle)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Install an IPA")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundStyle(Aurora.frost)
+                    Text("Pick any .ipa. AltLoad signs it with your free Apple ID certificate and installs it.")
+                        .font(.footnote)
+                        .foregroundStyle(Aurora.secondaryText)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color.white.opacity(0.4))
+            }
+            .padding(16)
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .disabled(pairings.selfPairing == nil)
+        .opacity(pairings.selfPairing == nil ? 0.5 : 1)
+        .glassEffect(.regular.tint(Aurora.card.opacity(0.6)).interactive(), in: .rect(cornerRadius: 20))
+        .overlay {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(Aurora.hairline, lineWidth: 1)
+        }
     }
 
     // MARK: - Checklist
@@ -335,7 +285,7 @@ struct InstallView: View {
                 StatusRow(
                     title: "Pairing file",
                     detail: pairings.selfPairing.map { "\($0.displayName), saved \($0.date.formatted(.relative(presentation: .named)))" }
-                        ?? "Create one in the Pair tab",
+                        ?? "Create one in Tools › Pair",
                     state: pairings.selfPairing == nil ? .attention : .done)
                 StatusRow(
                     title: "LocalDevVPN",
@@ -347,11 +297,16 @@ struct InstallView: View {
                     detail: AppleIDStore.email.isEmpty ? "You'll sign in when you install" : AppleIDStore.email,
                     state: AppleIDStore.email.isEmpty ? .pending : .done)
                 StatusRow(
-                    title: "AltStore",
+                    title: LocalizedStringKey(store.name),
                     detail: installedDetail,
-                    state: controller.installed == nil ? .pending : (controller.installed!.isExpired ? .attention : .done))
+                    state: storeState)
             }
         }
+    }
+
+    private var storeState: StatusRow.Status {
+        guard let app = controller.installed(store) else { return .pending }
+        return app.isExpired ? .attention : .done
     }
 
     private var readyCount: Int {
@@ -359,25 +314,13 @@ struct InstallView: View {
         if pairings.selfPairing != nil { n += 1 }
         if vpnActive { n += 1 }
         if !AppleIDStore.email.isEmpty { n += 1 }
-        if let app = controller.installed, !app.isExpired { n += 1 }
+        if let app = controller.installed(store), !app.isExpired { n += 1 }
         return n
     }
 
     private var installedDetail: String {
-        guard let app = controller.installed else { return "Not installed yet" }
+        guard let app = controller.installed(store) else { return "Not installed yet" }
         return "\(app.version), installed \(app.installedAt.formatted(.relative(presentation: .named)))"
-    }
-
-    private var phaseKey: String {
-        switch controller.phase {
-        case .idle: "idle"
-        case .checking: "checking"
-        case .downloading: "downloading"
-        case .needsVPN: "vpn"
-        case .working: "working"
-        case .success: "success"
-        case .failed: "failed"
-        }
     }
 
     private static func parseDate(_ s: String) -> Date? {

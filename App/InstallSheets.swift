@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - Apple ID
 
+/// Full-screen Apple ID sign-in (used by Tools › Certificates; installs sign in inside InstallFlowView).
 struct SignInSheet: View {
     let anisetteURL: String
     let onContinue: (AppleIDCredentials, Bool) -> Void
@@ -55,7 +56,6 @@ struct SignInSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
     }
 
     private var host: String {
@@ -116,7 +116,6 @@ struct TwoFactorSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
     }
 
     private var headline: String {
@@ -185,6 +184,5 @@ struct RevokeSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
     }
 }

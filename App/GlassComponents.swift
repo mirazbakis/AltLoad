@@ -38,21 +38,28 @@ struct GlassActionButton: View {
     }
 }
 
-/// Rounded glass card used for instructions, status and details.
+/// Catalyst-style card: Liquid Glass tinted with Catalyst's #140C20 plum and a
+/// faint violet hairline, like its "Signing with…" banner on My Apps.
 struct GlassCard<Content: View>: View {
     var tint: Color? = nil
     var padding: CGFloat = 18
     @ViewBuilder var content: Content
 
+    private let radius: CGFloat = 20
+
     var body: some View {
         content
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassEffect(.regular.tint((tint ?? Aurora.violet).opacity(tint == nil ? 0.12 : 0.22)), in: .rect(cornerRadius: 28))
+            .glassEffect(.regular.tint(tint.map { $0.opacity(0.22) } ?? Aurora.card.opacity(0.6)), in: .rect(cornerRadius: radius))
+            .overlay {
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .strokeBorder((tint ?? Aurora.violet).opacity(0.25), lineWidth: 1)
+            }
     }
 }
 
-/// Small uppercase label above a group of cards.
+/// Catalyst's section header: 13pt semibold, uppercase, white at 60%.
 struct SectionLabel: View {
     let title: LocalizedStringKey
     var trailing: String? = nil
@@ -60,18 +67,112 @@ struct SectionLabel: View {
     var body: some View {
         HStack {
             Text(title)
-                .font(.caption.weight(.bold))
+                .font(.system(size: 13, weight: .semibold))
                 .textCase(.uppercase)
-                .tracking(1.2)
-                .foregroundStyle(Aurora.lilac.opacity(0.75))
+                .foregroundStyle(Aurora.secondaryText)
             Spacer()
             if let trailing {
                 Text(trailing)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Aurora.lilac.opacity(0.75))
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Aurora.secondaryText)
             }
         }
-        .padding(.horizontal, 6)
+        .padding(.horizontal, 4)
+    }
+}
+
+// MARK: - App cells (Catalyst / SideStore style)
+
+/// App icon from a source, or a gradient tile with a symbol while it loads.
+struct AppIconView: View {
+    var url: URL?
+    var symbol: String = "app.fill"
+    var size: CGFloat = 56
+
+    var body: some View {
+        AsyncImage(url: url) { image in
+            image.resizable().scaledToFit()
+        } placeholder: {
+            RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
+                .fill(Aurora.accentGradient)
+                .overlay {
+                    Image(systemName: symbol)
+                        .font(.system(size: size * 0.4, weight: .semibold))
+                        .foregroundStyle(Aurora.frost)
+                }
+        }
+        .frame(width: size, height: size)
+        .clipShape(.rect(cornerRadius: size * 0.225, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
+                .strokeBorder(.white.opacity(0.08), lineWidth: 0.5)
+        }
+    }
+}
+
+/// Catalyst's capsule button: a tiny caption over a bold value ("EXPIRES IN" / "5 DAYS"),
+/// or a single word ("GET", "OPEN", "UPDATE").
+struct PillButton: View {
+    var caption: String? = nil
+    let title: String
+    var tint: Color = Aurora.violet
+    var prominent = true
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 0) {
+                if let caption {
+                    Text(caption.uppercased())
+                        .font(.system(size: 8, weight: .bold))
+                        .opacity(0.75)
+                }
+                Text(title.uppercased())
+                    .font(.system(size: 13, weight: .bold))
+                    .monospacedDigit()
+            }
+            .foregroundStyle(prominent ? Aurora.frost : tint)
+            .frame(minWidth: 72, minHeight: 34)
+            .padding(.horizontal, 6)
+        }
+        .buttonStyle(.plain)
+        .glassEffect(.regular.tint(tint.opacity(prominent ? 0.85 : 0.2)).interactive(), in: .capsule)
+    }
+}
+
+/// An app row in the style of Catalyst's AppBannerView: icon, name, detail line
+/// and a pill on the right.
+struct AppBannerRow<Trailing: View>: View {
+    let name: String
+    let detail: String
+    var detailColor: Color = Aurora.secondaryText
+    var iconURL: URL? = nil
+    var symbol: String = "app.fill"
+    @ViewBuilder var trailing: Trailing
+
+    var body: some View {
+        HStack(spacing: 14) {
+            AppIconView(url: iconURL, symbol: symbol, size: 56)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(name)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(Aurora.frost)
+                    .lineLimit(1)
+                Text(detail)
+                    .font(.footnote)
+                    .foregroundStyle(detailColor)
+                    .lineLimit(2)
+            }
+            Spacer(minLength: 8)
+            trailing
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .glassEffect(.regular.tint(Aurora.card.opacity(0.6)), in: .rect(cornerRadius: 22))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .strokeBorder(Aurora.hairline, lineWidth: 1)
+        }
     }
 }
 
@@ -200,6 +301,32 @@ struct ProgressRing: View {
         .frame(width: size, height: size)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(value.map { "\(Int($0 * 100)) percent" } ?? "In progress")
+    }
+}
+
+/// Linear progress in a glass capsule, violet fill with a soft glow.
+struct GlassProgressBar: View {
+    var value: Double
+    var height: CGFloat = 10
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(Color.white.opacity(0.08))
+                Capsule()
+                    .fill(Aurora.accentGradient)
+                    .frame(width: max(height, geo.size.width * min(max(value, 0), 1)))
+                    .shadow(color: Aurora.violet.opacity(0.6), radius: 8)
+            }
+        }
+        .frame(height: height)
+        .padding(3)
+        .glassEffect(.regular.tint(Aurora.card.opacity(0.5)), in: .capsule)
+        .animation(.spring(duration: 0.5), value: value)
+        .accessibilityElement()
+        .accessibilityLabel("Progress")
+        .accessibilityValue(Text(value.formatted(.percent.precision(.fractionLength(0)))))
     }
 }
 
@@ -341,7 +468,7 @@ private struct MarkShape: Shape {
 
 // MARK: - Scaffold
 
-/// Screen scaffold: aurora background + scrolling content column.
+/// Screen scaffold: black + glow background edge to edge, scrolling content column.
 struct AuroraScreen<Content: View>: View {
     @ViewBuilder var content: Content
 
@@ -352,7 +479,7 @@ struct AuroraScreen<Content: View>: View {
                 VStack(spacing: 22) {
                     content
                 }
-                .frame(maxWidth: 440)
+                .frame(maxWidth: 680)
                 .padding(.horizontal, 20)
                 .padding(.top, 8)
                 .padding(.bottom, 32)

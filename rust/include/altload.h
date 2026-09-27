@@ -129,6 +129,20 @@ int32_t altload_account_session_run(AltLoadInstallSession *session,
                                     char **out_json);
 void altload_string_free(char *s);
 
+
+/* ---- Device ops: on-device AltServer + files into apps (rust/src/install/device.rs) ---- */
+
+/* Opens the tunnel from config (pairing_file_path, host_name, endpoints; the
+   Apple ID fields are ignored) and runs one op from request_json:
+   install_app, install_profiles, remove_profiles, remove_app, list_apps, place_file.
+   Returns 0 with result JSON in *out_json, or 1 with an error message.
+   Free *out_json with altload_string_free. Blocking. */
+int32_t altload_device_run(const AltLoadInstallConfig *config,
+                           const char *request_json,
+                           AltLoadProgressCb progress_cb,
+                           void *ctx,
+                           char **out_json);
+
 #ifdef __cplusplus
 }
 #endif

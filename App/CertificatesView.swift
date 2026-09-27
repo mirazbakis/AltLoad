@@ -9,57 +9,56 @@ struct CertificatesView: View {
     @State private var pendingRevoke: DevCertificate?
 
     var body: some View {
-        NavigationStack {
-            AuroraScreen {
-                header
+        AuroraScreen {
+            header
 
-                switch controller.phase {
-                case .signedOut:
-                    signedOut
-                case .loading(let stage):
-                    loading(stage)
-                case .loaded:
-                    if let overview = controller.overview {
-                        content(overview)
-                    }
-                case .failed(let message):
-                    failure(message)
+            switch controller.phase {
+            case .signedOut:
+                signedOut
+            case .loading(let stage):
+                loading(stage)
+            case .loaded:
+                if let overview = controller.overview {
+                    content(overview)
                 }
+            case .failed(let message):
+                failure(message)
             }
-            .navigationTitle("Certificates")
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        controller.refresh()
-                    } label: {
-                        Label("Refresh", systemImage: "arrow.clockwise")
-                    }
-                    .disabled(controller.isBusy || controller.overview == nil)
+        }
+        .navigationTitle("Certificates")
+        .toolbarTitleDisplayMode(.inlineLarge)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    controller.refresh()
+                } label: {
+                    Label("Refresh", systemImage: "arrow.clockwise")
                 }
+                .disabled(controller.isBusy || controller.overview == nil)
             }
-            .sheet(isPresented: $showSignIn) {
-                SignInSheet(anisetteURL: InstallController.shared.anisetteURL) { credentials, remember in
-                    controller.load(with: credentials, remember: remember)
-                }
+        }
+        .fullScreenCover(isPresented: $showSignIn) {
+            SignInSheet(anisetteURL: InstallController.shared.anisetteURL) { credentials, remember in
+                controller.load(with: credentials, remember: remember)
             }
-            .sheet(item: $controller.twoFactor) { prompt in
-                TwoFactorSheet(prompt: prompt) { controller.respond($0) }
-                    .interactiveDismissDisabled()
+            .auroraTheme()
+        }
+        .fullScreenCover(item: $controller.twoFactor) { prompt in
+            TwoFactorSheet(prompt: prompt) { controller.respond($0) }
+                .auroraTheme()
+        }
+        .confirmationDialog(
+            "Revoke this certificate?",
+            isPresented: Binding(get: { pendingRevoke != nil }, set: { if !$0 { pendingRevoke = nil } }),
+            presenting: pendingRevoke
+        ) { cert in
+            Button("Revoke \(cert.displayName)", role: .destructive) {
+                controller.revoke([cert])
+                pendingRevoke = nil
             }
-            .confirmationDialog(
-                "Revoke this certificate?",
-                isPresented: Binding(get: { pendingRevoke != nil }, set: { if !$0 { pendingRevoke = nil } }),
-                presenting: pendingRevoke
-            ) { cert in
-                Button("Revoke \(cert.displayName)", role: .destructive) {
-                    controller.revoke([cert])
-                    pendingRevoke = nil
-                }
-                Button("Cancel", role: .cancel) { pendingRevoke = nil }
-            } message: { _ in
-                Text("Apps signed with this certificate will stop opening until they're signed again. This can't be undone.")
-            }
+            Button("Cancel", role: .cancel) { pendingRevoke = nil }
+        } message: { _ in
+            Text("Apps signed with this certificate will stop opening until they're signed again. This can't be undone.")
         }
         .animation(.spring(duration: 0.5, bounce: 0.2), value: controller.phase)
         .task {

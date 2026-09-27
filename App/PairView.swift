@@ -9,19 +9,17 @@ struct PairView: View {
     @State private var appleTVPin = ""
 
     var body: some View {
-        NavigationStack {
-            AuroraScreen {
-                header
+        AuroraScreen {
+            header
 
-                GlassEffectContainer(spacing: 18) {
-                    content
-                        .id(phaseKey)
-                        .transition(.blurReplace.combined(with: .scale(0.96)))
-                }
+            GlassEffectContainer(spacing: 18) {
+                content
+                    .id(phaseKey)
+                    .transition(.blurReplace.combined(with: .scale(0.96)))
             }
-            .navigationTitle("Pair")
-            .toolbarTitleDisplayMode(.inlineLarge)
         }
+        .navigationTitle("Pair")
+        .toolbarTitleDisplayMode(.inlineLarge)
         .animation(.spring(duration: 0.55, bounce: 0.25), value: controller.phase)
         .sensoryFeedback(trigger: controller.phase) { _, newPhase in
             switch newPhase {

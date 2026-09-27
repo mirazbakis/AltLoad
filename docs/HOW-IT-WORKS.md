@@ -13,7 +13,7 @@ This document describes each stage of the install, with the protocol, the librar
 | Apple ID + signing | [`isideload`](https://github.com/nab138/isideload) 0.4 (uses idevice, a fork of apple-codesign, rcgen, keyring) | `rust/src/install.rs` |
 | Discovery | `NetServiceBrowser` / `NetService` (mDNSResponder), used for pairing and Apple TV, so no multicast entitlement is needed | `App/PairingController.swift`, `App/AppleTVDiscovery.swift` |
 | Loopback | [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN): detection via `getifaddrs`, and control via `localdevvpn://` and `altload://` URLs | `App/LocalDevVPN.swift` |
-| Catalog | AltStore source JSON (`https://apps.altstore.io`), `URLSession` download with progress, IPA cache in Application Support | `App/AltStoreCatalog.swift` |
+| Catalog | Store source JSON (AltStore: `https://apps.altstore.io`, Catalyst: its `source.json` on GitHub), `URLSession` download with progress, IPA cache in Application Support | `App/StoreCatalog.swift` |
 | Secrets | Keychain (`kSecClassGenericPassword`, `WhenUnlockedThisDeviceOnly`) for the Apple ID password. isideload's `KeyringStorage` for the certificate key and anisette state | `App/AppleIDStore.swift` |
 
 ## 1. Pairing (the Pair tab)
@@ -73,8 +73,8 @@ AltServer normally writes these keys, and AltStore reads them at runtime:
 |---|---|---|
 | `ALTDeviceID` | AltLoad (`prepare_app`) | UDID of the device AltStore runs on |
 | `ALTServerID` | AltLoad | ID of the "server" that installed it. This is a stable per-install UUID |
-| `ALTCertificateID` + `ALTCertificate.p12` | isideload (`apply_special_app_behavior`) | The signing identity AltStore uses to re-sign the apps *it* installs |
-| `ALTAppGroups` | isideload | The registered app group |
+| `ALTCertificateID` + `ALTCertificate.p12` | isideload (`apply_special_app_behavior`); for Catalyst, AltLoad (`inject_store_keys`) | The signing identity AltStore uses to re-sign the apps *it* installs |
+| `ALTAppGroups` | isideload; for Catalyst, AltLoad (`inject_store_keys`) | The registered app group |
 
 isideload then re-signs every bundle with the matching profile's entitlements, using `apple-codesign-quick`.
 
@@ -113,3 +113,18 @@ void    altload_install_session_cancel(session);
 - Free Apple IDs are limited to 3 sideloaded apps, 10 App IDs per 7 days, and 7-day signatures.
 - The anisette server is a third party. Self-host one if you'd rather not depend on it.
 - The install pipeline hasn't been compiled or tested on a device yet. The first build may need small API fixes against the pinned idevice and isideload versions.
+
+## On-device AltServer
+
+`App/AltServerHost.swift` makes AltLoad the AltServer for the AltStore on the same iPhone.
+
+- **Discovery, on-device link (preferred).** AltStore's `FindServerOperation` posts the Darwin notification `io.altstore.Request.WiredServerConnectionAvailable` and waits one second for `io.altstore.Response.WiredServerConnectionAvailable`. AltLoad answers, so AltStore treats it as a USB-connected AltServer, posts `io.altstore.Request.WiredServerConnectionStart` and listens on `127.0.0.1:28151`. AltLoad connects there and becomes the server side of that connection.
+- **Discovery, Wi-Fi.** A Bonjour `_altserver._tcp` service with TXT `serverID` = the ALTServerID AltLoad wrote into AltStore, which makes it AltStore's preferred network server.
+- **Protocol.** AltServer's: an Int32 little-endian length, then JSON; one request per connection. Handled: `AnisetteDataRequest` (v1 headers from the anisette server, mapped to `ALTAnisetteData`), `PrepareAppRequest` + raw app data + `BeginInstallationRequest` (with `InstallationProgressResponse` updates), `InstallProvisioningProfilesRequest`, `RemoveProvisioningProfilesRequest`, `RemoveAppRequest`. JIT (`EnableUnsignedCodeExecutionRequest`) returns an error.
+- **Device work.** `altload_device_run` (`rust/src/install/device.rs`) opens the same LocalDevVPN tunnel and uses installation_proxy + AFC (via isideload's `install_app_rsd`) and misagent. Profile handling mirrors AltServer's `ALTDeviceManager`: free profiles are taken off before an install and the active ones put back after, so a free Apple ID stays under 3 active apps. AltLoad's own profile is always protected.
+- **Background.** iOS suspends AltLoad in the background, so AltServer only answers while AltLoad is open or kept awake (silent audio, Tools › AltServer).
+
+## Pairing file into apps
+
+`place_file` uses house_arrest (`VendContainer`, falling back to `VendDocuments`) to write this iPhone's RPPairing file into another app: `Documents/PairingFile_RemoteRP.plist` for Catalyst/SideStore, `Documents/rp_pairing_file.plist` for StikDebug and other idevice apps. After installing Catalyst, AltLoad does this automatically.
+

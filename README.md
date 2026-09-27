@@ -4,7 +4,7 @@
 
 <h1 align="center">AltLoad</h1>
 
-<p align="center"><b>Install AltStore on your iPhone using just your iPhone, with no computer involved.</b></p>
+<p align="center"><b>Install AltStore or Catalyst (and your own IPAs) on your iPhone using just your iPhone, with no computer involved.</b></p>
 
 Normally, installing [AltStore](https://altstore.io) requires AltServer running on a Mac or PC. AltLoad does that job on the iPhone itself. It pairs the iPhone with itself, signs AltStore with your Apple ID, and installs it. When the 7-day signature is about to run out, you refresh it in AltLoad with one tap.
 
@@ -38,23 +38,22 @@ AltLoad is a sideloaded app, so you install the `.ipa` the same way as any other
 
 ## Using AltLoad
 
-1. **Pair this iPhone (once).** Open the **Pair** tab and tap **Pair This iPhone or iPad**. Then go to **Settings › Privacy & Security › Developer Mode**, scroll down, tap **Pair with AltLoad**, and enter the code AltLoad shows you.
+1. **Pair this iPhone (once).** Open **Tools › Pair** and tap **Pair This iPhone or iPad**. Then go to **Settings › Privacy & Security › Developer Mode**, scroll down, tap **Pair with AltLoad**, and enter the code AltLoad shows you.
 2. **Set up LocalDevVPN (once).** Install it from the App Store and open it once so it can add its VPN configuration.
-3. **Install AltStore.** Open the **Install** tab, tap **Install AltStore**, sign in with your Apple ID and enter the two-factor code. If LocalDevVPN is off, AltLoad asks you to turn it on, then continues by itself.
+3. **Install a store.** Open the **Install** tab, pick **AltStore** (the default) or **Catalyst**, tap **Install**, sign in with your Apple ID and enter the two-factor code. If LocalDevVPN is off, AltLoad asks you to turn it on, then continues by itself.
 4. **Trust it.** The first time you open AltStore, trust your Apple ID in **Settings › General › VPN & Device Management**.
-5. **Refresh every week.** With a free Apple ID, AltStore stops opening after 7 days. AltLoad reminds you the day before, and you open the **Install** tab and tap **Refresh AltStore**.
+5. **Use AltStore normally.** AltLoad runs its own **AltServer** on the iPhone, so AltStore can install and refresh apps without a computer. Keep AltLoad open while it works, or turn on background mode in **Tools › AltServer**. LocalDevVPN has to be on.
+6. **Refresh every week.** With a free Apple ID, apps stop opening after 7 days. Refresh in AltStore, or in AltLoad (**Install** tab, or the pill in **Tools › Library**). AltLoad reminds you the day before.
 
-> **Why refresh in AltLoad and not in AltStore?** AltStore's built-in refresh looks for AltServer on a computer, which this setup doesn't have. AltLoad does the refreshing instead, and your AltStore data and apps are kept.
+> **How AltStore finds AltLoad.** AltStore first asks, through a system notification, whether an AltServer is connected over USB. AltLoad answers and connects to AltStore on the iPhone itself, so AltStore picks it before anything else. AltLoad also advertises itself on Wi-Fi with the server ID it wrote into AltStore. The installs, provisioning profiles and app removal AltStore asks for go through LocalDevVPN, like AltLoad's own installs.
 
 ### What's in the app
 
 | Tab | What it does |
 |---|---|
-| **Install** | Installs, refreshes or updates AltStore, always the newest version from the official AltStore source. It can also install an `.ipa` file you pick. |
-| **Certificates** | Revoke, view, and manage certificates tied to your Apple ID. | 
-| **Pair** | Creates pairing files on the device, for this iPhone, another iPhone or iPad, or an Apple TV. |
-| **Library** | Your saved pairing files (also in **Files › On My iPhone › AltLoad**) and AltStore's expiry date. |
-| **Settings** | Apple ID, anisette server, AltStore source, LocalDevVPN and background options. |
+| **Install** | Pick AltStore (default) or [Catalyst](https://github.com/mirazbakis/Catalyst), then install, refresh or update it, always the newest version from its source. **Install an IPA** signs any `.ipa` you pick with your own free Apple ID certificate and installs it. Installs run full screen with a step-by-step progress bar (LocalDevVPN, device link, Apple sign-in, signing, installing). Catalyst gets this iPhone's pairing file placed inside it automatically. |
+| **Tools** | **AltServer** (status, background mode, activity log) · **Pair** (pairing files for this iPhone, another iPhone or iPad, or an Apple TV) · **Pairing File to Apps** (copies the pairing file into Catalyst, SideStore, StikDebug or any development-signed app) · **Library** (every app AltLoad installed, with a days-left pill you tap to refresh, plus saved pairing files) · **Certificates** (your Apple ID's certificates, App IDs and devices). |
+| **Settings** | Apple ID, default store and store sources, anisette server, LocalDevVPN and background options. |
 
 ## Building the IPA yourself
 

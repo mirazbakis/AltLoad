@@ -62,6 +62,8 @@
     <array>
         <string>_remotepairing-pairable-host._tcp</string>
         <string>_remotepairing-manual-pairing._tcp</string>
+        <!-- AltLoad's on-device AltServer, found by AltStore over Wi-Fi. -->
+        <string>_altserver._tcp</string>
         <!-- Throwaway type used only to trigger the Local Network prompt. -->
         <string>_altloadprobe._tcp</string>
     </array>

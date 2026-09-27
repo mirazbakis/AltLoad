@@ -16,6 +16,8 @@ idevice = { version = "0.1.61", default-features = false, features = [
   "tunnel_tcp_stack",
   "afc",
   "installation_proxy",
+  "misagent",
+  "house_arrest",
   "tcp",
   "ring",
 ] }
