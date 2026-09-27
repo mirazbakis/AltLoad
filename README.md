@@ -32,7 +32,7 @@ AltLoad is a sideloaded app, so you install the `.ipa` the same way as any other
 1. Download **`AltLoad.ipa`**:
    - the latest stable build is on the [**Releases**](https://github.com/mirazbakis/AltLoad/releases) page,
    - the newest build of `main` is always at [**Nightly build**](https://github.com/mirazbakis/AltLoad/releases/tag/nightly), which needs no GitHub account, or
-   - the newest development build is on the [**Actions**](https://github.com/mirazbakis/AltLoad/actions) page. Open the latest green run and download **AltLoad-unsigned** from **Artifacts**. You need to be signed in to GitHub for this.
+   - the newest development build is on the [**Actions**](https://github.com/mirazbakis/AltLoad/actions) page. Open the latest green run and download **AltLoad.ipa** from **Artifacts**. You need to be signed in to GitHub for this.
 2. Sign and install it with whatever you already use to sideload: AltStore, SideStore, Sideloadly, Xcode or another signing tool.
 3. If iOS says the developer isn't trusted, go to **Settings › General › VPN & Device Management**, tap your Apple ID and choose **Trust**.
 
@@ -64,7 +64,7 @@ You don't need a Mac for this: GitHub can build it for you.
 1. **Fork** this repository (the **Fork** button at the top right).
 2. In your fork, open the **Actions** tab and enable workflows if GitHub asks.
 3. Run **Build unsigned IPA**, either by clicking **Run workflow** or by pushing a commit.
-4. When it finishes (about 10–20 minutes the first time), download **AltLoad-unsigned** from the run's **Artifacts**. The zip contains `AltLoad.ipa`.
+4. When it finishes (about 10–20 minutes the first time), download **AltLoad.ipa** from the run's **Artifacts**.
 
 To publish a release, push a tag starting with `v` (for example `v1.0.0`). The workflow attaches `AltLoad.ipa` to a GitHub Release automatically.
 

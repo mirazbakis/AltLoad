@@ -89,11 +89,14 @@ jobs:
           lipo -info "$EXE"
           codesign --verify --verbose "$APP"
 
+      # archive: false uploads the .ipa itself. Zipped artifacts download as
+      # AltLoad-unsigned.zip with the IPA inside, and signers given that zip
+      # report "archive appears to be corrupted".
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v7
         with:
-          name: AltLoad-unsigned
           path: AltLoad.ipa
+          archive: false
           if-no-files-found: error
           retention-days: 90
 
