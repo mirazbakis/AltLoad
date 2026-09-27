@@ -4,14 +4,14 @@
 
 <h1 align="center">AltLoad</h1>
 
-<p align="center"><b>Install AltStore or Catalyst (and your own IPAs) on your iPhone using just your iPhone, with no computer involved.</b></p>
+<p align="center"><b>Install AltStore Classic or Catalyst completely on device.</b></p>
 
 Normally, installing [AltStore](https://altstore.io) requires AltServer running on a Mac or PC. AltLoad does that job on the iPhone itself. It pairs the iPhone with itself, signs AltStore with your Apple ID, and installs it. When the 7-day signature is about to run out, you refresh it in AltLoad with one tap.
 
-Built with SwiftUI for iOS 27, with a dark purple theme and Liquid Glass.
+AltLoad simulates AltServer using some advanced tools introduced in the **iOS 27** update.
 
 > [!WARNING]
-> **Early preview.** AltLoad hasn't been tested properly yet. Expect bugs, and please [open an issue](https://github.com/mirazbakis/AltLoad/issues) if something doesn't work.
+> **Early preview.** AltLoad is still in testing. Expect bugs, and please [open an issue](https://github.com/mirazbakis/AltLoad/issues) if something doesn't work.
 
 > AltLoad is an independent project. It is not affiliated with AltStore, Riley Testut, SideStore or Apple.
 
