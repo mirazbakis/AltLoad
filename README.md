@@ -4,7 +4,7 @@
 
 <h1 align="center">AltLoad</h1>
 
-<p align="center"><b>Install AltStore Classic or Catalyst completely on device.</b></p>
+<p align="center"><b>Install AltStore Classic completely on device.</b></p>
 
 Normally, installing [AltStore](https://altstore.io) requires AltServer running on a Mac or PC. AltLoad does that job on the iPhone itself. It pairs the iPhone with itself, signs AltStore with your Apple ID, and installs it. When the 7-day signature is about to run out, you refresh it in AltLoad with one tap.
 
