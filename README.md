@@ -11,7 +11,7 @@ Normally, installing [AltStore](https://altstore.io) requires AltServer running 
 AltLoad simulates AltServer using some advanced tools introduced in the **iOS 27** update.
 
 > [!WARNING]
-> **Early preview.** AltLoad is still in testing. Expect bugs, and please [open an issue](https://github.com/mirazbakis/AltLoad/issues) if something doesn't work.
+> AltLoad is still in active development. The features and the design are not final; and is subject to change. If you find bugs, please report them as specified in SECURITY.md, not in a public issue. 
 
 > AltLoad is an independent project. It is not affiliated with AltStore, Riley Testut, SideStore or Apple.
 
