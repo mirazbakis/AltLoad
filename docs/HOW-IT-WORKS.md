@@ -13,8 +13,8 @@ This document describes each stage of the install, with the protocol, the librar
 | Apple ID + signing | [`isideload`](https://github.com/nab138/isideload) 0.4.6 (uses idevice, a fork of apple-codesign, rcgen, keyring) | `rust/src/install.rs` |
 | Discovery | `NetServiceBrowser` / `NetService` (mDNSResponder), used for pairing and Apple TV, so no multicast entitlement is needed | `App/Services/PairingController.swift`, `App/Services/AppleTVDiscovery.swift` |
 | Loopback | [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN): detection via `getifaddrs`, and control via `localdevvpn://` and `altload://` URLs | `App/Services/LocalDevVPN.swift` |
-| Catalog | AltStore's source JSON (`https://apps.altstore.io`, Release and Beta), `URLSession` download with progress, IPA cache in Application Support | `App/Features/Install/StoreCatalog.swift` |
-| Secrets | Keychain (`kSecClassGenericPassword`, `WhenUnlockedThisDeviceOnly`) for the Apple ID password. isideload's `KeyringStorage` for the certificate key and anisette state | `App/Services/AppleIDStore.swift` |
+| Catalog | AltStore-format sources (`https://apps.altstore.io` for AltStore and Beta, `https://apps.sidestore.io` for SideStore), GitHub releases for LiveContainer and both nightlies, with fallbacks for when SideStore's repository is down; `URLSession` download with progress, IPA cache in Application Support | `App/Features/Install/StoreCatalog.swift` |
+| Secrets | Keychain (`kSecClassGenericPassword`, `WhenUnlockedThisDeviceOnly`) for the Apple ID password. files in `Application Support/AltLoad` (`FileStorage` in `rust/src/install.rs`) for the certificate key and anisette state, one folder per anisette server; values left in the Keychain by older builds are moved over | `App/Services/AppleIDStore.swift`, `rust/src/install.rs` |
 
 ## 1. Pairing (the Pair tab)
 
@@ -50,7 +50,7 @@ This is the same path StikDebug uses (`tunnel_create_rppairing` to `10.7.0.1:491
 
 This comes from isideload's `AppleAccount`.
 
-- **Anisette:** Apple's servers require `X-Apple-I-MD`, `X-Apple-I-MD-M` and related machine-identity headers. `RemoteV3AnisetteProvider` provisions a virtual machine identity through an anisette v3 server over a websocket, then caches the state. The default is SideStore's `https://ani.sidestore.io`. Settings offers a picker built from `https://servers.sidestore.io/servers.json` (HTTPS entries only, merged with a built-in list) plus a custom URL. If sign-in fails with an anisette error, the error message suggests switching servers.
+- **Anisette:** Apple's servers require `X-Apple-I-MD`, `X-Apple-I-MD-M` and related machine-identity headers. `RemoteV3AnisetteProvider` provisions a virtual machine identity through an anisette v3 server over a websocket, then caches the state. The default is **Automatic**: before signing in, AltLoad checks which servers answer `/v3/client_info` (Windows-ADI servers first, since Apple refuses most others since 12 October 2026) and passes up to four to Rust, which moves on to the next when Apple or a server rejects the anisette data. Wrong passwords, 2FA problems and cancellations are not retried. Settings also offers a picker built from `https://servers.sidestore.io/servers.json` (HTTPS entries only, merged with a built-in list), a custom URL, and **Reset Anisette Data**. AltServer's `AnisetteDataRequest` uses the same list.
 - **GrandSlam (GSA):** the SRP-6a login to `gsa.apple.com`, which never sends the password in plaintext.
 - **2FA:** trusted-device push or SMS. Rust calls `AltLoadPromptCb(kind: 1, json)`. Swift shows `TwoFactorSheet` and answers with `altload_install_session_respond("code:123456" | "sms:<id>" | "devices" | "resend" | "abort")`.
 

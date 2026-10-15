@@ -210,7 +210,9 @@ final class AltServerHost: ObservableObject {
             let identifier = request["identifier"] as? String ?? ""
             switch identifier {
             case "AnisetteDataRequest":
-                let data = try await AnisetteV1.fetch(from: InstallController.shared.anisetteURL)
+                // The same servers AltLoad signs in with ("Automatic" picks working ones).
+                let servers = await AnisetteServers.shared.signInList(preferred: InstallController.shared.anisetteURL)
+                let data = try await AnisetteV1.fetchFirst(servers.split(separator: "\n").map(String.init))
                 try await session.send(["version": 1, "identifier": "AnisetteDataResponse", "anisetteData": data])
                 log("Sent anisette data", detail: "AltStore is signing in (\(route)).", kind: .info)
 
@@ -496,6 +498,15 @@ enum AnisetteV1 {
             }
             return nil
         }
+    }
+
+    /// Tries each server in turn and returns the first usable anisette data.
+    static func fetchFirst(_ servers: [String]) async throws -> [String: String] {
+        var lastError: Error = AnisetteError.unsupported("No anisette server")
+        for server in servers {
+            do { return try await fetch(from: server) } catch { lastError = error }
+        }
+        throw lastError
     }
 
     static func fetch(from urlString: String) async throws -> [String: String] {
