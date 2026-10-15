@@ -1,6 +1,6 @@
 # AltLoad
 
-iOS 27 app that signs and installs AltStore, SideStore and LiveContainer on the iPhone itself. SwiftUI front end, Rust core (pairing, tunnel, Apple ID sign-in, signing, installing) linked as a static library through a C FFI.
+App (iOS 18+, on-device pairing on iOS 27+) that signs and installs AltStore, SideStore and LiveContainer on the iPhone itself. SwiftUI front end, Rust core (pairing, tunnel, Apple ID sign-in, signing, installing) linked as a static library through a C FFI.
 
 ## Layout
 
@@ -11,7 +11,10 @@ iOS 27 app that signs and installs AltStore, SideStore and LiveContainer on the 
   - `Device/`: device ops over the tunnel, Developer Disk Image, LocalDevVPN, location simulation.
   - `Pairing/`: pairing host, saved pairing files, Apple TV discovery, background keep-alive.
   - `AltServer/`: the on-device AltServer AltStore talks to.
+  - `Pairing/PairingLiveActivity.swift`: starts and updates the pairing-code Live Activity.
 - `App/Features/<Tab>/`: SwiftUI screens only.
+- `Shared/`: code compiled into both the app and the widget extension (`PairingActivityAttributes`).
+- `Widgets/`: `AltLoadWidgets` extension that draws the pairing code in the Dynamic Island and on the Lock Screen.
 - `App/UI/`: `Theme.swift` (palette, still named `Aurora`), `Background.swift`, `Components.swift` (shared views; some keep old `Glass*` names).
 - `rust/src/lib.rs`: pairing host FFI. `rust/src/install/`: install and account sessions, split into `sign_in`, `storage`, `tunnel`, `bundle`, `prompts`, `account`, `device`.
 - `rust/include/altload.h`: the C header Swift imports as `AltLoadFFI`. Keep it in sync with every `#[no_mangle]` function.
@@ -30,10 +33,11 @@ xcodebuild -project AltLoad.xcodeproj -scheme AltLoad -sdk iphonesimulator \
 
 ## Conventions
 
-- Bundle ID `com.mirazbakis.altload`. Version and build number live in `project.yml` (`MARKETING_VERSION`, `CURRENT_PROJECT_VERSION`).
+- Bundle ID `com.mirazbakis.altload` (widgets: `com.mirazbakis.altload.widgets`). Version and build number live in `project.yml` (`MARKETING_VERSION`, `CURRENT_PROJECT_VERSION`); `ALTLOAD_PRERELEASE` ("beta 1", or empty) is shown after the version in About.
+- Deployment target is iOS 18.0 (also `IPHONEOS_DEPLOYMENT_TARGET` in `scripts/build-rust.sh`). Guard iOS 26/27 APIs with `#available`; on-device pairing is gated by `PairingController.canPairOnDevice`, and older versions import a pairing file instead.
 - Commits are authored as the owner's own git identity. No co-author or "Generated with" trailers on commits or PRs.
 - The owner pushes through GitHub Desktop; there are no GitHub credentials in the shell.
 - CI (`.github/workflows/build.yml`) runs only when started by hand. See the `release` skill.
-- UI: midnight background with one navy spotlight, solid `cardSurface()` cards, `AltLoadButtonStyle` buttons at least 44 pt tall. No glass on content.
+- UI: midnight background with one navy spotlight, solid `cardSurface()` cards, Liquid Glass `AltLoadButtonStyle` buttons at least 44 pt tall (`liquidGlass(tint:in:)` falls back to material before iOS 26). Icons (`IconTile`) are plain symbols with no tile behind them; prefer symbols without a built-in box or circle.
 - Anisette: default is `AnisetteServers.automatic`; anything that needs a server URL must go through `AnisetteServers.signInList(preferred:)`, never use `anisetteURL` directly.
 - Comments explain why, in plain sentences, like the surrounding code.

@@ -42,7 +42,7 @@ struct LocationView: View {
                 } label: {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(item.name ?? "Place")
-                        if let subtitle = item.address?.shortAddress {
+                        if let subtitle = item.subtitle {
                             Text(subtitle).font(.caption).foregroundStyle(Aurora.secondaryText)
                         }
                     }
@@ -129,10 +129,25 @@ struct LocationView: View {
     }
 
     private func choose(_ item: MKMapItem) {
-        let coordinate = item.location.coordinate
+        let coordinate: CLLocationCoordinate2D
+        if #available(iOS 26, *) {
+            coordinate = item.location.coordinate
+        } else {
+            coordinate = item.placemark.coordinate
+        }
         pin = coordinate
         position = .region(MKCoordinateRegion(center: coordinate, latitudinalMeters: 2000, longitudinalMeters: 2000))
         query = ""
         results = []
+    }
+}
+
+private extension MKMapItem {
+    /// A short address under the place's name.
+    var subtitle: String? {
+        if #available(iOS 26, *) {
+            return address?.shortAddress
+        }
+        return placemark.title
     }
 }

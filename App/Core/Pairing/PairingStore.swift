@@ -81,6 +81,14 @@ final class PairingStore: ObservableObject {
         return try store(fileAt: url, move: false, name: name, model: "", udid: "")
     }
 
+    /// Imports a pairing file for *this* iPhone and uses it for installs. This is
+    /// how pairing works below iOS 27, where the iPhone can't pair with AltLoad itself.
+    func importForThisDevice(at url: URL) throws -> SavedPairing {
+        let item = try importFile(at: url)
+        selfPairingID = item.id
+        return item
+    }
+
     func delete(_ item: SavedPairing) {
         try? FileManager.default.removeItem(at: item.fileURL.deletingLastPathComponent())
         items.removeAll { $0.id == item.id }

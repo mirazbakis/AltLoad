@@ -1,5 +1,6 @@
 import CoreLocation
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Creates a pairing file on-device (StikPair's mechanism) for this iPhone,
 /// another iPhone/iPad, or an Apple TV.
@@ -7,12 +8,13 @@ struct PairView: View {
     @StateObject private var controller = PairingController.shared
     @StateObject private var store = PairingStore.shared
     @State private var appleTVPin = ""
+    @State private var showImporter = false
 
     var body: some View {
         AuroraScreen {
             header
 
-            GlassEffectContainer(spacing: 18) {
+            GlassGroup(spacing: 18) {
                 content
                     .id(phaseKey)
                     .transition(.blurReplace.combined(with: .scale(0.96)))
@@ -21,6 +23,14 @@ struct PairView: View {
         .navigationTitle("Pair")
         .toolbarTitleDisplayMode(.inlineLarge)
         .animation(.spring(duration: 0.55, bounce: 0.25), value: controller.phase)
+        .fileImporter(isPresented: $showImporter, allowedContentTypes: [.propertyList, .xml, .data]) { result in
+            guard case .success(let url) = result else { return }
+            do {
+                controller.phase = .success(try store.importForThisDevice(at: url))
+            } catch {
+                controller.phase = .failed("The pairing file couldn't be imported: \(error.localizedDescription)")
+            }
+        }
         .sensoryFeedback(trigger: controller.phase) { _, newPhase in
             switch newPhase {
             case .success: return .success
@@ -62,8 +72,18 @@ struct PairView: View {
         switch controller.phase {
         case .idle:
             VStack(spacing: 14) {
-                GlassActionButton(title: "Pair This iPhone or iPad", systemImage: "iphone.gen3", prominent: true) {
-                    controller.start()
+                if PairingController.canPairOnDevice {
+                    GlassActionButton(title: "Pair This iPhone or iPad", systemImage: "iphone.gen3", prominent: true) {
+                        controller.start()
+                    }
+                    GlassActionButton(title: "Import Pairing File", systemImage: "square.and.arrow.down") {
+                        showImporter = true
+                    }
+                } else {
+                    importGuidance
+                    GlassActionButton(title: "Import Pairing File", systemImage: "square.and.arrow.down", prominent: true) {
+                        showImporter = true
+                    }
                 }
                 GlassActionButton(title: "Pair Apple TV", systemImage: "appletv") {
                     controller.browseForAppleTVs()
@@ -258,6 +278,24 @@ struct PairView: View {
         }
     }
 
+    /// Below iOS 27 the iPhone can't pair with AltLoad, so the pairing file has
+    /// to come from a computer once.
+    private var importGuidance: some View {
+        GlassCard(tint: Aurora.accent) {
+            VStack(alignment: .leading, spacing: 12) {
+                Label("Import a pairing file", systemImage: "doc.badge.gearshape")
+                    .font(.headline)
+                    .foregroundStyle(Aurora.frost)
+                Text("Pairing on this device needs iOS 27. On iOS \(UIDevice.current.systemVersion), make a pairing file on a computer once, then bring it here.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                GuideStep(number: 1, text: "Create the pairing file on a Mac or PC, for example with **iloader** or **idevice_pair**")
+                GuideStep(number: 2, text: "Save it to **Files** on this iPhone or iPad, or AirDrop it over")
+                GuideStep(number: 3, text: "Tap **Import Pairing File** and choose it")
+            }
+        }
+    }
+
     // MARK: - Pieces
 
     private func lastPairingCard(_ item: SavedPairing) -> some View {
@@ -354,7 +392,9 @@ struct PairView: View {
 
     private var subtitle: String {
         switch controller.phase {
-        case .idle: "Create a pairing file right on this device. AltLoad uses it to install apps, just like a computer would."
+        case .idle: PairingController.canPairOnDevice
+            ? "Create a pairing file right on this device. AltLoad uses it to install apps, just like a computer would."
+            : "AltLoad needs this device's pairing file to install apps, just like a computer would."
         case .waiting: "Listening on your local network."
         case .showPin, .enteringAppleTVPin: "Almost there."
         case .browsingAppleTV: "Searching nearby."

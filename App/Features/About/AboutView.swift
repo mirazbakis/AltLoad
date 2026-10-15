@@ -10,7 +10,8 @@ struct AboutView: View {
     private var version: String {
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "–"
         let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "–"
-        return "\(v) (\(b))"
+        let pre = Bundle.main.infoDictionary?["AltLoadPrerelease"] as? String ?? ""
+        return pre.isEmpty ? "\(v) (\(b))" : "\(v) \(pre) (\(b))"
     }
 
     var body: some View {
@@ -51,13 +52,13 @@ struct AboutView: View {
                 VStack(spacing: 10) {
                     SectionLabel(title: "Legal")
                     VStack(spacing: 0) {
-                        link("Terms of Service", symbol: "doc.text.fill", url: "https://mirazbakis.github.io/terms.html")
+                        link("Terms of Service", symbol: "doc.text", url: "https://mirazbakis.github.io/terms.html")
                         divider
-                        link("AltLoad License", symbol: "checkmark.seal.fill", url: "https://github.com/mirazbakis/AltLoad/blob/main/LICENSE.md")
+                        link("AltLoad License", symbol: "checkmark.seal", url: "https://github.com/mirazbakis/AltLoad/blob/main/LICENSE.md")
                         divider
-                        link("Third-Party Notices", symbol: "list.bullet.rectangle.fill", url: "https://github.com/mirazbakis/AltLoad/blob/main/THIRD_PARTY_NOTICES.md")
+                        link("Third-Party Notices", symbol: "list.bullet", url: "https://github.com/mirazbakis/AltLoad/blob/main/THIRD_PARTY_NOTICES.md")
                         divider
-                        link("Security Policy", symbol: "lock.shield.fill", url: "https://github.com/mirazbakis/AltLoad/blob/main/SECURITY.md")
+                        link("Security Policy", symbol: "lock.shield", url: "https://github.com/mirazbakis/AltLoad/blob/main/SECURITY.md")
                     }
                     .cardSurface()
                 }
@@ -69,7 +70,7 @@ struct AboutView: View {
                         divider
                         link("Source Code", symbol: "chevron.left.forwardslash.chevron.right", url: "https://github.com/mirazbakis/AltLoad")
                         divider
-                        link("Report a Problem", symbol: "exclamationmark.bubble.fill", url: "https://github.com/mirazbakis/AltLoad/issues")
+                        link("Report a Problem", symbol: "exclamationmark.bubble", url: "https://github.com/mirazbakis/AltLoad/issues")
                     }
                     .cardSurface()
                 }
@@ -137,7 +138,7 @@ struct AboutView: View {
     private func link(_ title: String, symbol: String, url: String) -> some View {
         Link(destination: URL(string: url)!) {
             HStack(spacing: 14) {
-                IconTile(symbol: symbol, tint: Aurora.raised, size: 36)
+                IconTile(symbol: symbol, tint: Aurora.mist, size: 36)
                 Text(title).font(.subheadline.weight(.medium)).foregroundStyle(Aurora.frost)
                 Spacer()
                 Image(systemName: "arrow.up.right")

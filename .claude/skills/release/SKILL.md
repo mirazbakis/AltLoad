@@ -13,4 +13,6 @@ description: Publish a new AltLoad version (bump version, release notes, CI rele
 6. **Run CI:** GitHub › Actions › Build IPA › Run workflow, branch `main`, "What to do with the IPA" = **Release**, tag `v<version>`. The run creates the tag, publishes the release as latest and attaches `AltLoad.ipa`. **Nightly** instead replaces the Nightly build; **Build only** leaves an artifact on the run.
 7. **Verify** with the GitHub API: the release exists and is latest, the body matches the notes, and the IPA's `Info.plist` has the new `CFBundleShortVersionString` and `CFBundleVersion`. Also check `https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa` returns 200 (the website's Download button).
 
+Betas use tags like `v1.2.0-beta.1`: `MARKETING_VERSION` stays numeric (`1.2.0`), `ALTLOAD_PRERELEASE` in `project.yml` holds "beta 1", and the notes go in `docs/releases/v1.2.0-beta.1.md`. CI publishes tags with a `-` as a prerelease and doesn't mark them latest. Clear `ALTLOAD_PRERELEASE` for the final release.
+
 Don't push a `v*` tag by itself: tags no longer start CI.

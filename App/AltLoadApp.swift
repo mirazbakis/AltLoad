@@ -27,18 +27,18 @@ struct RootView: View {
 
     var body: some View {
         TabView(selection: $tab) {
-            Tab("Install", systemImage: "arrow.down.app.fill", value: AppTab.install) {
+            Tab("Install", systemImage: "tray.and.arrow.down.fill", value: AppTab.install) {
                 InstallView(selectedTab: $tab)
             }
             Tab("Tools", systemImage: "wrench.and.screwdriver.fill", value: AppTab.tools) {
                 ToolsView()
             }
             .badge(expiringSoon)
-            Tab("About", systemImage: "info.circle.fill", value: AppTab.about) {
+            Tab("About", systemImage: "info", value: AppTab.about) {
                 AboutView()
             }
         }
-        .tabBarMinimizeBehavior(.onScrollDown)
+        .minimizingTabBarOnScroll()
         // Installs and refreshes run full screen over whichever tab started them.
         .fullScreenCover(item: $install.flow) { target in
             InstallFlowView(target: target) { RootView.openPair(tab: $tab) }
@@ -63,5 +63,17 @@ struct RootView: View {
     static func openPair(tab: Binding<AppTab>) {
         tab.wrappedValue = .tools
         ToolsRouter.shared.path = [.pair]
+    }
+}
+
+private extension View {
+    /// Tucks the tab bar away while scrolling down, on iOS 26 and later.
+    @ViewBuilder
+    func minimizingTabBarOnScroll() -> some View {
+        if #available(iOS 26, *) {
+            tabBarMinimizeBehavior(.onScrollDown)
+        } else {
+            self
+        }
     }
 }

@@ -14,7 +14,7 @@ on:
           - Nightly
         default: Build only
       version:
-        description: "Release tag, e.g. v1.1.0 (only for Release). Notes come from docs/releases/<tag>.md"
+        description: "Release tag, e.g. v1.1.0 or v1.2.0-beta.1 (only for Release). Notes come from docs/releases/<tag>.md"
         type: string
         required: false
 
@@ -37,8 +37,8 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
-          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::Set version to a tag like v1.1.0"; exit 1
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-(beta|rc)\.[0-9]+)?$ ]]; then
+            echo "::error::Set version to a tag like v1.1.0 or v1.2.0-beta.1"; exit 1
           fi
           if [[ ! -f "docs/releases/$VERSION.md" ]]; then
             echo "::error::Add release notes at docs/releases/$VERSION.md first"; exit 1
@@ -92,6 +92,11 @@ jobs:
           cp -R "$APP" build/Payload/
           find build/Payload -name '.DS_Store' -delete
           # Ad-hoc ("fake") sign so sideload signers accept the IPA; they re-sign it anyway.
+          # The widget extension (Dynamic Island) is signed first, since the app's
+          # signature covers it.
+          for EXT in build/Payload/AltLoad.app/PlugIns/*.appex; do
+            [[ -d "$EXT" ]] && codesign --force --sign - --timestamp=none --generate-entitlement-der "$EXT"
+          done
           codesign --force --sign - --timestamp=none --generate-entitlement-der build/Payload/AltLoad.app
           codesign --verify --verbose build/Payload/AltLoad.app
           (cd build && zip -qry -X ../AltLoad.ipa Payload)
@@ -124,7 +129,8 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-      # A full release (not a prerelease), marked as the latest one. Creates the
+      # A full release marked as the latest one, or a prerelease for beta and rc
+      # tags (v1.2.0-beta.1), which leaves the latest release alone. Creates the
       # tag on the commit this run built if it doesn't exist yet.
       - name: Publish release
         if: inputs.publish == 'Release'
@@ -135,9 +141,9 @@ jobs:
           name: AltLoad ${{ inputs.version }}
           body_path: docs/releases/${{ inputs.version }}.md
           files: AltLoad.ipa
-          prerelease: false
+          prerelease: ${{ contains(inputs.version, '-') }}
           draft: false
-          make_latest: true
+          make_latest: ${{ !contains(inputs.version, '-') }}
 
       # Points the public "Nightly build" release at the commit this run built,
       # so anyone can download the IPA without a GitHub account.

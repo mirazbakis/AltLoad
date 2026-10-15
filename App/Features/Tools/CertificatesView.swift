@@ -348,11 +348,7 @@ struct CertificatesView: View {
     private func toolRow(title: LocalizedStringKey, detail: String, systemImage: String, tint: Color, disabled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                Image(systemName: systemImage)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(tint)
-                    .frame(width: 34, height: 34)
-                    .background(tint.opacity(0.16), in: .rect(cornerRadius: 10, style: .continuous))
+                IconTile(symbol: systemImage, tint: tint, size: 34)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Aurora.frost)
                     if !detail.isEmpty {

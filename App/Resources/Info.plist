@@ -18,7 +18,12 @@
     <string>$(MARKETING_VERSION)</string>
     <key>CFBundleVersion</key>
     <string>$(CURRENT_PROJECT_VERSION)</string>
+    <key>AltLoadPrerelease</key>
+    <string>$(ALTLOAD_PRERELEASE)</string>
     <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <!-- The pairing code in the Dynamic Island and on the Lock Screen. -->
+    <key>NSSupportsLiveActivities</key>
     <true/>
     <key>UILaunchScreen</key>
     <dict/>

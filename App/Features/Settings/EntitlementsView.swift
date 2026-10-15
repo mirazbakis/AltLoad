@@ -12,12 +12,12 @@ struct EntitlementsView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 4)
 
-            CardSection(title: "Free Apple ID", symbol: "person.crop.circle") {
+            CardSection(title: "Free Apple ID", symbol: "person") {
                 ForEach(Capability.all.filter { $0.tier == .free }) { row($0) }
                 note("Personal teams can usually enable these.")
             }
 
-            CardSection(title: "Paid Developer Account", symbol: "star.circle", tint: Aurora.ember) {
+            CardSection(title: "Paid Developer Account", symbol: "star", tint: Aurora.ember) {
                 ForEach(Capability.all.filter { $0.tier == .paid }) { row($0) }
                 note("These need an Apple Developer Program membership. On a free Apple ID, Apple refuses them and the install stops with the reason, so leave them off there.")
             }

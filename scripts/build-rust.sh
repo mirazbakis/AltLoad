@@ -4,6 +4,9 @@
 set -euo pipefail
 
 export DEVELOPER_DIR="${DEVELOPER_DIR:-$(xcode-select -p)}"
+# Match project.yml's deployment target, or the C parts (ring) are built for the
+# SDK's iOS version and may not load on older devices.
+export IPHONEOS_DEPLOYMENT_TARGET=18.0
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT/rust"
 

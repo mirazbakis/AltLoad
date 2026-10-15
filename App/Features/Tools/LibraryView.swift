@@ -140,11 +140,7 @@ struct LibraryView: View {
     }
 
     private func icon(_ symbol: String, tint: Color) -> some View {
-        Image(systemName: symbol)
-            .font(.title3)
-            .foregroundStyle(Aurora.frost)
-            .frame(width: 44, height: 44)
-            .background(tint.gradient, in: .rect(cornerRadius: 12, style: .continuous))
+        IconTile(symbol: symbol, tint: tint, size: 44)
     }
 
     private func appRow(_ app: InstalledApp) -> some View {

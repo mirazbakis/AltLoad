@@ -1,12 +1,12 @@
 import SwiftUI
 
-// AltLoad's own components: solid midnight surfaces with a hairline edge, big
-// filled buttons, no glass on content (the system tab bar keeps its own).
+// AltLoad's own components: solid midnight surfaces with a hairline edge, and
+// Liquid Glass buttons on top of them. Icons stand on their own, without tiles.
 // The old "Glass" names stay so every screen picks the new look up.
 
 // MARK: - Buttons & cards
 
-/// Full-width action, 56 pt tall. Prominent actions are filled with the accent.
+/// Full-width action, 56 pt tall. Prominent actions are glass tinted with the accent.
 struct GlassActionButton: View {
     let title: LocalizedStringKey
     var systemImage: String? = nil
@@ -31,7 +31,8 @@ struct GlassActionButton: View {
     }
 }
 
-/// Filled (prominent) or quiet button surface with a press state.
+/// Liquid Glass button: tinted with the accent when prominent, clear otherwise.
+/// The glass reacts to touch and the button gives a little when pressed.
 struct AltLoadButtonStyle: ButtonStyle {
     var prominent = true
     var tint: Color = Aurora.accent
@@ -40,24 +41,55 @@ struct AltLoadButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         configuration.label
             .font(.system(size: 17, weight: .semibold))
             .padding(.horizontal, 16)
             .frame(minHeight: minHeight)
             .foregroundStyle(prominent ? Aurora.frost : (tint == Aurora.accent ? Aurora.frost : tint))
-            .background {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .fill(prominent
-                          ? AnyShapeStyle(LinearGradient(colors: [tint, tint.mix(with: .black, by: 0.35)], startPoint: .top, endPoint: .bottom))
-                          : AnyShapeStyle(Aurora.raised))
-            }
+            .liquidGlass(tint: prominent ? tint.opacity(0.7) : nil, in: shape)
             .overlay {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .strokeBorder(prominent ? Color.white.opacity(0.14) : Aurora.hairline, lineWidth: 1)
+                // A light top edge so the glass reads on the dark cards.
+                shape.strokeBorder(
+                    LinearGradient(colors: [.white.opacity(prominent ? 0.32 : 0.2), .white.opacity(0.04)],
+                                   startPoint: .top, endPoint: .bottom),
+                    lineWidth: 1)
             }
-            .opacity(isEnabled ? (configuration.isPressed ? 0.8 : 1) : 0.45)
-            .scaleEffect(configuration.isPressed ? 0.985 : 1)
-            .animation(.spring(duration: 0.2), value: configuration.isPressed)
+            .opacity(isEnabled ? 1 : 0.45)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.spring(duration: 0.25, bounce: 0.3), value: configuration.isPressed)
+    }
+}
+
+extension View {
+    /// Interactive Liquid Glass, optionally tinted. Before iOS 26 it falls back
+    /// to a frosted material with the tint laid over it.
+    @ViewBuilder
+    func liquidGlass<S: Shape>(tint: Color? = nil, in shape: S) -> some View {
+        if #available(iOS 26, *) {
+            glassEffect(tint.map { Glass.regular.tint($0).interactive() } ?? .regular.interactive(), in: shape)
+        } else {
+            background {
+                ZStack {
+                    shape.fill(.ultraThinMaterial)
+                    if let tint { shape.fill(tint) }
+                }
+            }
+        }
+    }
+}
+
+/// Lets neighbouring glass shapes blend into each other on iOS 26 and later.
+struct GlassGroup<Content: View>: View {
+    var spacing: CGFloat? = nil
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        if #available(iOS 26, *) {
+            GlassEffectContainer(spacing: spacing) { content }
+        } else {
+            content
+        }
     }
 }
 
@@ -118,7 +150,8 @@ struct SectionLabel: View {
     }
 }
 
-/// Icon in a rounded square, the way rows in About and Settings lead.
+/// The symbol that leads rows in About, Settings and Tools: just the icon in
+/// its tint, no tile behind it. Dark tints are lightened so they read on midnight.
 struct IconTile: View {
     let symbol: String
     var tint: Color = Aurora.accent
@@ -126,10 +159,10 @@ struct IconTile: View {
 
     var body: some View {
         Image(systemName: symbol)
-            .font(.system(size: size * 0.46, weight: .semibold))
-            .foregroundStyle(Aurora.frost)
+            .font(.system(size: size * 0.62, weight: .semibold))
+            .symbolRenderingMode(.hierarchical)
+            .foregroundStyle(tint.mix(with: .white, by: 0.3))
             .frame(width: size, height: size)
-            .background(tint.gradient, in: .rect(cornerRadius: size * 0.28, style: .continuous))
     }
 }
 
@@ -241,6 +274,19 @@ extension View {
     }
 }
 
+/// The toolbar close button: the system's glass X on iOS 26, "Close" before it.
+struct CloseButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        if #available(iOS 26, *) {
+            Button(role: .close, action: action)
+        } else {
+            Button("Close", action: action)
+        }
+    }
+}
+
 // MARK: - Settings button
 
 /// The gear at the top right of each tab. A standard toolbar button, so it gets
@@ -312,8 +358,8 @@ struct PillButton: View {
             .foregroundStyle(prominent ? Aurora.frost : tint)
             .padding(.horizontal, 16)
             .frame(minWidth: 92, minHeight: 44)
-            .background(prominent ? AnyShapeStyle(tint.gradient) : AnyShapeStyle(tint.opacity(0.16)), in: .capsule)
-            .overlay { Capsule().strokeBorder(Color.white.opacity(prominent ? 0.14 : 0.06), lineWidth: 1) }
+            .liquidGlass(tint: tint.opacity(prominent ? 0.7 : 0.2), in: Capsule())
+            .overlay { Capsule().strokeBorder(Color.white.opacity(prominent ? 0.28 : 0.12), lineWidth: 1) }
             .contentShape(.capsule)
         }
         .buttonStyle(.plain)

@@ -66,7 +66,7 @@ struct SettingsView: View {
     // MARK: - Apple ID
 
     private var appleIDCard: some View {
-        CardSection(title: "Apple ID", symbol: "person.crop.circle.fill") {
+        CardSection(title: "Apple ID", symbol: "person.fill") {
             InfoRow(title: "Account", value: appleID.isEmpty ? "Not signed in" : appleID)
             accountStatus
 
@@ -239,7 +239,7 @@ struct SettingsView: View {
     }
 
     private var keepAliveCard: some View {
-        CardSection(title: "Background Keep-Alive", symbol: "bolt.horizontal.circle.fill") {
+        CardSection(title: "Background Keep-Alive", symbol: "bolt.horizontal.fill") {
             Toggle("Silent audio", systemImage: "speaker.wave.2", isOn: $pairing.keepAliveAudio)
                 .frame(minHeight: 44)
             Toggle("Location", systemImage: "location", isOn: $pairing.keepAliveLocation)

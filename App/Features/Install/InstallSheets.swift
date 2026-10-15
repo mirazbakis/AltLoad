@@ -40,7 +40,7 @@ struct SignInSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .close) { dismiss() }
+                    CloseButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Continue") {

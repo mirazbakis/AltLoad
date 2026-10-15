@@ -49,7 +49,7 @@ struct InstallFlowView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .close) { controller.finish() }
+                    CloseButton { controller.finish() }
                         .disabled(controller.isBusy)
                 }
             }

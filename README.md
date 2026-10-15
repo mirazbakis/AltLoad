@@ -1,156 +1,141 @@
-<p align="center">
-  <img src="docs/assets/logo.svg" width="128" height="128" alt="AltLoad logo">
-</p>
+<div align="center">
 
-<h1 align="center">AltLoad</h1>
+<img src="docs/assets/logo.svg" width="120" height="120" alt="AltLoad logo">
 
-<p align="center"><b>Install AltStore, SideStore and LiveContainer completely on device.</b></p>
+# AltLoad
 
-<p align="center">
-  <a href="https://github.com/mirazbakis/AltLoad/releases/latest"><b>Download</b></a> ·
-  <a href="https://mirazbakis.github.io/AltLoad.html">Website</a> ·
-  <a href="docs/HOW-IT-WORKS.md">How it works</a> ·
-  <a href="https://github.com/mirazbakis/AltLoad/issues">Issues</a>
-</p>
+### Install AltStore Classic on-device.
 
-Normally, installing [AltStore](https://altstore.io) or [SideStore](https://sidestore.io) needs a Mac or PC for the first install. AltLoad does that job on the iPhone itself: it pairs the iPhone with itself, signs the store you pick with **your own Apple ID** and installs it. When the 7-day signature is about to run out, you refresh it in AltLoad with one tap.
+No Mac, no PC, no cable. SideStore and LiveContainer too.
 
-AltLoad simulates AltServer using some advanced tools introduced in the **iOS 27** update.
+[![Download](https://img.shields.io/github/v/release/mirazbakis/AltLoad?label=stable&style=for-the-badge&color=2ea44f)](https://github.com/mirazbakis/AltLoad/releases/latest)
+[![Beta](https://img.shields.io/badge/beta-1.2.0%20beta%201-6e40c9?style=for-the-badge)](https://github.com/mirazbakis/AltLoad/releases/tag/v1.2.0-beta.1)
+[![Platform](https://img.shields.io/badge/iOS-18%2B-lightgrey?style=for-the-badge&logo=apple)](#compatibility)
+[![License](https://img.shields.io/badge/license-AltLoad-orange?style=for-the-badge)](LICENSE.md)
 
-> [!NOTE]
-> Since 1.0.0 the bundle ID is **`com.mirazbakis.altload`**. iOS treats it as a new app: install it, then pair once more in **Tools › Pair**. Nothing from older AltLoad builds carries over.
+[Website](https://mirazbakis.github.io/AltLoad.html) · [Releases](https://github.com/mirazbakis/AltLoad/releases) · [How it works](docs/HOW-IT-WORKS.md) · [Report a problem](https://github.com/mirazbakis/AltLoad/issues)
 
-> [!WARNING]
-> AltLoad is still in active development. The features and the design are not final; and is subject to change. If you find bugs, please report them as specified in SECURITY.md, not in a public issue.
+</div>
 
-> AltLoad is an independent project. It isn't affiliated with AltStore, SideStore, LiveContainer, Riley Testut or Apple.
+---
+
+> [!CAUTION]
+> **Download AltLoad only from here:**
+>
+> - **Website:** <https://mirazbakis.github.io/AltLoad.html>
+> - **GitHub:** <https://github.com/mirazbakis/AltLoad/releases>
+>
+> You sign in to AltLoad with your Apple ID. Anyone can take public source code, add a few lines that send your password to their own server, and hand it out under the same name and icon. Copies from other websites, app sources, signing services, Discord or Telegram aren't AltLoad, however official they look. Re-uploading AltLoad builds also isn't allowed by the [license](LICENSE.md).
+
+## What it is
+
+AltStore Classic keeps your sideloaded apps signed with your own Apple ID. Getting it onto the iPhone in the first place has always meant a computer running AltServer.
+
+AltLoad is that computer, running on the iPhone itself. It pairs the iPhone with itself, signs AltStore with your Apple ID and installs it. It also runs an AltServer right on the phone, so AltStore can keep refreshing your apps afterwards without ever looking for a Mac or PC.
+
+Prefer SideStore? AltLoad installs **SideStore** and **SideStore + LiveContainer** the same way, and drops the pairing file into SideStore so it can refresh on its own.
 
 ## Features
 
-- **Six stores to choose from:** AltStore, AltStore Beta, SideStore, SideStore Nightly, SideStore + LiveContainer and SideStore + LiveContainer Nightly. Always the newest build from each project's own source or GitHub releases.
-- **Works when SideStore's repository is down.** AltLoad falls back to a mirror, GitHub releases, a known-good build or its own saved copy, and you can always install an IPA from Files.
-- **SideStore gets its pairing file automatically**, so it can refresh apps by itself.
-- **Sign-in that keeps working.** AltLoad picks an anisette server that Apple still accepts and moves on to the next one if Apple refuses it. You can check your Apple ID from Settings without installing anything.
-- **Knows what's really installed.** AltLoad checks the iPhone for each store instead of trusting its own records, so a deleted or separately installed app shows up correctly.
-- **Built-in AltServer**, on by default and kept alive in the background, so AltStore can install and refresh apps without a computer.
-- **Entitlements.** Switch on capabilities such as Increased Memory Limit for the store's signature. Free-account and paid-account capabilities are listed separately.
-- **JIT.** Open emulators and other JIT apps with JIT enabled.
-- **Location.** Make the iPhone report any place on the map, for every app.
-- **Refresh reminders** the day before a free signature expires.
-- **Private by design.** Your password goes only to Apple. No analytics, no tracking.
+- **AltStore Classic, Beta, SideStore and SideStore + LiveContainer.** Stable or nightly, always the newest build from each project's own source.
+- **A built-in AltServer** that keeps running in the background.
+- **The pairing code in your Dynamic Island** <sup>new</sup>: read it while you're in Settings, no switching back and forth. iPhones without a Dynamic Island show it on the Lock Screen.
+- **Import a pairing file** <sup>new</sup>: on iOS 18–26, or if you'd rather pair with a computer.
+- **Sign-in that keeps working.** AltLoad finds an anisette server Apple still accepts and switches when one stops working.
+- **Fallbacks for when SideStore's servers are down**, and Install IPA from Files as a last resort.
+- **Extras:** entitlements like Increased Memory Limit, JIT, location simulation, and a reminder the day before your apps expire.
 
-## What you need
+## Requirements
 
-- An iPhone or iPad on **iOS 27 or later**, with **Developer Mode** on (**Settings › Privacy & Security › Developer Mode**).
-- **[LocalDevVPN](https://apps.apple.com/app/id6755608044)**, free on the App Store. It lets the iPhone connect to itself.
-- An **Apple ID**. A free one works: apps then last 7 days, with up to 3 sideloaded apps at once.
-- **Wi-Fi**, for the one-time pairing step.
+- An iPhone or iPad on **iOS 18 or later** (iOS 27 to pair on the device itself)
+- **Developer Mode** on
+- **[LocalDevVPN](https://apps.apple.com/app/id6755608044)**, free on the App Store
+- An **Apple ID**. A free one works: apps last 7 days, 3 at a time
+- **Wi-Fi**, the first time only
 
-## Install AltLoad
+## Compatibility
 
-1. Download **`AltLoad.ipa`** from the [**latest release**](https://github.com/mirazbakis/AltLoad/releases/latest). A newer, untested build is sometimes available as [**Nightly**](https://github.com/mirazbakis/AltLoad/releases/tag/nightly).
-2. Sideload it once with any signing tool you already use.
-3. If iOS says the developer isn't trusted, go to **Settings › General › VPN & Device Management** and trust your Apple ID.
+| iOS | Works? |
+| :-- | :-- |
+| **27 and later** | ✅ Yes. Pairs entirely on the device. |
+| **18 – 26** | ⚠️ Yes, from 1.2.0 beta 1, with a [pairing file made on a computer](#on-ios-18-26) once. |
+| **17 and earlier** | ❌ No |
 
-## Use it
+## How to use it
 
-1. **Pair (once).** **Tools › Pair › Pair This iPhone or iPad**, then in **Settings › Privacy & Security › Developer Mode** tap **Pair with AltLoad** and enter the code.
-2. **LocalDevVPN (once).** Install it and open it once so it adds its VPN configuration.
-3. **Install a store.** On the **Install** tab, pick one from the **Store** menu, tap **Install**, sign in with your Apple ID and enter the two-factor code.
-4. **Use it normally.** AltStore finds AltLoad's AltServer on the same iPhone. SideStore already has the pairing file and refreshes by itself. With SideStore + LC, open SideStore inside LiveContainer and import the pairing file from **Files › On My iPhone › AltLoad**. LocalDevVPN has to be on.
-5. **Refresh weekly** in the store or in AltLoad. AltLoad reminds you the day before.
+1. **Get AltLoad.** Download `AltLoad.ipa` from the [latest release](https://github.com/mirazbakis/AltLoad/releases/latest), or the [1.2.0 beta](https://github.com/mirazbakis/AltLoad/releases/tag/v1.2.0-beta.1) for the newest features, and install it once with any signing tool you already use.
+2. **Pair.** Open **Tools › Pair › Pair This iPhone or iPad**. Go to **Settings › Privacy & Security › Developer Mode**, tap **Pair with AltLoad** and type the code, which is waiting for you in the Dynamic Island.
+3. **Connect LocalDevVPN.**
+4. **Install.** On the **Install** tab, choose **AltStore** (or another store), tap **Install** and sign in with your Apple ID.
+5. **Done.** AltStore finds AltLoad's AltServer on the same iPhone and works like it would with a computer. Refresh once a week in AltStore or AltLoad; AltLoad reminds you the day before.
 
-| Tab | What's there |
-|---|---|
-| **Install** | Store menu, what's on the iPhone, install, update or refresh, Install IPA from Files, setup checklist. |
-| **Tools** | AltServer · JIT · Location · Pair · Pairing File to Apps · Library · Certificates |
-| **About** | Version, special thanks, legal links. The gear at the top right of every tab opens **Settings**: Apple ID (with a sign-in check), entitlements, anisette, LocalDevVPN, sources, background keep-alive. |
+### On iOS 18–26
 
-## Repository layout
+These versions can't pair with an app on the device itself, so make the pairing file on a Mac or PC once, for example with [iloader](https://github.com/nab138/iloader) or [idevice_pair](https://github.com/jkcoxson/idevice_pair). Then save it to Files on the iPhone, open **Tools › Pair › Import Pairing File** and choose it. Everything after that is the same.
 
-```
-App/
-  AltLoadApp.swift        entry point and tab bar
-  Core/                   logic, no views
-    Install/              install flow and Rust bridge, store catalog, entitlements
-    Account/              Apple ID, anisette servers, certificate manager
-    Device/               device ops, Developer Disk Image, LocalDevVPN, location
-    Pairing/              pairing host, saved pairing files, keep-alive
-    AltServer/            the on-device AltServer AltStore talks to
-  Features/               SwiftUI screens: Install, Tools, Settings, About
-  UI/                     theme, background and shared components
-  Resources/              Info.plist and the app icon
-rust/                     Rust core (C FFI)
-  src/lib.rs              pairing host
-  src/install/            install and account sessions: sign_in, storage, tunnel,
-                          bundle, prompts, account, device
-  include/altload.h       the FFI header Swift imports as AltLoadFFI
-scripts/build-rust.sh     builds rust/ into AltLoadFFI.xcframework
-docs/                     how it works, logo, release notes (docs/releases/<version>.md)
-.github/workflows/        Build IPA, started by hand
-.claude/                  project guide and release steps for Claude Code
-project.yml               XcodeGen project definition
-```
+## Is it safe?
 
-## Build it yourself
+AltLoad works entirely on your iPhone, and all of its code is here for anyone to check.
 
-**On GitHub (no Mac needed):** fork the repository, enable Actions in your fork, run **Build IPA** (it only runs when started by hand), and download `AltLoad.ipa` from the run's artifacts. Choose **Release** and a version like `v1.1.0` to publish a release (notes come from `docs/releases/<version>.md`), or **Nightly** to update the Nightly build.
+- **Your Apple ID password only goes to Apple.** If you choose *Remember password*, it stays in this iPhone's Keychain and never syncs.
+- **No AltLoad server, no analytics, no account.** Anisette servers help with sign-in but never see your password.
+- **Pairing files give access to your device.** Only put them in apps you trust.
 
-**On a Mac** with Xcode 27, [Homebrew](https://brew.sh) and [Rust](https://rustup.rs):
+> [!WARNING]
+> This applies to AltLoad as published in this repository and on the website above. A modified copy can do anything with the Apple ID you type into it.
+
+Found a security issue? Please follow [SECURITY.md](SECURITY.md) instead of opening a public issue.
+
+## Questions
+
+**Sign-in fails.** Apple now refuses many public anisette servers. Leave **Settings › Anisette** on **Automatic** and AltLoad picks one that works. Still failing? Tap **Reset Anisette Data** and try again in a few minutes.
+
+**SideStore won't download.** AltLoad tries SideStore's source, its mirror, GitHub and a known-good build in turn. If all of them are down, use **Install IPA from Files** in the Install tab's **…** menu.
+
+**AltLoad can't reach the iPhone.** Check that LocalDevVPN is connected, Developer Mode is on, and this iPhone shows up in **Tools › Pair**.
+
+**Why does the beta take 2 App IDs?** The Dynamic Island code comes from a small widget extension inside AltLoad, and each one needs its own App ID when you sideload AltLoad with a free account.
+
+## Project layout
+
+| Path | What's in it |
+| :-- | :-- |
+| `App/` | The SwiftUI app: Install, Tools, Settings and About, plus the install flow, pairing and the on-device AltServer |
+| `Widgets/` | The extension that draws the pairing code in the Dynamic Island and on the Lock Screen |
+| `Shared/` | Code used by both the app and the extension |
+| `rust/` | The Rust core: pairing host, Apple ID sign-in, signing and the tunnel to the device |
+| `scripts/` | `build-rust.sh`, which builds the Rust core into `AltLoadFFI.xcframework` |
+| `docs/` | [How it works](docs/HOW-IT-WORKS.md), the logo and release notes |
+| `.github/` | The **Build IPA** workflow, started by hand |
+
+### Build it yourself
+
+Fork the repository, enable Actions and run **Build IPA**; the IPA is attached to the run. Or on a Mac with Xcode 27, Homebrew and Rust:
 
 ```sh
 brew install xcodegen
 rustup target add aarch64-apple-ios aarch64-apple-ios-sim
-./scripts/build-rust.sh   # Rust core → AltLoadFFI.xcframework
-xcodegen generate         # project.yml → AltLoad.xcodeproj
+./scripts/build-rust.sh
+xcodegen generate
 open AltLoad.xcodeproj
 ```
 
-New Swift files anywhere under `App/` are picked up after `xcodegen generate`.
+## Contributing
 
-## How it works
+Issues and pull requests are welcome. For a bug, please include your iOS version, the AltLoad version, the store you picked and the step where it went wrong.
 
-[`docs/HOW-IT-WORKS.md`](docs/HOW-IT-WORKS.md) has the details. In short:
+## Thanks
 
-1. **Pairing.** iOS 27 can pair wirelessly with a host it finds on the network. AltLoad is that host, so the iPhone pairs with AltLoad the way it pairs with a Mac.
-2. **Apple ID.** AltLoad signs in to Apple's developer services first, trying anisette servers until Apple accepts one, so sign-in problems show up straight away.
-3. **Reaching itself.** LocalDevVPN routes `10.7.0.1` back into the phone, so AltLoad can open the same secure tunnel Xcode uses.
-4. **Signing and installing.** AltLoad registers the iPhone, gets a development certificate, creates the App IDs and profiles the store needs, adds what AltServer would write into AltStore, signs it and installs it through the tunnel. For SideStore it then places the pairing file inside the app.
-
-## Privacy and security
-
-- **Your Apple ID password goes only to Apple.** If you choose *Remember password*, it's kept in the iPhone's Keychain, readable only while unlocked, and never synced.
-- **Anisette.** Apple requires device-identity headers ("anisette") to sign in. AltLoad gets them from a public anisette server (picked automatically by default), which never sees your password. You can pick another in Settings. The anisette identity and signing certificate are kept in AltLoad's own app storage, not the Keychain, because some signing tools break Keychain access.
-- **Pairing files** give access to your device. Only share them with apps you trust.
-- Security issues: see [SECURITY.md](SECURITY.md). Please don't report them in a public issue.
-
-## FAQ
-
-**Sign-in fails.** Since 12 October 2026 Apple refuses sign-in data from many anisette servers. Keep **Settings › Anisette** on **Automatic**: AltLoad checks which servers answer and moves on to the next when Apple refuses one. If it still fails, tap **Reset Anisette Data** and try again later. **Settings › Apple ID › Sign In** checks your account without installing anything.
-
-**SideStore's repository is down.** AltLoad tries SideStore's source, its mirror, GitHub releases and a known-good build, then uses its own saved copy. If none of them answer, download a SideStore IPA elsewhere and use **Install IPA from Files** in the Install tab's **…** menu.
-
-**What are the nightlies?** The newest SideStore and LiveContainer builds from each project's GitHub. They install over the regular build and can be broken; pick the regular build again to go back.
-
-**It says the certificate limit is reached.** Free Apple IDs can only have a few development certificates. AltLoad asks which one to revoke. Apps signed with it elsewhere stop opening until they're signed again.
-
-**An entitlement makes the install fail.** Paid-only capabilities can't be enabled on a free Apple ID. Turn it off in **Settings › Entitlements**.
-
-**It can't connect to the iPhone.** Check that LocalDevVPN is connected, Developer Mode is on, and this iPhone is paired in **Tools › Pair**. If it still fails, pair again.
-
-## Special thanks
-
-- [**jkcoxson**](https://github.com/jkcoxson) for [idevice](https://github.com/jkcoxson/idevice) and [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN), which make talking to the iPhone from the iPhone possible.
-- [**nab138**](https://github.com/nab138) for [isideload](https://github.com/nab138/isideload): Apple ID sign-in, developer services and code signing.
-- [**StephenDev0**](https://github.com/StephenDev0) for [StikPair](https://github.com/StephenDev0/StikPair), the pairing flow AltLoad is based on, and StikDebug.
-- [**Riley Testut**](https://github.com/rileytestut) and the AltStore team for [AltStore](https://altstore.io).
-- The [**SideStore**](https://github.com/SideStore) team for SideStore and the public anisette servers.
-- [**LiveContainer**](https://github.com/LiveContainer/LiveContainer) for running apps without installing them.
-
-AltLoad downloads these apps from their own sources and doesn't redistribute them.
+AltLoad builds on [idevice](https://github.com/jkcoxson/idevice) and [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN) by **jkcoxson**, [isideload](https://github.com/nab138/isideload) by **nab138**, and [StikPair](https://github.com/StephenDev0/StikPair) by **StephenDev0**. It installs [AltStore](https://altstore.io) by **Riley Testut**, [SideStore](https://github.com/SideStore) and [LiveContainer](https://github.com/LiveContainer/LiveContainer), always downloaded from their own sources and never redistributed.
 
 ## License
 
-**Copyright (c) 2026 mirazbakis. All rights reserved.** See the [AltLoad License](LICENSE.md) for what you may do (personal use, building it yourself, contributing). Parts derived from StikPair, idevice and isideload stay under their own licenses, listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+See [LICENSE.md](LICENSE.md). In short, you can use AltLoad, build it yourself and send changes back. Redistributing builds, publishing a modified version or making money from it needs written permission. Code from StikPair, idevice and isideload keeps its own license ([THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). Using AltLoad means you agree to the [Terms of Service](https://mirazbakis.github.io/terms.html).
 
-Using AltLoad means you agree to the [Terms of Service](https://mirazbakis.github.io/terms.html).
+<div align="center">
+
+<sub>Not affiliated with AltStore, SideStore, LiveContainer, Riley Testut or Apple.</sub>
+
+**AltLoad by [mirazbakis](https://github.com/mirazbakis)**
+
+</div>

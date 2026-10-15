@@ -6,7 +6,8 @@ This document describes each stage of the install, with the protocol, the librar
 
 | Layer | What | Where |
 |---|---|---|
-| UI | SwiftUI, iOS 27 Liquid Glass (`glassEffect`, `GlassEffectContainer`, `.glass` / `.glassProminent` buttons, `glassEffectUnion`), `TabView` with `Tab`, midnight gradient background | `App/` |
+| UI | SwiftUI, Liquid Glass on iOS 26+ (`glassEffect` buttons, `GlassEffectContainer`) with a material fallback on iOS 18–25, `TabView` with `Tab`, midnight gradient background | `App/` |
+| Live Activity | ActivityKit + a WidgetKit extension that shows the pairing code in the Dynamic Island and on the Lock Screen | `App/Core/Pairing/PairingLiveActivity.swift`, `Shared/`, `Widgets/` |
 | Orchestration | `InstallController` (download, discovery, FFI session, prompts, expiry reminder), `PairingController` (pairing host) | `App/Core/Install/InstallController.swift`, `App/Core/Pairing/PairingController.swift` |
 | FFI | A C header plus a Rust static library packaged as `AltLoadFFI.xcframework` | `rust/include/altload.h`, `rust/src/*.rs` |
 | Device protocols | [`idevice`](https://github.com/jkcoxson/idevice) (git `d32c818`): `remote_pairing`, `rsd`, `tunnel_tcp_stack`, `afc`, `installation_proxy`, `misagent`, `house_arrest`, `cryptexd`, `dvt`, `debug_proxy` | `rust/src/lib.rs`, `rust/src/install/` |
@@ -22,10 +23,14 @@ iOS 27 lets a device pair wirelessly with a host that advertises `_remotepairing
 
 1. `altload_run_host` binds a TCP listener and generates a host identity (`RpPairingFile::generate`, `PairableHostInfo::generate`). It then calls back into Swift with the service ID, port and TXT records.
 2. Swift publishes those records with `NetService`, so the Bonjour registration goes through mDNSResponder and only needs the Local Network permission.
-3. The user taps **Settings › Privacy & Security › Developer Mode › Pair with AltLoad**. The device connects, and `PairableHost::accept` runs SRP pair-setup. The PIN goes to the UI and to a Live Activity.
+3. The user taps **Settings › Privacy & Security › Developer Mode › Pair with AltLoad**. The device connects, and `PairableHost::accept` runs SRP pair-setup. The PIN goes to the UI and to the Live Activity.
 4. The resulting **RPPairing file** is moved to `Documents/Pairings/<Device>-<id>/rp_pairing_file.plist`. It holds AltLoad's Ed25519 identity, the device's public key and its `altIRK`.
 
 `BGContinuedProcessingTask` keeps the listener alive while the user is in Settings. Silent audio or location can do the same as optional fallbacks.
+
+**Dynamic Island.** iOS only lets an app start a Live Activity while it's in the foreground, so `PairingLiveActivity` starts one when the user taps Pair, in a "waiting" state. When `pinCallback` fires, by then from the background, the activity is updated with the code, so it shows in the Dynamic Island (or on the Lock Screen on iPhones without one) while Settings is open. It ends a few seconds after pairing succeeds or fails. The views live in the `AltLoadWidgets` extension (`Widgets/`), and `PairingActivityAttributes` (`Shared/`) is compiled into both targets.
+
+**Below iOS 27** there is no RPPairing host mode, so the iPhone can't pair with AltLoad. AltLoad still runs from iOS 18: the Pair screen offers **Import Pairing File** instead, `PairingStore.importForThisDevice` copies a pairing file made on a computer into `Documents/Pairings` and marks it as this device's, and everything from step 2 on works the same.
 
 Apple TV uses the reverse direction: AltLoad is the client for the TV's `_remotepairing-manual-pairing._tcp` service, via `RemotePairingClient::connect`.
 
@@ -109,7 +114,8 @@ void    altload_install_session_cancel(session);
 
 ## Known limitations
 
-- Needs iOS 27+ (RPPairing host mode), Wi-Fi for pairing, and LocalDevVPN switched on during installs.
+- On-device pairing needs iOS 27+ (RPPairing host mode) and Wi-Fi. iOS 18–26 needs a pairing file made on a computer. LocalDevVPN has to be on during installs.
+- The widget extension takes a second App ID when AltLoad itself is sideloaded with a free Apple ID.
 - Free Apple IDs are limited to 3 sideloaded apps, 10 App IDs per 7 days, and 7-day signatures.
 - The anisette server is a third party. Self-host one if you'd rather not depend on it.
 - The install pipeline hasn't been compiled or tested on a device yet. The first build may need small API fixes against the pinned idevice and isideload versions.

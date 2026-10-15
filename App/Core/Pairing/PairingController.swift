@@ -48,6 +48,13 @@ final class PairingController: ObservableObject {
         return UserDefaults.standard.bool(forKey: key)
     }
 
+    /// iOS 27 lets the iPhone pair with a host on the network, which is how
+    /// AltLoad pairs with itself. Earlier versions need an imported pairing file.
+    static var canPairOnDevice: Bool {
+        if #available(iOS 27, *) { return true }
+        return false
+    }
+
     private let bindAddress = "0.0.0.0"
     /// Shown on the other device as "Pair with AltLoad".
     private let hostName = "AltLoad"
@@ -62,7 +69,14 @@ final class PairingController: ObservableObject {
     private var activeAppleTV: AppleTVDevice?
     private var appleTVCancelled = false
 
-    private var bgTask: BGContinuedProcessingTask?
+    /// The BGContinuedProcessingTask, kept untyped because that class needs iOS 26
+    /// and AltLoad still runs on older versions (where it only imports pairing files).
+    private var bgTaskObject: AnyObject?
+    @available(iOS 26, *)
+    private var bgTask: BGContinuedProcessingTask? {
+        get { bgTaskObject as? BGContinuedProcessingTask }
+        set { bgTaskObject = newValue }
+    }
     private var pairingStarted = false
     private var taskFinished = false
 
@@ -80,6 +94,7 @@ final class PairingController: ObservableObject {
     }
 
     nonisolated func registerBackgroundTask() {
+        guard #available(iOS 26, *) else { return }
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: PairingController.taskIdentifier,
             using: DispatchQueue.main
@@ -94,7 +109,7 @@ final class PairingController: ObservableObject {
     // MARK: - iPhone / iPad
 
     func start() {
-        guard !isRunning else { return }
+        guard Self.canPairOnDevice, !isRunning else { return }
         phase = .waiting
 
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
@@ -104,14 +119,18 @@ final class PairingController: ObservableObject {
         // the Pair screen tells the user which button to tap.
         if keepAliveAudio { keepAlive.startAudio() }
         if keepAliveLocation { keepAlive.startLocation() }
+        // Started now, while AltLoad is in front; the code is filled in later
+        // from the background.
+        PairingLiveActivity.shared.start(hostName: hostName)
 
         Task {
             guard await localNetwork.request() else {
                 keepAlive.stopAll()
+                PairingLiveActivity.shared.endAll()
                 phase = .failed(Self.localNetworkMessage)
                 return
             }
-            submitBackgroundTask()
+            if #available(iOS 26, *) { submitBackgroundTask() }
         }
     }
 
@@ -213,6 +232,7 @@ final class PairingController: ObservableObject {
 
     // MARK: - Host pairing (runs while the user is in Settings)
 
+    @available(iOS 26, *)
     private func submitBackgroundTask() {
         let request = BGContinuedProcessingTaskRequest(
             identifier: PairingController.taskIdentifier,
@@ -231,6 +251,7 @@ final class PairingController: ObservableObject {
         }
     }
 
+    @available(iOS 26, *)
     private func runPairing(task: BGContinuedProcessingTask?) {
         guard !pairingStarted else { return }
         pairingStarted = true
@@ -243,6 +264,7 @@ final class PairingController: ObservableObject {
             guard let self else { return }
             self.keepAlive.stopAll()
             self.finishTask(success: false)
+            PairingLiveActivity.shared.finish(success: false)
             if self.isRunning {
                 self.phase = .failed("Background time expired before a device connected. Tap Pair to try again.")
             }
@@ -282,6 +304,7 @@ final class PairingController: ObservableObject {
                     self.bgTask?.progress.completedUnitCount = 100
                     self.postReturnNotification()
                 }
+                PairingLiveActivity.shared.finish(success: succeeded)
                 self.finishTask(success: succeeded)
             }
         }
@@ -316,8 +339,8 @@ final class PairingController: ObservableObject {
     private func finishTask(success: Bool) {
         guard !taskFinished else { return }
         taskFinished = true
-        bgTask?.setTaskCompleted(success: success)
-        bgTask = nil
+        if #available(iOS 26, *) { bgTask?.setTaskCompleted(success: success) }
+        bgTaskObject = nil
     }
 
     fileprivate func startAdvertising(serviceID: String, port: Int32, txt: [String: Data]) {
@@ -334,8 +357,11 @@ final class PairingController: ObservableObject {
 
     fileprivate func presentPin(_ pin: String) {
         phase = .showPin(pin)
-        bgTask?.progress.completedUnitCount = 50
-        bgTask?.updateTitle("AltLoad", subtitle: "Enter code \(pin) on this device")
+        PairingLiveActivity.shared.show(code: pin)
+        if #available(iOS 26, *) {
+            bgTask?.progress.completedUnitCount = 50
+            bgTask?.updateTitle("AltLoad", subtitle: "Enter code \(pin) on this device")
+        }
         if keepAliveAudio || keepAliveLocation {
             notify(id: "altload.pin",
                    title: "AltLoad pairing code",
