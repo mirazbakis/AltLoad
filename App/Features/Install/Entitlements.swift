@@ -101,8 +101,7 @@ struct EntitlementsView: View {
             } label: {
                 Label("Turn All Off", systemImage: "xmark.circle").frame(maxWidth: .infinity)
             }
-            .buttonStyle(.glass)
-            .controlSize(.large)
+            .buttonStyle(AltLoadButtonStyle(prominent: false, tint: Aurora.danger))
             .disabled(settings.enabled.isEmpty)
 
             note("Turning one off stops AltLoad asking for it. Apple keeps it on the App ID until you remove it at developer.apple.com, so the profile may still include it.")

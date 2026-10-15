@@ -269,9 +269,7 @@ struct CertificatesView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 4)
                 }
-                .buttonStyle(.glass)
-                .tint(Aurora.danger)
-                .controlSize(.large)
+                .buttonStyle(AltLoadButtonStyle(prominent: false, tint: Aurora.danger))
                 .disabled(controller.isBusy)
             }
         }
@@ -353,8 +351,8 @@ struct CertificatesView: View {
                 Image(systemName: systemImage)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(tint)
-                    .frame(width: 30, height: 30)
-                    .glassEffect(.regular.tint(tint.opacity(0.22)), in: .circle)
+                    .frame(width: 34, height: 34)
+                    .background(tint.opacity(0.16), in: .rect(cornerRadius: 10, style: .continuous))
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Aurora.frost)
                     if !detail.isEmpty {
@@ -364,6 +362,8 @@ struct CertificatesView: View {
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
             }
+            .frame(minHeight: 44)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
         .disabled(disabled)

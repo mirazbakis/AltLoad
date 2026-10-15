@@ -1,51 +1,45 @@
 import SwiftUI
 
-/// Settings as glass cards on the midnight background.
+/// Settings, opened from the gear at the top right of every tab.
 struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var pairing = PairingController.shared
     @StateObject private var install = InstallController.shared
     @StateObject private var anisette = AnisetteServers.shared
-    @ObservedObject private var altServer = AltServerHost.shared
+    @StateObject private var account = CertificatesController.shared
     @ObservedObject private var entitlements = EntitlementSettings.shared
     @State private var anisetteChoice = ""
     private static let customTag = "custom"
     @State private var appleID = AppleIDStore.email
     @State private var targetIP = LocalDevVPN.targetIP
     @State private var vpnActive = LocalDevVPN.isActive
+    @State private var showSignIn = false
+    @State private var anisetteReset = false
     @State private var sourceURLs: [StoreApp: String] = Dictionary(uniqueKeysWithValues: StoreApp.allCases.map {
         ($0, UserDefaults.standard.string(forKey: $0.sourceDefaultsKey) ?? $0.defaultSourceURL.absoluteString)
     })
 
-    private var version: String {
-        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "–"
-        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "–"
-        return "\(v) (\(b))"
-    }
-
     var body: some View {
         NavigationStack {
             AuroraScreen {
-                headerCard
                 appleIDCard
                 LinkCard(title: "Entitlements", symbol: "checkmark.shield.fill",
                          value: entitlements.enabled.isEmpty ? "Off" : "\(entitlements.enabled.count) on") {
                     EntitlementsView()
                 }
-                vpnCard
                 anisetteCard
+                vpnCard
                 sourcesCard
                 keepAliveCard
-                thanksCard
-                legalCard
-
-                Text("AltLoad isn't affiliated with AltStore, Riley Testut or Apple. Apple, iPhone and iOS are trademarks of Apple Inc.")
-                    .font(.caption)
-                    .foregroundStyle(Aurora.secondaryText)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 8)
             }
             .navigationTitle("Settings")
-            .toolbarTitleDisplayMode(.inlineLarge)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                        .fontWeight(.semibold)
+                }
+            }
             .task {
                 await anisette.refresh()
                 syncAnisetteChoice()
@@ -55,48 +49,143 @@ struct SettingsView: View {
                 appleID = AppleIDStore.email
                 vpnActive = LocalDevVPN.isActive
             }
-        }
-    }
-
-    // MARK: - Cards
-
-    private var headerCard: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(spacing: 14) {
-                    AltLoadMark(size: 56)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("AltLoad")
-                            .font(.title2.bold())
-                            .foregroundStyle(Aurora.frost)
-                        Text("Version \(version)")
-                            .font(.subheadline)
-                            .foregroundStyle(Aurora.secondaryText)
-                    }
-                    Spacer(minLength: 0)
+            .onChange(of: account.phase) { _, _ in appleID = AppleIDStore.email }
+            .fullScreenCover(isPresented: $showSignIn) {
+                SignInSheet(anisetteURL: install.anisetteURL) { credentials, remember in
+                    account.load(with: credentials, remember: remember)
                 }
-                HStack(spacing: 8) {
-                    StatTile(title: "Apps", value: "\(install.apps.count)")
-                    StatTile(title: "Entitlements", value: "\(entitlements.enabled.count)")
-                    StatTile(title: "AltServer", value: altServer.isRunning ? "On" : "Off")
-                }
+                .auroraTheme()
+            }
+            .fullScreenCover(item: $account.twoFactor) { prompt in
+                TwoFactorSheet(prompt: prompt) { account.respond($0) }
+                    .auroraTheme()
             }
         }
     }
+
+    // MARK: - Apple ID
 
     private var appleIDCard: some View {
         CardSection(title: "Apple ID", symbol: "person.crop.circle.fill") {
             InfoRow(title: "Account", value: appleID.isEmpty ? "Not signed in" : appleID)
-            Button(role: .destructive) {
-                AppleIDStore.forgetAll()
-                appleID = ""
-            } label: {
-                Label("Forget Apple ID and Password", systemImage: "trash").frame(maxWidth: .infinity)
+            accountStatus
+
+            HStack(spacing: 10) {
+                Button {
+                    if let saved = account.savedCredentials {
+                        account.load(with: saved)
+                    } else {
+                        showSignIn = true
+                    }
+                } label: {
+                    Label(signInTitle, systemImage: "person.badge.key.fill").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(AltLoadButtonStyle())
+                .disabled(account.isBusy)
+
+                Button(role: .destructive) {
+                    AppleIDStore.forgetAll()
+                    account.signOut()
+                    appleID = ""
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(AltLoadButtonStyle(prominent: false, tint: Aurora.danger))
+                .disabled(appleID.isEmpty)
+                .accessibilityLabel("Forget Apple ID and password")
             }
-            .buttonStyle(.glass)
-            .disabled(appleID.isEmpty)
+            footnote("Signing in here checks your Apple ID with Apple straight away, including two-factor, without installing anything.")
         }
     }
+
+    private var signInTitle: String {
+        switch account.phase {
+        case .loaded: "Check Again"
+        case .loading: "Signing In…"
+        default: appleID.isEmpty ? "Sign In" : "Sign In Again"
+        }
+    }
+
+    @ViewBuilder
+    private var accountStatus: some View {
+        switch account.phase {
+        case .signedOut:
+            EmptyView()
+        case .loading(let stage):
+            HStack(spacing: 10) {
+                ProgressView()
+                Text(stage).font(.subheadline).foregroundStyle(Aurora.secondaryText)
+            }
+        case .loaded:
+            Label("Signed in\(account.overview.map { " · \($0.team.name)" } ?? "")", systemImage: "checkmark.seal.fill")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Aurora.success)
+        case .failed(let message):
+            VStack(alignment: .leading, spacing: 6) {
+                Label("Sign-in failed", systemImage: "exclamationmark.triangle.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Aurora.danger)
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(Aurora.secondaryText)
+                    .textSelection(.enabled)
+                    .lineLimit(8)
+            }
+        }
+    }
+
+    // MARK: - Anisette
+
+    private var anisetteCard: some View {
+        CardSection(title: "Anisette", symbol: "server.rack") {
+            HStack {
+                Text("Server").foregroundStyle(Aurora.secondaryText)
+                if anisette.isLoading { ProgressView() }
+                Spacer()
+                Picker("Server", selection: $anisetteChoice) {
+                    Text("Automatic").tag(AnisetteServers.automatic)
+                    Divider()
+                    ForEach(anisette.servers) { server in
+                        Text(server.name).tag(server.address)
+                    }
+                    Text("Custom…").tag(Self.customTag)
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+            }
+            .font(.subheadline)
+            .frame(minHeight: 44)
+            .onChange(of: anisetteChoice) { _, choice in
+                if choice != Self.customTag { install.anisetteURL = choice }
+            }
+
+            if anisetteChoice == Self.customTag {
+                TextField("https://…", text: $install.anisetteURL)
+                    .font(.footnote.monospaced())
+                    .keyboardType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .inputField()
+            } else if anisetteChoice != AnisetteServers.automatic {
+                InfoRow(title: "Address", value: install.anisetteURL, monospaced: true)
+            }
+
+            Button {
+                AnisetteServers.resetProvisioning()
+                anisetteReset = true
+            } label: {
+                Label(anisetteReset ? "Anisette Data Reset" : "Reset Anisette Data",
+                      systemImage: anisetteReset ? "checkmark" : "arrow.counterclockwise")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(AltLoadButtonStyle(prominent: false))
+            .disabled(anisetteReset)
+
+            footnote("Apple needs device-identity headers (\"anisette\") to sign in; the server never sees your password. Automatic checks which servers answer and moves on to the next one if Apple refuses a server's data. Reset if sign-in keeps failing.")
+        }
+    }
+
+    // MARK: - LocalDevVPN
 
     private var vpnCard: some View {
         CardSection(title: "LocalDevVPN", symbol: "network.badge.shield.half.filled") {
@@ -113,47 +202,15 @@ struct SettingsView: View {
                 Label(LocalDevVPN.isInstalled ? "Turn On LocalDevVPN" : "Get LocalDevVPN", systemImage: "power")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.glass)
+            .buttonStyle(AltLoadButtonStyle(prominent: false))
             footnote("Installs go through LocalDevVPN, which loops this address back into the iPhone. Only change it if you changed LocalDevVPN's peer IP.")
         }
     }
 
-    private var anisetteCard: some View {
-        CardSection(title: "Anisette Server", symbol: "server.rack") {
-            HStack {
-                Text("Server").foregroundStyle(Aurora.secondaryText)
-                if anisette.isLoading { ProgressView().controlSize(.mini) }
-                Spacer()
-                Picker("Server", selection: $anisetteChoice) {
-                    ForEach(anisette.servers) { server in
-                        Text(server.name).tag(server.address)
-                    }
-                    Text("Custom…").tag(Self.customTag)
-                }
-                .pickerStyle(.menu)
-                .labelsHidden()
-            }
-            .font(.subheadline)
-            .onChange(of: anisetteChoice) { _, choice in
-                if choice != Self.customTag { install.anisetteURL = choice }
-            }
-
-            if anisetteChoice == Self.customTag {
-                TextField("https://…", text: $install.anisetteURL)
-                    .font(.footnote.monospaced())
-                    .keyboardType(.URL)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .inputField()
-            } else {
-                InfoRow(title: "Address", value: install.anisetteURL, monospaced: true)
-            }
-            footnote("Apple requires device-identity headers (\"anisette\") to sign in. The server never sees your password. If sign-in fails, try another server.")
-        }
-    }
+    // MARK: - Sources
 
     private var sourcesCard: some View {
-        CardSection(title: "AltStore Sources", symbol: "shippingbox.fill") {
+        CardSection(title: "Sources", symbol: "shippingbox.fill") {
             ForEach(StoreApp.allCases) { store in
                 VStack(alignment: .leading, spacing: 6) {
                     Text(store.name)
@@ -174,71 +231,24 @@ struct SettingsView: View {
                     saveSource(store)
                 }
             } label: {
-                Label("Use Official Source", systemImage: "arrow.uturn.backward").frame(maxWidth: .infinity)
+                Label("Use Official Sources", systemImage: "arrow.uturn.backward").frame(maxWidth: .infinity)
             }
-            .buttonStyle(.glass)
-            footnote("AltLoad installs the newest version listed in each source. Pick Release or Beta on the Install tab.")
+            .buttonStyle(AltLoadButtonStyle(prominent: false))
+            footnote("AltLoad installs the newest build each source lists. If SideStore's source or repository is down, it falls back to a mirror, its GitHub releases and then a known-good build.")
         }
     }
 
     private var keepAliveCard: some View {
         CardSection(title: "Background Keep-Alive", symbol: "bolt.horizontal.circle.fill") {
             Toggle("Silent audio", systemImage: "speaker.wave.2", isOn: $pairing.keepAliveAudio)
+                .frame(minHeight: 44)
             Toggle("Location", systemImage: "location", isOn: $pairing.keepAliveLocation)
+                .frame(minHeight: 44)
             footnote("Turn one on if the Live Activity doesn't start while you pair from Settings.")
         }
     }
 
-    private var thanksCard: some View {
-        CardSection(title: "Special Thanks", symbol: "heart.fill") {
-            thanksRow("jkcoxson", for: "idevice and LocalDevVPN, which let AltLoad talk to this iPhone", url: "https://github.com/jkcoxson")
-            thanksRow("nab138", for: "isideload: Apple ID sign-in, signing and installing", url: "https://github.com/nab138/isideload")
-            thanksRow("StephenDev0", for: "StikPair and StikDebug, the base for pairing and JIT", url: "https://github.com/StephenDev0")
-            thanksRow("Riley Testut", for: "AltStore", url: "https://github.com/altstoreio/AltStore")
-        }
-    }
-
-    private var legalCard: some View {
-        CardSection(title: "Legal", symbol: "doc.text.fill") {
-            linkRow("Terms of Service", "https://mirazbakis.github.io/terms.html")
-            linkRow("AltLoad License", "https://github.com/mirazbakis/AltLoad/blob/main/LICENSE")
-            linkRow("Third-Party Notices", "https://github.com/mirazbakis/AltLoad/blob/main/THIRD_PARTY_NOTICES.md")
-            linkRow("Security Policy", "https://github.com/mirazbakis/AltLoad/blob/main/SECURITY.md")
-        }
-    }
-
-    // MARK: - Rows
-
-    private func thanksRow(_ name: String, for work: String, url: String) -> some View {
-        Link(destination: URL(string: url)!) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "person.crop.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(Aurora.sky)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(name).font(.subheadline.weight(.semibold)).foregroundStyle(Aurora.frost)
-                    Text(work).font(.caption).foregroundStyle(Aurora.secondaryText)
-                        .multilineTextAlignment(.leading)
-                }
-                Spacer(minLength: 0)
-                Image(systemName: "arrow.up.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Aurora.secondaryText)
-            }
-        }
-    }
-
-    private func linkRow(_ title: String, _ url: String) -> some View {
-        Link(destination: URL(string: url)!) {
-            HStack {
-                Text(title).font(.subheadline).foregroundStyle(Aurora.frost)
-                Spacer()
-                Image(systemName: "arrow.up.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Aurora.secondaryText)
-            }
-        }
-    }
+    // MARK: - Helpers
 
     private func footnote(_ text: String) -> some View {
         Text(text)
@@ -247,11 +257,13 @@ struct SettingsView: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    // MARK: - Helpers
-
     private func syncAnisetteChoice() {
-        anisetteChoice = anisette.servers.contains { $0.address == install.anisetteURL }
-            ? install.anisetteURL : Self.customTag
+        let current = install.anisetteURL
+        if current == AnisetteServers.automatic || anisette.servers.contains(where: { $0.address == current }) {
+            anisetteChoice = current
+        } else {
+            anisetteChoice = Self.customTag
+        }
     }
 
     private func sourceBinding(_ store: StoreApp) -> Binding<String> {

@@ -1,12 +1,13 @@
 // On-device sideloading for AltLoad.
 //
 // This is the on-device version of what AltServer does from a computer:
-//   1. Open a tunnel to *this* iPhone: through LocalDevVPN (which reflects packets
+//   1. Sign in to the user's Apple ID (GrandSlam SRP + anisette headers), falling
+//      back to the next anisette server when Apple rejects one.
+//   2. Open a tunnel to *this* iPhone: through LocalDevVPN (which reflects packets
 //      sent to 10.7.0.1 back into the device), connect to its own RemotePairing
 //      service on port 49152 with the RPPairing file from the Pair tab, pair-verify, ask
 //      it for a TCP listener, wrap that in the TLS-PSK "CDTunnel", run a
 //      userspace TCP stack over it and do the RemoteServiceDiscovery handshake.
-//   2. Sign in to the user's Apple ID (GrandSlam SRP + anisette headers).
 //   3. Use the free developer portal API to register this device's UDID, create
 //      or reuse a development certificate, register App IDs and app groups, and
 //      download provisioning profiles.
@@ -48,6 +49,7 @@ use isideload::sideload::builder::MaxCertsBehavior;
 use isideload::sideload::cert_identity::CertificateIdentity;
 use isideload::sideload::{SideloaderBuilder, TeamSelection};
 use isideload::util::keyring_storage::KeyringStorage;
+use isideload::util::storage::SideloadingStorage;
 use tokio::net::TcpStream;
 use tokio::sync::{mpsc, Mutex as AsyncMutex};
 
@@ -401,7 +403,13 @@ async fn run_install(
         }
     };
 
-    // 1. Tunnel to this device.
+    // 1. Apple ID first, so a sign-in problem shows up straight away instead of
+    // after the device link, and 2FA is done before anything touches the device.
+    cbs.progress("Signing in to Apple…", -1.0);
+    let dev_session = sign_in(&cfg.apple_id, &cfg.password, &cfg.anisette_url, cbs, replies.clone()).await?;
+    check()?;
+
+    // 2. Tunnel to this device.
     cbs.progress("Connecting to this device…", -1.0);
     let (mut adapter, mut handshake) = open_tunnel(&cfg).await?;
     let udid = handshake
@@ -412,10 +420,10 @@ async fn run_install(
         .ok_or("This device didn't report its UDID over RSD.")?;
     check()?;
 
-    // 2. Unpack the IPA and add AltStore's device keys.
+    // 3. Unpack the IPA and add AltStore's device keys.
     cbs.progress("Preparing the app…", -1.0);
     let (work_dir, app_dir) = prepare_app(&cfg.ipa_path, &udid, &cfg.server_id)?;
-    let result = sign_and_install(&cfg, cbs, replies, &check, &udid, app_dir, &mut adapter, &mut handshake).await;
+    let result = sign_and_install(&cfg, dev_session, cbs, replies, &check, &udid, app_dir, &mut adapter, &mut handshake).await;
     let _ = std::fs::remove_dir_all(&work_dir);
     result
 }
@@ -423,6 +431,7 @@ async fn run_install(
 #[allow(clippy::too_many_arguments)]
 async fn sign_and_install(
     cfg: &Config,
+    dev_session: DeveloperSession,
     cbs: Callbacks,
     replies: Replies,
     check: &impl Fn() -> Result<(), String>,
@@ -431,11 +440,6 @@ async fn sign_and_install(
     adapter: &mut AdapterHandle,
     handshake: &mut RsdHandshake,
 ) -> Result<Installed, String> {
-    check()?;
-
-    // 3. Apple ID.
-    cbs.progress("Signing in to Apple…", -1.0);
-    let dev_session = sign_in(&cfg.apple_id, &cfg.password, &cfg.anisette_url, cbs, replies.clone()).await?;
     check()?;
 
     let cert_replies = replies.clone();
@@ -453,7 +457,7 @@ async fn sign_and_install(
     let mut sideloader = SideloaderBuilder::new(dev_session, cfg.apple_id.clone())
         .team_selection(TeamSelection::First)
         .max_certs_behavior(MaxCertsBehavior::Prompt(revoke_prompt.clone()))
-        .storage(Box::new(KeyringStorage::new("AltLoad".to_string())))
+        .storage(Box::new(FileStorage::new("signing", Some("AltLoad"))))
         .machine_name(cfg.machine_name.clone())
         .delete_app_after_install(false)
         .build();
@@ -476,7 +480,7 @@ async fn sign_and_install(
     // making a new one) and its app group.
     if bundle_id_of(&app_dir) == ALTSTORE_BETA_BUNDLE_ID {
         cbs.progress("Preparing AltStore Beta…", -1.0);
-        let storage = KeyringStorage::new("AltLoad".to_string());
+        let storage = FileStorage::new("signing", Some("AltLoad"));
         let cert = CertificateIdentity::retrieve(
             &cfg.machine_name,
             &cfg.apple_id,
@@ -532,17 +536,68 @@ async fn sign_and_install(
 /// Signs in to the Apple ID (GSA + anisette, 2FA through the prompt callback)
 /// and opens a developer-services session. Shared by installs and the
 /// certificate manager.
+///
+/// `anisette_urls` is one server or several separated by newlines, best first.
+/// When Apple or a server rejects the anisette data (a dead server, -45061,
+/// -80045 and the like) the next one is tried. Wrong passwords, 2FA problems and
+/// cancellations stop right away so the account isn't hammered.
 async fn sign_in(
+    apple_id: &str,
+    password: &str,
+    anisette_urls: &str,
+    cbs: Callbacks,
+    replies: Replies,
+) -> Result<DeveloperSession, String> {
+    let urls: Vec<&str> = anisette_urls
+        .split(['\n', ',', ' '])
+        .map(str::trim)
+        .filter(|u| !u.is_empty())
+        .collect();
+    let urls = if urls.is_empty() { vec!["https://ani.jkcoxson.com"] } else { urls };
+
+    let mut failures: Vec<String> = Vec::new();
+    for (i, url) in urls.iter().enumerate() {
+        if i > 0 {
+            cbs.progress(&format!("Signing in to Apple (trying {})…", host_of(url)), -1.0);
+        }
+        match sign_in_with(apple_id, password, url, cbs, replies.clone()).await {
+            Ok(session) => return Ok(session),
+            Err((e, detail)) => {
+                let retry = is_anisette_failure(&detail) && i + 1 < urls.len();
+                failures.push(format!("{}: {e}", host_of(url)));
+                if !retry {
+                    break;
+                }
+            }
+        }
+    }
+
+    let last = failures.last().cloned().unwrap_or_default();
+    if failures.len() > 1 {
+        Err(format!(
+            "Apple ID sign-in failed with every anisette server AltLoad tried.\n\n{}",
+            failures.join("\n")
+        ))
+    } else {
+        Err(last)
+    }
+}
+
+async fn sign_in_with(
     apple_id: &str,
     password: &str,
     anisette_url: &str,
     cbs: Callbacks,
     replies: Replies,
-) -> Result<DeveloperSession, String> {
+) -> Result<DeveloperSession, (String, String)> {
+    // Each server provisions its own anisette identity, so each gets its own folder.
     let anisette = RemoteV3AnisetteProvider::default()
-        .map_err(|e| err("Anisette setup failed", e))?
+        .map_err(|e| (err("Anisette setup failed", &e), format!("anisette {e:?}")))?
         .set_url(anisette_url)
-        .set_storage(Box::new(KeyringStorage::new("AltLoad.anisette".to_string())));
+        .set_storage(Box::new(FileStorage::new(
+            &format!("anisette/{}", host_of(anisette_url)),
+            Some("AltLoad.anisette"),
+        )));
 
     let two_factor = move |params: TwoFactorCallbackParams| {
         let replies = replies.clone();
@@ -563,11 +618,104 @@ async fn sign_in(
         .anisette_provider(anisette)
         .login(password, two_factor)
         .await
-        .map_err(|e| err("Apple ID sign-in failed", e))?;
+        .map_err(|e| (err("Apple ID sign-in failed", &e), format!("{e} {e:?}")))?;
 
     DeveloperSession::from_account(&mut account)
         .await
-        .map_err(|e| err("Couldn't open a developer session", e))
+        .map_err(|e| (err("Couldn't open a developer session", &e), format!("{e} {e:?}")))
+}
+
+/// Errors that come from the anisette server or Apple refusing its data, where
+/// another server may well work. Anything about the password, 2FA or the user
+/// cancelling is not retried.
+fn is_anisette_failure(message: &str) -> bool {
+    let m = message.to_lowercase();
+    let user_side = ["-22406", "incorrect", "password", "2fa", "two-factor", "verification code", "cancel", "abort", "locked", "disabled"];
+    if user_side.iter().any(|s| m.contains(s)) && !m.contains("anisette") {
+        return false;
+    }
+    [
+        "anisette", "provision", "client info", "client_info", "-45061", "-45054", "-80045",
+        "-22410", "-22411", "websocket", "error sending request", "timed out", "connection",
+        "dns", "certificate verify", "status code 5", "502", "503", "504",
+    ]
+    .iter()
+    .any(|s| m.contains(s))
+}
+
+fn host_of(url: &str) -> String {
+    url.trim()
+        .trim_start_matches("https://")
+        .trim_start_matches("http://")
+        .split('/')
+        .next()
+        .unwrap_or("anisette")
+        .replace(':', "_")
+}
+
+// MARK: - Storage
+
+/// isideload's state (the anisette identity and the signing certificate) kept as
+/// files in Application Support/AltLoad. The Keychain used before fails with
+/// errSecMissingEntitlement when AltLoad is sideloaded by signers that drop the
+/// keychain-access-groups entitlement, and then sign-in can't save its
+/// anisette provisioning and fails. Values saved in the Keychain by older
+/// builds are still read once and moved over.
+struct FileStorage {
+    dir: PathBuf,
+    legacy: Option<KeyringStorage>,
+}
+
+impl FileStorage {
+    fn new(sub: &str, legacy_service: Option<&str>) -> Self {
+        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        let dir = PathBuf::from(home)
+            .join("Library/Application Support/AltLoad")
+            .join(sub);
+        let _ = std::fs::create_dir_all(&dir);
+        Self { dir, legacy: legacy_service.map(|s| KeyringStorage::new(s.to_string())) }
+    }
+
+    fn path(&self, key: &str) -> PathBuf {
+        let safe: String = key
+            .chars()
+            .map(|c| if c.is_ascii_alphanumeric() || c == '.' || c == '-' || c == '_' { c } else { '_' })
+            .collect();
+        self.dir.join(safe)
+    }
+}
+
+impl SideloadingStorage for FileStorage {
+    fn store(&self, key: &str, value: &str) -> Result<(), rootcause::Report> {
+        std::fs::create_dir_all(&self.dir)?;
+        std::fs::write(self.path(key), value)?;
+        Ok(())
+    }
+
+    fn retrieve(&self, key: &str) -> Result<Option<String>, rootcause::Report> {
+        match std::fs::read_to_string(self.path(key)) {
+            Ok(v) if !v.is_empty() => return Ok(Some(v)),
+            Ok(_) => return Ok(None),
+            Err(e) if e.kind() != std::io::ErrorKind::NotFound => return Err(e.into()),
+            Err(_) => {}
+        }
+        // Older AltLoad builds kept this in the Keychain. Move it over if it's readable.
+        let old = self.legacy.as_ref().and_then(|k| k.retrieve(key).ok().flatten());
+        if let Some(v) = &old {
+            let _ = std::fs::write(self.path(key), v);
+        }
+        Ok(old)
+    }
+
+    fn delete(&self, key: &str) -> Result<(), rootcause::Report> {
+        if let Some(k) = &self.legacy {
+            let _ = k.delete(key);
+        }
+        match std::fs::remove_file(self.path(key)) {
+            Err(e) if e.kind() != std::io::ErrorKind::NotFound => Err(e.into()),
+            _ => Ok(()),
+        }
+    }
 }
 
 // MARK: - Tunnel

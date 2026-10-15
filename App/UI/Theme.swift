@@ -1,41 +1,47 @@
 import SwiftUI
 
-/// AltLoad's palette: midnight navy, after Freight Manager's dark theme. Deep blue
-/// gradient, a warm orange and a cyan glow, plain Liquid Glass, one blue accent.
-/// No purple anywhere. The enum keeps its old name so every screen picks it up.
+/// AltLoad's palette: Freight Manager's navy tone, taken darker. A midnight base,
+/// one dark navy spotlight, solid navy surfaces and a deep blue accent. The dark
+/// green and white come from the app icon. The enum keeps its old name so every
+/// screen picks it up.
 enum Aurora {
     // Base, from darkest to lightest.
-    static let night = Color(red: 0.012, green: 0.027, blue: 0.071)      // #03071A
-    static let card = Color(red: 0.035, green: 0.075, blue: 0.155)       // #091328
-    static let navy = Color(red: 0.050, green: 0.150, blue: 0.280)       // #0D2647
+    static let night = Color(red: 0.012, green: 0.020, blue: 0.043)      // #03050B
+    static let spotlight = Color(red: 0.055, green: 0.125, blue: 0.290)  // #0E204A
+    static let card = Color(red: 0.039, green: 0.063, blue: 0.118)       // #0A101E
+    static let raised = Color(red: 0.063, green: 0.098, blue: 0.173)     // #10192C
+    static let navy = Color(red: 0.075, green: 0.161, blue: 0.333)       // #132955
 
     // Highlights.
-    static let accent = Color(red: 0.180, green: 0.540, blue: 1.000)     // #2E8AFF
-    static let sky = Color(red: 0.300, green: 0.820, blue: 0.950)        // #4DD1F2
-    static let mist = Color(red: 0.690, green: 0.800, blue: 0.930)       // #B0CCED
+    static let accent = Color(red: 0.235, green: 0.478, blue: 0.890)     // #3C7AE3
+    static let accentDeep = Color(red: 0.122, green: 0.282, blue: 0.620) // #1F489E
+    static let sky = Color(red: 0.490, green: 0.690, blue: 0.980)        // #7DB0FA
+    static let mist = Color(red: 0.640, green: 0.720, blue: 0.840)       // #A3B8D6
+    static let forest = Color(red: 0.090, green: 0.420, blue: 0.290)     // #176B4A, the icon's green
     static let ember = Color.orange
     static let frost = Color.white
 
-    static let success = Color(red: 0.300, green: 0.850, blue: 0.560)    // #4DD98F
-    static let danger = Color(red: 1.000, green: 0.420, blue: 0.420)     // #FF6B6B
+    static let success = Color(red: 0.250, green: 0.760, blue: 0.500)    // #40C280
+    static let danger = Color(red: 0.960, green: 0.380, blue: 0.400)     // #F56166
 
-    /// Secondary text, white at 60%.
-    static let secondaryText = Color.white.opacity(0.6)
+    /// Secondary text, white at 58%.
+    static let secondaryText = Color.white.opacity(0.58)
     /// Hairline around cards.
-    static let hairline = Color.white.opacity(0.08)
+    static let hairline = Color.white.opacity(0.07)
 
     /// Row fill for Lists and Forms.
-    static let rowFill = card.opacity(0.75)
+    static let rowFill = card
 
     static let accentGradient = LinearGradient(
-        colors: [sky, accent],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing)
-
-    static let markGradient = LinearGradient(
-        colors: [Color(red: 0.16, green: 0.42, blue: 0.86), Color(red: 0.02, green: 0.05, blue: 0.13)],
+        colors: [accent, accentDeep],
         startPoint: .top,
         endPoint: .bottom)
+
+    /// The icon's background: midnight into dark green.
+    static let markGradient = LinearGradient(
+        colors: [Color(red: 0.035, green: 0.075, blue: 0.130), Color(red: 0.020, green: 0.200, blue: 0.140)],
+        startPoint: .top,
+        endPoint: .bottomTrailing)
 }
 
 extension View {
@@ -51,7 +57,7 @@ extension View {
         listRowBackground(Aurora.rowFill)
     }
 
-    /// Hides the default grouped background so the midnight gradient shows through.
+    /// Hides the default grouped background so the midnight background shows through.
     func auroraListBackground() -> some View {
         self
             .scrollContentBackground(.hidden)

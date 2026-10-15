@@ -1,6 +1,6 @@
 name: AltLoad
 options:
-  bundleIdPrefix: com.altload
+  bundleIdPrefix: com.mirazbakis
   deploymentTarget:
     iOS: "27.0"
   createIntermediateGroups: true
@@ -28,7 +28,7 @@ targets:
         embed: false
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.altload.AltLoad
+        PRODUCT_BUNDLE_IDENTIFIER: com.mirazbakis.altload
         INFOPLIST_FILE: App/Resources/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AltLoad
         OTHER_LDFLAGS: "-lc++"

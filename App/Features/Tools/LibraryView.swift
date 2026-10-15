@@ -117,7 +117,7 @@ struct LibraryView: View {
                             .foregroundStyle(Aurora.frost)
                             .padding(.horizontal, 7)
                             .padding(.vertical, 3)
-                            .glassEffect(.regular.tint(Aurora.accent.opacity(0.5)), in: .capsule)
+                            .background(Aurora.accentDeep, in: .capsule)
                     }
                 }
                 Text([item.model, item.date.formatted(date: .abbreviated, time: .shortened)]
@@ -129,6 +129,9 @@ struct LibraryView: View {
             Spacer(minLength: 0)
             ShareLink(item: item.fileURL) {
                 Image(systemName: "square.and.arrow.up")
+                    .font(.body.weight(.semibold))
+                    .frame(width: 44, height: 44)
+                    .contentShape(.rect)
             }
             .buttonStyle(.borderless)
             .accessibilityLabel("Export \(item.displayName) pairing file")
@@ -141,7 +144,7 @@ struct LibraryView: View {
             .font(.title3)
             .foregroundStyle(Aurora.frost)
             .frame(width: 44, height: 44)
-            .glassEffect(.regular.tint(tint.opacity(0.45)), in: .circle)
+            .background(tint.gradient, in: .rect(cornerRadius: 12, style: .continuous))
     }
 
     private func appRow(_ app: InstalledApp) -> some View {

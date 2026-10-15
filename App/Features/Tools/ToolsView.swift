@@ -25,7 +25,7 @@ struct ToolsView: View {
         NavigationStack(path: $router.path) {
             AuroraScreen {
                 VStack(spacing: 10) {
-                    SectionLabel(title: "AltStore")
+                    SectionLabel(title: "Stores")
                     toolRow(.altServer, symbol: "server.rack", title: "AltServer",
                             detail: altServerDetail,
                             tint: altServer.isRunning ? Aurora.success : Aurora.accent)
@@ -58,6 +58,7 @@ struct ToolsView: View {
             }
             .navigationTitle("Tools")
             .toolbarTitleDisplayMode(.inlineLarge)
+            .settingsButton()
             .navigationDestination(for: ToolRoute.self) { route in
                 switch route {
                 case .altServer: AltServerView()
@@ -96,11 +97,7 @@ struct ToolsView: View {
     private func toolRow(_ route: ToolRoute, symbol: String, title: String, detail: String, tint: Color = Aurora.accent) -> some View {
         NavigationLink(value: route) {
             HStack(spacing: 14) {
-                Image(systemName: symbol)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(Aurora.frost)
-                    .frame(width: 44, height: 44)
-                    .glassEffect(.regular.tint(tint.opacity(0.5)), in: .circle)
+                IconTile(symbol: symbol, tint: tint == Aurora.accent ? Aurora.accentDeep : tint, size: 44)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
                         .font(.system(size: 17, weight: .bold))
@@ -117,13 +114,10 @@ struct ToolsView: View {
                     .foregroundStyle(Color.white.opacity(0.4))
             }
             .padding(14)
+            .frame(minHeight: 72)
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.tint(Aurora.card.opacity(0.6)).interactive(), in: .rect(cornerRadius: 20))
-        .overlay {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .strokeBorder(Aurora.hairline, lineWidth: 1)
-        }
+        .cardSurface()
     }
 }

@@ -80,8 +80,7 @@ struct LocationView: View {
                         Label(spoofer.isRunning ? "Move Here" : "Simulate", systemImage: "location.fill")
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.glassProminent)
-                    .tint(Aurora.accent)
+                    .buttonStyle(AltLoadButtonStyle())
                     .disabled(pin == nil || pairings.selfPairing == nil)
 
                     if spoofer.isRunning {
@@ -90,10 +89,9 @@ struct LocationView: View {
                         } label: {
                             Label("Stop", systemImage: "stop.fill").frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.glass)
+                        .buttonStyle(AltLoadButtonStyle(prominent: false))
                     }
                 }
-                .controlSize(.large)
             }
         }
         .frame(maxWidth: 560)

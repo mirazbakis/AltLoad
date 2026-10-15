@@ -1,8 +1,9 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Pick AltStore or AltStore Beta, see whether it's really on this iPhone, and
-/// install, update or refresh it. The install itself runs in InstallFlowView.
+/// Pick a store (AltStore, AltStore Beta, SideStore or SideStore + LC), see whether
+/// it's really on this iPhone, and install, update or refresh it. The install
+/// itself runs in InstallFlowView.
 struct InstallView: View {
     @Binding var selectedTab: AppTab
     @StateObject private var controller = InstallController.shared
@@ -19,7 +20,7 @@ struct InstallView: View {
     var body: some View {
         NavigationStack {
             AuroraScreen {
-                channelPicker
+                storeMenu
 
                 hero
 
@@ -42,12 +43,16 @@ struct InstallView: View {
                     }
                 }
 
+                if store.isSideStore, controller.releases[store] == nil, controller.catalogErrors[store] != nil {
+                    repositoryDownCard
+                }
+
                 VStack(spacing: 10) {
                     SectionLabel(title: "Setup", trailing: "\(readyCount) of 4 ready")
                     checklist
                 }
 
-                Text("AltLoad signs AltStore with your Apple ID and installs it straight onto this iPhone. With a free Apple ID it lasts 7 days, and AltLoad reminds you the day before.")
+                Text("AltLoad signs \(store.name) with your Apple ID and installs it straight onto this iPhone. With a free Apple ID it lasts 7 days, and AltLoad reminds you the day before.")
                     .font(.system(size: 13))
                     .foregroundStyle(Aurora.secondaryText)
                     .multilineTextAlignment(.center)
@@ -56,7 +61,7 @@ struct InstallView: View {
             .navigationTitle("Install")
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Menu {
                         Button("Check for Updates", systemImage: "arrow.clockwise") {
                             Task {
@@ -74,6 +79,7 @@ struct InstallView: View {
                     }
                 }
             }
+            .settingsButton()
             .task {
                 if controller.releases.count < StoreApp.allCases.count { await controller.loadCatalogs() }
             }
@@ -106,63 +112,140 @@ struct InstallView: View {
         .animation(.spring(duration: 0.45, bounce: 0.2), value: selectedRaw)
     }
 
-    // MARK: - Release / Beta
+    // MARK: - Store picker
 
-    private var channelPicker: some View {
-        Picker("Build", selection: $selectedRaw) {
-            ForEach(StoreApp.allCases) { option in
-                Text(option.channel).tag(option.rawValue)
+    /// One dropdown for every store, grouped by family.
+    private var storeMenu: some View {
+        Menu {
+            Section("AltStore") {
+                menuItem(.altstore, title: "AltStore")
+                menuItem(.altstoreBeta, title: "AltStore Beta")
+            }
+            Section("SideStore") {
+                menuItem(.sidestore, title: "SideStore")
+                menuItem(.sidestoreNightly, title: "SideStore Nightly")
+            }
+            Section("SideStore + LiveContainer") {
+                menuItem(.sidestoreLC, title: "SideStore + LC")
+                menuItem(.sidestoreLCNightly, title: "SideStore + LC Nightly")
+            }
+        } label: {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Store")
+                        .font(.caption)
+                        .foregroundStyle(Aurora.secondaryText)
+                    Text(store.name)
+                        .font(.headline)
+                        .foregroundStyle(Aurora.frost)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Aurora.secondaryText)
+            }
+            .padding(.horizontal, 14)
+            .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
+            .cardSurface(radius: 18)
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: selectedRaw)
+    }
+
+    private func menuItem(_ option: StoreApp, title: String) -> some View {
+        Button {
+            selectedRaw = option.rawValue
+        } label: {
+            if option == store {
+                Label(title, systemImage: "checkmark")
+            } else if controller.isOnDevice(option) && !option.isNightly {
+                Label(title, systemImage: "iphone")
+            } else {
+                Text(title)
             }
         }
-        .pickerStyle(.segmented)
-        .controlSize(.large)
+    }
+
+    /// SideStore's repository and source go down now and then.
+    private var repositoryDownCard: some View {
+        GlassCard(tint: Aurora.ember) {
+            VStack(alignment: .leading, spacing: 10) {
+                Label("\(store.name)'s repository is down", systemImage: "exclamationmark.icloud.fill")
+                    .font(.headline)
+                Text(StoreCatalog.newestCachedIPA(store) != nil
+                     ? "AltLoad will use the copy it downloaded last time. You can also pick an IPA you have."
+                     : "AltLoad tried the source, its mirror and GitHub. Try again later, or pick a \(store.name) IPA you already have.")
+                    .font(.subheadline)
+                    .foregroundStyle(Aurora.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 10) {
+                    Button {
+                        Task { await controller.loadCatalog(store) }
+                    } label: {
+                        Label("Retry", systemImage: "arrow.clockwise").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(AltLoadButtonStyle(prominent: false))
+                    Button {
+                        showImporter = true
+                    } label: {
+                        Label("Pick IPA", systemImage: "doc.badge.plus").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(AltLoadButtonStyle(prominent: false))
+                    .disabled(pairings.selfPairing == nil)
+                }
+            }
+        }
     }
 
     // MARK: - Hero
 
     private var hero: some View {
-        GlassCard(padding: 24) {
-            VStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .fill(Aurora.accent.opacity(0.45))
-                        .frame(width: 120, height: 120)
-                        .blur(radius: 38)
-                    AppIconView(url: controller.releases[store]?.iconURL, symbol: store.fallbackSymbol, size: 96)
-                        .shadow(color: .black.opacity(0.45), radius: 14, y: 8)
-                }
-
-                VStack(spacing: 4) {
+        GlassCard(padding: 22) {
+          VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .center, spacing: 18) {
+                AppIconView(url: controller.releases[store]?.iconURL ?? store.defaultIconURL, symbol: store.fallbackSymbol, size: 84)
+                    .shadow(color: .black.opacity(0.5), radius: 14, y: 8)
+                VStack(alignment: .leading, spacing: 4) {
                     Text(store.name)
-                        .font(.title.bold())
+                        .font(.title2.bold())
                         .foregroundStyle(Aurora.frost)
                     Text(store.tagline)
                         .font(.footnote)
                         .foregroundStyle(Aurora.mist)
-                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text(versionLine)
-                        .font(.subheadline)
+                        .font(.caption)
                         .foregroundStyle(Aurora.secondaryText)
-                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
                 }
-
-                HStack(spacing: 8) {
-                    statusChip
-                    if !entitlements.enabled.isEmpty {
-                        GlassChip(text: "\(entitlements.enabled.count) entitlement\(entitlements.enabled.count == 1 ? "" : "s")",
-                                  systemImage: "checkmark.shield.fill", tint: Aurora.sky)
-                    }
-                }
+                Spacer(minLength: 0)
             }
-            .frame(maxWidth: .infinity)
-            .id(store)
-            .transition(.blurReplace)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) { chips }
+                VStack(alignment: .leading, spacing: 8) { chips }
+            }
+            .padding(.top, 16)
+          }
+        }
+        .id(store)
+        .transition(.blurReplace)
+    }
+
+    @ViewBuilder
+    private var chips: some View {
+        statusChip
+        if !entitlements.enabled.isEmpty {
+            GlassChip(text: "\(entitlements.enabled.count) entitlement\(entitlements.enabled.count == 1 ? "" : "s")",
+                      systemImage: "checkmark.shield.fill", tint: Aurora.sky)
         }
     }
 
     private var versionLine: String {
         if let release = controller.releases[store] {
-            var line = "Latest \(release.version)"
+            var line = store.isNightly ? "Nightly build" : "Latest \(release.version)"
             if let date = release.date.flatMap(Self.parseDate) {
                 line += " · \(date.formatted(date: .abbreviated, time: .omitted))"
             }
@@ -176,7 +259,7 @@ struct InstallView: View {
     @ViewBuilder
     private var statusChip: some View {
         let record = controller.installed(store)
-        switch controller.presence[store] {
+        switch controller.presence[store.base] {
         case .checking where record == nil:
             GlassChip(text: "Checking this iPhone…", systemImage: "magnifyingglass")
         case .missing:
@@ -205,7 +288,7 @@ struct InstallView: View {
 
     private var primaryTitle: String {
         let latest = controller.releases[store]?.version ?? ""
-        guard controller.isOnDevice(store) else { return "Install \(store.name) \(latest)" }
+        guard controller.isOnDevice(store) else { return store.isNightly ? "Install \(store.name)" : "Install \(store.name) \(latest)" }
         return controller.updateAvailable(store) ? "Update to \(latest)" : "Refresh \(store.name)"
     }
 

@@ -25,11 +25,9 @@ struct InstallFlowView: View {
                 ScrollView {
                     VStack(spacing: 26) {
                         header
-                        GlassEffectContainer(spacing: 16) {
-                            step
-                                .id(phaseKey)
-                                .transition(.blurReplace.combined(with: .scale(0.97)))
-                        }
+                        step
+                            .id(phaseKey)
+                            .transition(.blurReplace.combined(with: .scale(0.97)))
                     }
                     .frame(maxWidth: 560)
                     .padding(.horizontal, 20)
@@ -40,9 +38,7 @@ struct InstallFlowView: View {
                 .scrollBounceBehavior(.basedOnSize)
                 .scrollDismissesKeyboard(.interactively)
                 .safeAreaInset(edge: .bottom) {
-                    GlassEffectContainer(spacing: 12) {
-                        actions
-                    }
+                    actions
                     .frame(maxWidth: 560)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 8)
@@ -90,14 +86,8 @@ struct InstallFlowView: View {
 
     private var header: some View {
         VStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(Aurora.accent.opacity(0.5))
-                    .frame(width: 130, height: 130)
-                    .blur(radius: 42)
-                AppIconView(url: iconURL, symbol: symbol, size: 104)
-                    .shadow(color: .black.opacity(0.4), radius: 16, y: 8)
-            }
+            AppIconView(url: iconURL, symbol: symbol, size: 104)
+                .shadow(color: .black.opacity(0.5), radius: 18, y: 10)
             VStack(spacing: 4) {
                 Text(target.title)
                     .font(.title.bold())
@@ -207,8 +197,13 @@ struct InstallFlowView: View {
                                 .font(.subheadline)
                                 .foregroundStyle(Aurora.secondaryText)
                         }
-                        if app.store == .altstore {
+                        if app.store == .altstore || app.store == .altstoreBeta {
                             Label("AltStore uses AltLoad as its AltServer. Keep AltLoad open while AltStore installs or refreshes, or turn on background mode in Tools › AltServer.", systemImage: "server.rack")
+                                .font(.footnote)
+                                .foregroundStyle(Aurora.mist)
+                        }
+                        if app.store?.isSideStore == true {
+                            Label("SideStore refreshes apps by itself. Keep LocalDevVPN on when it does.", systemImage: "arrow.triangle.2.circlepath")
                                 .font(.footnote)
                                 .foregroundStyle(Aurora.mist)
                         }
@@ -279,11 +274,7 @@ struct InstallFlowView: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular.tint(Aurora.card.opacity(0.6)), in: .rect(cornerRadius: 20))
-        .overlay {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .strokeBorder(Aurora.hairline, lineWidth: 1)
-        }
+        .cardSurface()
         .animation(.spring(duration: 0.4), value: controller.step)
     }
 
@@ -362,11 +353,7 @@ struct InstallFlowView: View {
                     .padding(.horizontal, 16)
                     .frame(minHeight: 50)
             }
-            .glassEffect(.regular.tint(Aurora.card.opacity(0.6)), in: .rect(cornerRadius: 18))
-            .overlay {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .strokeBorder(Aurora.hairline, lineWidth: 1)
-            }
+            .cardSurface(radius: 18)
 
             Text("Your password goes only to Apple, and a remembered one stays in this iPhone's Keychain. Apple also needs device-identity headers (\"anisette\"), which AltLoad gets from \(anisetteHost). \(limitNote)")
                 .font(.system(size: 13))
@@ -377,7 +364,8 @@ struct InstallFlowView: View {
     }
 
     private var anisetteHost: String {
-        URL(string: controller.anisetteURL)?.host() ?? controller.anisetteURL
+        if controller.anisetteURL == AnisetteServers.automatic { return "a public server that's working right now" }
+        return URL(string: controller.anisetteURL)?.host() ?? controller.anisetteURL
     }
 
     private var limitNote: String {

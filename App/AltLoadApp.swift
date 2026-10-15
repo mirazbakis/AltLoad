@@ -17,7 +17,7 @@ struct AltLoadApp: App {
 }
 
 enum AppTab: Hashable {
-    case install, tools, settings
+    case install, tools, about
 }
 
 struct RootView: View {
@@ -34,8 +34,8 @@ struct RootView: View {
                 ToolsView()
             }
             .badge(expiringSoon)
-            Tab("Settings", systemImage: "gearshape.fill", value: AppTab.settings) {
-                SettingsView()
+            Tab("About", systemImage: "info.circle.fill", value: AppTab.about) {
+                AboutView()
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)

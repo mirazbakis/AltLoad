@@ -152,7 +152,7 @@ struct PairView: View {
                         appleTVPin = String(value.filter(\.isNumber).prefix(6))
                     }
                     .padding(.vertical, 14)
-                    .glassEffect(.regular.tint(Aurora.navy.opacity(0.3)).interactive(), in: .rect(cornerRadius: 22))
+                    .cardSurface()
                 GlassActionButton(title: "Pair", systemImage: "link", prominent: true) {
                     controller.submitAppleTVPin(appleTVPin)
                 }
@@ -192,9 +192,7 @@ struct PairView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 6)
                 }
-                .buttonStyle(.glassProminent)
-                .tint(Aurora.accent)
-                .controlSize(.extraLarge)
+                .buttonStyle(AltLoadButtonStyle(minHeight: 56))
 
                 footnote(saved.isAppleTV
                          ? "Also saved in **Files › On My iPhone › AltLoad › Pairings**."
@@ -246,8 +244,7 @@ struct PairView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                     Button("Allow Always") { controller.requestLocationAuthorization() }
-                        .buttonStyle(.glass)
-                        .controlSize(.regular)
+                        .buttonStyle(AltLoadButtonStyle(prominent: false, radius: 14, minHeight: 44))
                 }
             }
         case .denied, .restricted:
@@ -284,10 +281,12 @@ struct PairView: View {
                 ShareLink(item: item.fileURL) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.body.weight(.semibold))
-                        .frame(width: 22, height: 22)
+                        .foregroundStyle(Aurora.frost)
+                        .frame(width: 44, height: 44)
+                        .background(Aurora.raised, in: .circle)
+                        .overlay { Circle().strokeBorder(Aurora.hairline, lineWidth: 1) }
                 }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
+                .buttonStyle(.plain)
                 .accessibilityLabel("Export \(item.displayName) pairing file")
             }
         }

@@ -4,7 +4,7 @@
 
 <h1 align="center">AltLoad</h1>
 
-<p align="center"><b>Install AltStore Classic completely on device.</b></p>
+<p align="center"><b>Install AltStore, SideStore and LiveContainer completely on device.</b></p>
 
 <p align="center">
   <a href="https://github.com/mirazbakis/AltLoad/releases/latest"><b>Download</b></a> ·
@@ -25,6 +25,7 @@ AltLoad simulates AltServer using some advanced tools introduced in the **iOS 27
 ## Features
 
 - **AltStore or AltStore Beta**, always the newest build from AltStore's official source.
+- **SideStore and SideStore + LiveContainer**, stable or nightly. If SideStore's repository is down, AltLoad falls back to a mirror, GitHub releases, a known-good build or its own saved copy.
 - **Knows what's really installed.** AltLoad checks the iPhone for AltStore instead of trusting its own records, so a deleted or separately installed AltStore shows up correctly.
 - **Built-in AltServer**, on by default and kept alive in the background, so AltStore can install and refresh apps without a computer.
 - **Entitlements.** Switch on capabilities such as Increased Memory Limit for AltStore's signature. Free-account and paid-account capabilities are listed separately.
@@ -58,7 +59,7 @@ AltLoad simulates AltServer using some advanced tools introduced in the **iOS 27
 |---|---|
 | **Install** | Release / Beta picker, what's on the iPhone, install, update or refresh, setup checklist. |
 | **Tools** | AltServer · JIT · Location · Pair · Pairing File to Apps · Library · Certificates |
-| **Settings** | Apple ID, Entitlements, LocalDevVPN, anisette server, AltStore sources, background keep-alive, special thanks. |
+| **About** | Version, special thanks, legal links. The gear at the top right of every tab opens **Settings**: Apple ID (with a sign-in check), entitlements, anisette, LocalDevVPN, sources, background keep-alive. |
 
 ## Repository layout
 
@@ -107,13 +108,13 @@ New Swift files anywhere under `App/` are picked up after `xcodegen generate`.
 ## Privacy and security
 
 - **Your Apple ID password goes only to Apple.** If you choose *Remember password*, it's kept in the iPhone's Keychain, readable only while unlocked, and never synced.
-- **Anisette.** Apple requires device-identity headers ("anisette") to sign in. AltLoad gets them from a public anisette server (`ani.jkcoxson.com` by default), which never sees your password. You can pick another in Settings.
+- **Anisette.** Apple requires device-identity headers ("anisette") to sign in. AltLoad gets them from a public anisette server (picked automatically by default), which never sees your password. You can pick another in Settings.
 - **Pairing files** give access to your device. Only share them with apps you trust.
 - Security issues: see [SECURITY.md](SECURITY.md). Please don't report them in a public issue.
 
 ## FAQ
 
-**Sign-in fails.** Update to the latest AltLoad: Apple stopped accepting older anisette data, and current builds handle the new requirements. If it still fails, pick another server in **Settings › Anisette Server**.
+**Sign-in fails.** Since 12 October 2026 Apple refuses sign-in data from many anisette servers. Keep **Settings › Anisette** on **Automatic**: AltLoad checks which servers answer and moves on to the next when Apple refuses one. If it still fails, tap **Reset Anisette Data** and try again later. **Settings › Apple ID › Sign In** checks your account without installing anything.
 
 **It says the certificate limit is reached.** Free Apple IDs can only have a few development certificates. AltLoad asks which one to revoke. Apps signed with it elsewhere stop opening until they're signed again.
 

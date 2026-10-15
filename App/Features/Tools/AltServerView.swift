@@ -43,11 +43,7 @@ struct AltServerView: View {
                     .padding(.horizontal, 16)
                     .frame(minHeight: 52)
                 }
-                .glassEffect(.regular.tint(Aurora.card.opacity(0.6)), in: .rect(cornerRadius: 18))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .strokeBorder(Aurora.hairline, lineWidth: 1)
-                }
+                .cardSurface(radius: 18)
                 Text("iOS pauses apps in the background. Keep AltLoad open while AltStore installs or refreshes, or turn on background mode (it plays inaudible audio).")
                     .font(.system(size: 13))
                     .foregroundStyle(Aurora.secondaryText)

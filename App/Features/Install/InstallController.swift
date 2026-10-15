@@ -39,7 +39,7 @@ enum InstallTarget: Identifiable, Equatable {
 
 /// The stages shown in the install flow's progress bar.
 enum InstallStep: Int, CaseIterable, Identifiable, Comparable {
-    case download, vpn, link, signIn, sign, install, pairing
+    case download, vpn, signIn, link, sign, install, pairing
 
     var id: Int { rawValue }
 
@@ -102,6 +102,8 @@ struct InstalledApp: Codable, Equatable, Identifiable {
     let installedAt: Date
     /// For IPAs from Files: the file in the IPA cache, used to refresh it later.
     var ipaFile: String? = nil
+    /// The store it was installed as, so a nightly refreshes as a nightly.
+    var channel: String? = nil
 
     var id: String { bundleID }
 
@@ -116,6 +118,7 @@ struct InstalledApp: Codable, Equatable, Identifiable {
 
     /// How to sign this app again.
     var refreshTarget: InstallTarget? {
+        if let channel, let chosen = StoreApp(rawValue: channel) { return .store(chosen) }
         if let store { return .store(store) }
         guard let ipaFile else { return nil }
         let url = StoreCatalog.cacheDirectory.appendingPathComponent(ipaFile)
@@ -191,17 +194,17 @@ final class InstallController: ObservableObject {
         didSet { UserDefaults.standard.set(anisetteURL, forKey: "anisette.url") }
     }
 
-    /// isideload's default, which serves the client info Apple now expects.
-    static let defaultAnisette = "https://ani.jkcoxson.com"
-    /// The default before Apple stopped accepting Android anisette states.
-    private static let previousDefault = "https://ani.sidestore.io"
+    /// AltLoad picks a working server itself unless the user chose one.
+    static let defaultAnisette = AnisetteServers.automatic
 
-    /// The saved server, moving anyone still on the old default to the new one once.
+    /// The saved choice. Anyone still on an old fixed default (SideStore's server, then
+    /// jkcoxson's, which stopped answering on its own) moves to Automatic once.
     private static var savedAnisette: String {
         let defaults = UserDefaults.standard
         guard let saved = defaults.string(forKey: "anisette.url") else { return defaultAnisette }
-        if saved == previousDefault && !defaults.bool(forKey: "anisette.migrated") {
-            defaults.set(true, forKey: "anisette.migrated")
+        let oldDefaults = ["https://ani.sidestore.io", "https://ani.jkcoxson.com"]
+        if oldDefaults.contains(saved) && !defaults.bool(forKey: "anisette.migrated.auto") {
+            defaults.set(true, forKey: "anisette.migrated.auto")
             defaults.set(defaultAnisette, forKey: "anisette.url")
             return defaultAnisette
         }
@@ -265,13 +268,13 @@ final class InstallController: ObservableObject {
     /// AltLoad's own record of installing `store`. It can be stale: the app may have
     /// been deleted since, or installed some other way. See `isOnDevice`.
     func installed(_ store: StoreApp) -> InstalledApp? {
-        apps.first { $0.store == store }
+        apps.first { $0.store == store.base }
     }
 
     /// Whether `store` is on this iPhone: the device check when there is one,
     /// otherwise AltLoad's record.
     func isOnDevice(_ store: StoreApp) -> Bool {
-        switch presence[store] {
+        switch presence[store.base] {
         case .installed: true
         case .missing: false
         default: installed(store) != nil
@@ -280,11 +283,13 @@ final class InstallController: ObservableObject {
 
     /// The version on the device if the check read it, else the recorded one.
     func installedVersion(_ store: StoreApp) -> String? {
-        if case .installed(let version) = presence[store], let version, !version.isEmpty { return version }
+        if case .installed(let version) = presence[store.base], let version, !version.isEmpty { return version }
         return installed(store)?.version
     }
 
     func updateAvailable(_ store: StoreApp) -> Bool {
+        // Nightly versions are dates, not comparable with the app's own version.
+        guard !store.isNightly else { return false }
         guard isOnDevice(store), let current = installedVersion(store), let latest = releases[store] else { return false }
         return latest.version.compare(current, options: .numeric) == .orderedDescending
     }
@@ -292,8 +297,9 @@ final class InstallController: ObservableObject {
     /// Looks for `store` on this iPhone instead of assuming it's there. With a pairing
     /// file and LocalDevVPN on, reads the device's app list (which also gives the
     /// version). Otherwise asks iOS which AltStore URL schemes open.
-    func checkDevice(_ store: StoreApp = .altstore) async {
+    func checkDevice(_ requested: StoreApp = .altstore) async {
         guard !isBusy else { return }
+        let store = requested.base
         if presence[store] == nil { presence[store] = .checking }
 
         if PairingStore.shared.selfPairing != nil, LocalDevVPN.isActive,
@@ -306,12 +312,15 @@ final class InstallController: ObservableObject {
             return
         }
 
-        // AltStore registers "altstore" plus "altstore-<its bundle ID>". The second
-        // tells the builds apart; if even the first is missing, no AltStore is here.
+        // Fall back to the URL schemes each store registers. AltStore's
+        // "altstore-<bundle ID>" tells Release and Beta apart. LiveContainer+SideStore
+        // also registers "sidestore", so that one can't prove standalone SideStore.
         let app = UIApplication.shared
-        if let own = URL(string: "altstore-\(store.bundleIdentifier)://"), app.canOpenURL(own) {
-            presence[store] = .installed(version: nil)
-        } else if let any = URL(string: "altstore://"), !app.canOpenURL(any) {
+        func opens(_ scheme: String) -> Bool { URL(string: "\(scheme)://").map(app.canOpenURL) ?? false }
+        if opens(store.queryScheme) {
+            presence[store] = store == .sidestore && opens(StoreApp.sidestoreLC.queryScheme)
+                ? .unknown : .installed(version: nil)
+        } else if store.isSideStore || !opens("altstore") {
             presence[store] = .missing
         } else {
             presence[store] = .unknown
@@ -497,9 +506,12 @@ final class InstallController: ObservableObject {
         switch outcome {
         case .installed(var app):
             if case .ipa(let url) = target { app.ipaFile = url.lastPathComponent }
+            if case .store(let store) = target { app.channel = store.rawValue }
             // SideStore-family apps need this iPhone's pairing file in their Documents.
             if PairingDestination.isSideStoreFamily(app.bundleID) {
                 await placePairingFile(in: app.bundleID, pairing: pairing.fileURL)
+            } else if app.store == .sidestoreLC {
+                pairingNote = "In LiveContainer, open SideStore and import the pairing file from Files › On My iPhone › AltLoad."
             }
             apps.removeAll { $0.bundleID == app.bundleID }
             apps.insert(app, at: 0)
@@ -510,8 +522,8 @@ final class InstallController: ObservableObject {
         case .failed(let message):
             if message == "Cancelled." {
                 phase = .idle
-            } else if message.localizedCaseInsensitiveContains("anisette") {
-                phase = .failed(message + "\n\nThe anisette server may be down. Pick another one in Settings › Anisette server and try again.")
+            } else if message.localizedCaseInsensitiveContains("anisette") || message.contains("-80045") || message.contains("-45061") {
+                phase = .failed(message + "\n\nApple refused the sign-in data from the anisette servers AltLoad tried. Open Settings › Anisette, tap Reset Anisette Data, and try again in a few minutes.")
             } else {
                 phase = .failed(message)
             }
@@ -537,7 +549,7 @@ final class InstallController: ObservableObject {
         let ctx = Unmanaged.passRetained(self).toOpaque()
         let ctxBits = UInt(bitPattern: ctx)
         let sessionBits = UInt(bitPattern: session)
-        let anisette = anisetteURL.isEmpty ? Self.defaultAnisette : anisetteURL
+        let anisette = await AnisetteServers.shared.signInList(preferred: anisetteURL)
         let serverID = Self.serverID
         let deviceName = UIDevice.current.name
         let capabilities = EntitlementSettings.shared.requestValue

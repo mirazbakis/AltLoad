@@ -148,14 +148,13 @@ final class CertificatesController: ObservableObject {
         self.session = session
         phase = .loading((request["op"] as? String) == "revoke" ? "Revoking certificate…" : "Signing in to Apple…")
 
-        let anisette = InstallController.shared.anisetteURL.isEmpty
-            ? InstallController.defaultAnisette
-            : InstallController.shared.anisetteURL
+        let preferred = InstallController.shared.anisetteURL
         let ctx = Unmanaged.passRetained(self).toOpaque()
         let ctxBits = UInt(bitPattern: ctx)
         let sessionBits = UInt(bitPattern: session)
 
         Task {
+            let anisette = await AnisetteServers.shared.signInList(preferred: preferred)
             let result: Result<Data, AccountError> = await withCheckedContinuation { continuation in
                 DispatchQueue.global(qos: .userInitiated).async {
                     guard let session = OpaquePointer(bitPattern: sessionBits) else {

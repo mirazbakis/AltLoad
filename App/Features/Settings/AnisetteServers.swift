@@ -14,14 +14,19 @@ final class AnisetteServers: ObservableObject {
 
     static let listURL = URL(string: "https://servers.sidestore.io/servers.json")!
 
-    /// Used when the live list can't be fetched. The default server first.
+    /// Stored as the anisette choice when AltLoad should pick a working server itself.
+    static let automatic = "auto"
+
+    /// Used when the live list can't be fetched. Since Apple started refusing most
+    /// remote anisette on 12 October 2026, the Windows-ADI servers are the ones that
+    /// still sign in, so they come first.
     static let builtIn: [AnisetteServer] = [
-        AnisetteServer(name: "jkcoxson (default)", address: "https://ani.jkcoxson.com"),
+        AnisetteServer(name: "jkcoxson (Windows ADI)", address: "https://ani.jkcoxson.com"),
+        AnisetteServer(name: "SideStore (Windows ADI)", address: "https://win.ani.sidestore.io"),
         AnisetteServer(name: "SideStore", address: "https://ani.sidestore.io"),
         AnisetteServer(name: "SideStore (.app)", address: "https://ani.sidestore.app"),
         AnisetteServer(name: "SideStore (.zip)", address: "https://ani.sidestore.zip"),
         AnisetteServer(name: "SideStore (.xyz)", address: "https://ani.846969.xyz"),
-        AnisetteServer(name: "StikStore", address: "https://ani.stikstore.app"),
         AnisetteServer(name: "nythepegasus", address: "https://ani.npeg.us"),
         AnisetteServer(name: "WE. Studio", address: "https://anisette.wedotstud.io"),
         AnisetteServer(name: "crystall1nedev", address: "https://anisette.crystall1ne.dev")
@@ -54,6 +59,51 @@ final class AnisetteServers: ObservableObject {
     }
 
     func name(for address: String) -> String? {
-        servers.first { $0.address == address }?.name
+        if address == Self.automatic { return "Automatic" }
+        return servers.first { $0.address == address }?.name
+    }
+
+    /// The servers to sign in with, best first, joined by newlines for the Rust side,
+    /// which moves on to the next one when Apple or a server rejects the anisette data.
+    /// A server the user picked goes first; servers that don't answer are dropped.
+    func signInList(preferred: String) async -> String {
+        var order = servers.map(\.address)
+        let pinned = preferred != Self.automatic && !preferred.isEmpty
+        if pinned {
+            order.removeAll { $0 == preferred }
+            order.insert(preferred, at: 0)
+        }
+        let candidates = Array(order.prefix(8))
+        let alive = await withTaskGroup(of: (String, Bool).self) { group in
+            for address in candidates {
+                group.addTask { (address, await Self.isAlive(address)) }
+            }
+            var results: [String: Bool] = [:]
+            for await (address, ok) in group { results[address] = ok }
+            return results
+        }
+        var picked = candidates.filter { alive[$0] == true }
+        // A server the user chose is always tried, even if the check missed it.
+        if pinned, !picked.contains(preferred) { picked.insert(preferred, at: 0) }
+        if picked.isEmpty { picked = Array(candidates.prefix(3)) }
+        return picked.prefix(4).joined(separator: "\n")
+    }
+
+    /// Quick check that a v3 server answers with its client info.
+    nonisolated static func isAlive(_ address: String) async -> Bool {
+        guard let url = URL(string: address.trimmingCharacters(in: .whitespaces) + "/v3/client_info") else { return false }
+        let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 5)
+        guard let (data, response) = try? await URLSession.shared.data(for: request),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return false }
+        return json["client_info"] is String
+    }
+
+    /// Removes the anisette identities AltLoad provisioned, so the next sign-in
+    /// starts clean. Useful after Apple rejects one.
+    nonisolated static func resetProvisioning() {
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("AltLoad/anisette", isDirectory: true)
+        try? FileManager.default.removeItem(at: dir)
     }
 }

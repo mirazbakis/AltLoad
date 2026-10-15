@@ -59,7 +59,8 @@ struct SignInSheet: View {
     }
 
     private var host: String {
-        URL(string: anisetteURL)?.host() ?? anisetteURL
+        if anisetteURL == AnisetteServers.automatic { return "a public server that's working right now" }
+        return URL(string: anisetteURL)?.host() ?? anisetteURL
     }
 }
 
