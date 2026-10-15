@@ -100,11 +100,18 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+      # A v* tag is a full release (not a prerelease), marked as the latest one.
+      # Its notes come from docs/releases/<tag>.md.
       - name: Attach IPA to release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v3
         with:
+          name: AltLoad ${{ github.ref_name }}
+          body_path: docs/releases/${{ github.ref_name }}.md
           files: AltLoad.ipa
+          prerelease: false
+          draft: false
+          make_latest: true
 
       # Keeps a public "Nightly build" release pointing at the newest main build,
       # so anyone can download the IPA without a GitHub account.

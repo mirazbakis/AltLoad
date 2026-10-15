@@ -7,7 +7,7 @@
 <p align="center"><b>Install AltStore Classic completely on device.</b></p>
 
 <p align="center">
-  <a href="https://github.com/mirazbakis/AltLoad/releases/tag/nightly"><b>Download</b></a> ·
+  <a href="https://github.com/mirazbakis/AltLoad/releases/latest"><b>Download</b></a> ·
   <a href="https://mirazbakis.github.io/AltLoad.html">Website</a> ·
   <a href="docs/HOW-IT-WORKS.md">How it works</a> ·
   <a href="https://github.com/mirazbakis/AltLoad/issues">Issues</a>
@@ -42,7 +42,7 @@ AltLoad simulates AltServer using some advanced tools introduced in the **iOS 27
 
 ## Install AltLoad
 
-1. Download **`AltLoad.ipa`** from [**Releases**](https://github.com/mirazbakis/AltLoad/releases), or the newest build of `main` from [**Nightly**](https://github.com/mirazbakis/AltLoad/releases/tag/nightly).
+1. Download **`AltLoad.ipa`** from the [**latest release**](https://github.com/mirazbakis/AltLoad/releases/latest). The newest build of `main` is also available as [**Nightly**](https://github.com/mirazbakis/AltLoad/releases/tag/nightly), but it's untested.
 2. Sideload it once with any signing tool you already use.
 3. If iOS says the developer isn't trusted, go to **Settings › General › VPN & Device Management** and trust your Apple ID.
 
