@@ -506,7 +506,9 @@ async fn sign_and_install(
         std::future::ready(())
     };
     let (signed_dir, _special) = sideloader
-        .sign_app(app_dir, Some(team.clone()), false, Some(sign_progress))
+        // No pairing file: that's for AltStore's remote-AltServer setup, and AltLoad
+        // is AltStore's AltServer itself. The UDID matches the ALTDeviceID we wrote.
+        .sign_app(app_dir, Some(team.clone()), false, Some(sign_progress), None, Some(udid))
         .await
         .map_err(|e| err("Signing failed", e))?;
     check()?;
