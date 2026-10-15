@@ -61,6 +61,6 @@ extension View {
     func auroraListBackground() -> some View {
         self
             .scrollContentBackground(.hidden)
-            .background(AuroraBackground())
+            .background(AppBackground())
     }
 }

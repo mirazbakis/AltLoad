@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xcodegen generate)",
+      "Bash(bash scripts/build-rust.sh)",
+      "Bash(cargo build:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ]
+  }
+}

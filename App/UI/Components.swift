@@ -642,7 +642,7 @@ struct AuroraScreen<Content: View>: View {
 
     var body: some View {
         ZStack {
-            AuroraBackground()
+            AppBackground()
             ScrollView {
                 VStack(spacing: 22) {
                     content
@@ -660,7 +660,7 @@ struct AuroraScreen<Content: View>: View {
 
 #Preview("Mark") {
     ZStack {
-        AuroraBackground()
+        AppBackground()
         VStack(spacing: 30) {
             AltLoadMark(size: 160)
             ProgressRing(value: 0.42, size: 80)

@@ -32,7 +32,7 @@ If you break these terms, every permission in section 1 ends automatically. It i
 
 Some parts of AltLoad come from other projects. Those parts stay under their original licenses, reproduced in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), and nothing in this license limits or adds to the rights those licenses give:
 
-- **StikPair**, Copyright (c) 2026 StephenDev0, StikPair License (MIT, Non-Commercial). AltLoad's pairing flow (`App/Services/PairingController.swift`, `App/Services/KeepAlive.swift`, `App/Services/LocalNetworkAuthorization.swift`, `App/Services/AppleTVDiscovery.swift`, `rust/src/lib.rs` and `scripts/build-rust.sh`) is derived from it.
+- **StikPair**, Copyright (c) 2026 StephenDev0, StikPair License (MIT, Non-Commercial). AltLoad's pairing flow (`App/Core/Pairing/PairingController.swift`, `App/Core/Pairing/KeepAlive.swift`, `App/Core/Pairing/LocalNetworkAuthorization.swift`, `App/Core/Pairing/AppleTVDiscovery.swift`, `rust/src/lib.rs` and `scripts/build-rust.sh`) is derived from it.
 - **idevice**, Copyright 2026 Jackson Coxson, MIT License. `rust/src/lib.rs` is derived from its `ffi/src/pairable_host.rs`.
 
 Builds also include Rust crates under their own licenses (mostly MIT and/or Apache-2.0), including **isideload** by nab138 (MIT).

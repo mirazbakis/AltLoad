@@ -61,7 +61,7 @@ void altload_apple_tv_session_free(AltLoadAppleTvSession *session);
 void altload_result_free(AltLoadResult *r);
 
 
-/* ---- On-device sideloading (rust/src/install.rs) ---- */
+/* ---- On-device sideloading (rust/src/install/mod.rs) ---- */
 
 typedef void (*AltLoadProgressCb)(void *ctx, const char *stage, double fraction); /* fraction < 0: indeterminate */
 typedef void (*AltLoadPromptCb)(void *ctx, int32_t kind, const char *json);       /* 1 = two-factor, 2 = revoke certificates */
@@ -116,7 +116,7 @@ void altload_install_session_free(AltLoadInstallSession *session);
 void altload_install_result_free(AltLoadInstallResult *r);
 
 
-/* ---- Certificate manager: your own Apple ID (rust/src/install.rs) ---- */
+/* ---- Certificate manager: your own Apple ID (rust/src/install/mod.rs) ---- */
 
 /* Runs {"op":"overview"} or {"op":"revoke","serials":[...]} against the Apple
    ID's own team. Reuses an AltLoadInstallSession for 2FA prompts and cancel.

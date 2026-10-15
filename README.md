@@ -71,19 +71,24 @@ AltLoad simulates AltServer using some advanced tools introduced in the **iOS 27
 ```
 App/
   AltLoadApp.swift        entry point and tab bar
-  Features/
-    Install/              Install tab, install flow, store catalog, entitlements
-    Tools/                AltServer, JIT, Location, Pair, Library, Certificates
-    Settings/             Settings sheet and anisette servers
-    About/                About tab: version, special thanks, legal links
-  Services/               device link, AltServer host, pairing, Keychain, LocalDevVPN, DDI
+  Core/                   logic, no views
+    Install/              install flow and Rust bridge, store catalog, entitlements
+    Account/              Apple ID, anisette servers, certificate manager
+    Device/               device ops, Developer Disk Image, LocalDevVPN, location
+    Pairing/              pairing host, saved pairing files, keep-alive
+    AltServer/            the on-device AltServer AltStore talks to
+  Features/               SwiftUI screens: Install, Tools, Settings, About
   UI/                     theme, background and shared components
   Resources/              Info.plist and the app icon
-rust/                     Rust core: pairing, tunnel, signing and device ops (C FFI)
+rust/                     Rust core (C FFI)
+  src/lib.rs              pairing host
+  src/install/            install and account sessions: sign_in, storage, tunnel,
+                          bundle, prompts, account, device
   include/altload.h       the FFI header Swift imports as AltLoadFFI
 scripts/build-rust.sh     builds rust/ into AltLoadFFI.xcframework
 docs/                     how it works, logo, release notes (docs/releases/<version>.md)
 .github/workflows/        Build IPA, started by hand
+.claude/                  project guide and release steps for Claude Code
 project.yml               XcodeGen project definition
 ```
 

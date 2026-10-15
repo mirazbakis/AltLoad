@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Full midnight background with a single dark navy spotlight falling from the top.
 /// Static: nothing drifts or glows behind the content.
-struct AuroraBackground: View {
+struct AppBackground: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -22,5 +22,5 @@ struct AuroraBackground: View {
 }
 
 #Preview {
-    AuroraBackground()
+    AppBackground()
 }

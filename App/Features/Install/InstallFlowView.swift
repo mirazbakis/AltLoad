@@ -21,7 +21,7 @@ struct InstallFlowView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AuroraBackground()
+                AppBackground()
                 ScrollView {
                     VStack(spacing: 26) {
                         header

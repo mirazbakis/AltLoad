@@ -7,14 +7,14 @@ This document describes each stage of the install, with the protocol, the librar
 | Layer | What | Where |
 |---|---|---|
 | UI | SwiftUI, iOS 27 Liquid Glass (`glassEffect`, `GlassEffectContainer`, `.glass` / `.glassProminent` buttons, `glassEffectUnion`), `TabView` with `Tab`, midnight gradient background | `App/` |
-| Orchestration | `InstallController` (download, discovery, FFI session, prompts, expiry reminder), `PairingController` (pairing host) | `App/Features/Install/InstallController.swift`, `App/Services/PairingController.swift` |
+| Orchestration | `InstallController` (download, discovery, FFI session, prompts, expiry reminder), `PairingController` (pairing host) | `App/Core/Install/InstallController.swift`, `App/Core/Pairing/PairingController.swift` |
 | FFI | A C header plus a Rust static library packaged as `AltLoadFFI.xcframework` | `rust/include/altload.h`, `rust/src/*.rs` |
-| Device protocols | [`idevice`](https://github.com/jkcoxson/idevice) (git `d32c818`): `remote_pairing`, `rsd`, `tunnel_tcp_stack`, `afc`, `installation_proxy`, `misagent`, `house_arrest`, `cryptexd`, `dvt`, `debug_proxy` | `rust/src/lib.rs`, `rust/src/install.rs` |
-| Apple ID + signing | [`isideload`](https://github.com/nab138/isideload) 0.4.6 (uses idevice, a fork of apple-codesign, rcgen, keyring) | `rust/src/install.rs` |
-| Discovery | `NetServiceBrowser` / `NetService` (mDNSResponder), used for pairing and Apple TV, so no multicast entitlement is needed | `App/Services/PairingController.swift`, `App/Services/AppleTVDiscovery.swift` |
-| Loopback | [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN): detection via `getifaddrs`, and control via `localdevvpn://` and `altload://` URLs | `App/Services/LocalDevVPN.swift` |
-| Catalog | AltStore-format sources (`https://apps.altstore.io` for AltStore and Beta, `https://apps.sidestore.io` for SideStore), GitHub releases for LiveContainer and both nightlies, with fallbacks for when SideStore's repository is down; `URLSession` download with progress, IPA cache in Application Support | `App/Features/Install/StoreCatalog.swift` |
-| Secrets | Keychain (`kSecClassGenericPassword`, `WhenUnlockedThisDeviceOnly`) for the Apple ID password. files in `Application Support/AltLoad` (`FileStorage` in `rust/src/install.rs`) for the certificate key and anisette state, one folder per anisette server; values left in the Keychain by older builds are moved over | `App/Services/AppleIDStore.swift`, `rust/src/install.rs` |
+| Device protocols | [`idevice`](https://github.com/jkcoxson/idevice) (git `d32c818`): `remote_pairing`, `rsd`, `tunnel_tcp_stack`, `afc`, `installation_proxy`, `misagent`, `house_arrest`, `cryptexd`, `dvt`, `debug_proxy` | `rust/src/lib.rs`, `rust/src/install/` |
+| Apple ID + signing | [`isideload`](https://github.com/nab138/isideload) 0.4.6 (uses idevice, a fork of apple-codesign, rcgen, keyring) | `rust/src/install/sign_in.rs`, `rust/src/install/bundle.rs` |
+| Discovery | `NetServiceBrowser` / `NetService` (mDNSResponder), used for pairing and Apple TV, so no multicast entitlement is needed | `App/Core/Pairing/PairingController.swift`, `App/Core/Pairing/AppleTVDiscovery.swift` |
+| Loopback | [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN): detection via `getifaddrs`, and control via `localdevvpn://` and `altload://` URLs | `App/Core/Device/LocalDevVPN.swift` |
+| Catalog | AltStore-format sources (`https://apps.altstore.io` for AltStore and Beta, `https://apps.sidestore.io` for SideStore), GitHub releases for LiveContainer and both nightlies, with fallbacks for when SideStore's repository is down; `URLSession` download with progress, IPA cache in Application Support | `App/Core/Install/StoreCatalog.swift` |
+| Secrets | Keychain (`kSecClassGenericPassword`, `WhenUnlockedThisDeviceOnly`) for the Apple ID password. files in `Application Support/AltLoad` (`FileStorage` in `rust/src/install/storage.rs`) for the certificate key and anisette state, one folder per anisette server; values left in the Keychain by older builds are moved over | `App/Core/Account/AppleIDStore.swift`, `rust/src/install/storage.rs` |
 
 ## 1. Pairing (the Pair tab)
 
@@ -98,7 +98,7 @@ A free-account profile lasts 7 days. AltStore's built-in refresh expects to find
 int32_t altload_run_host(...);                         // host mode, device pairs to us
 AltLoadAppleTvSession *altload_apple_tv_session_new(void);
 int32_t altload_apple_tv_session_run(...);             // client mode, Apple TV
-// install (rust/src/install.rs)
+// install (rust/src/install/)
 AltLoadInstallSession *altload_install_session_new(void);
 int32_t altload_install_session_run(session, config, progress_cb, prompt_cb, ctx, out); // blocking
 int32_t altload_install_session_respond(session, response);                             // answer a prompt
@@ -116,7 +116,7 @@ void    altload_install_session_cancel(session);
 
 ## On-device AltServer
 
-`App/Services/AltServerHost.swift` makes AltLoad the AltServer for the AltStore on the same iPhone.
+`App/Core/AltServer/AltServerHost.swift` makes AltLoad the AltServer for the AltStore on the same iPhone.
 
 - **Discovery, on-device link (preferred).** AltStore's `FindServerOperation` posts the Darwin notification `io.altstore.Request.WiredServerConnectionAvailable` and waits one second for `io.altstore.Response.WiredServerConnectionAvailable`. AltLoad answers, so AltStore treats it as a USB-connected AltServer, posts `io.altstore.Request.WiredServerConnectionStart` and listens on `127.0.0.1:28151`. AltLoad connects there and becomes the server side of that connection.
 - **Discovery, Wi-Fi.** A Bonjour `_altserver._tcp` service with TXT `serverID` = the ALTServerID AltLoad wrote into AltStore, which makes it AltStore's preferred network server.
@@ -131,11 +131,11 @@ void    altload_install_session_cancel(session);
 
 ## JIT and location
 
-Both need the Developer Disk Image, which iOS 27 takes as a personalised cryptex. `App/Services/DeveloperDiskImage.swift` downloads it once (from [doronz88/DeveloperDiskImage](https://github.com/doronz88/DeveloperDiskImage)); `ensure_ddi` in `rust/src/install/device.rs` asks cryptexd whether it's installed and, if not, personalises it through TSS and installs it.
+Both need the Developer Disk Image, which iOS 27 takes as a personalised cryptex. `App/Core/Device/DeveloperDiskImage.swift` downloads it once (from [doronz88/DeveloperDiskImage](https://github.com/doronz88/DeveloperDiskImage)); `ensure_ddi` in `rust/src/install/device.rs` asks cryptexd whether it's installed and, if not, personalises it through TSS and installs it.
 
 - **JIT** (`enable_jit`): DVT process control launches the app suspended, debugserver attaches with `vAttach;<pid>` and detaches with `D`. The attach marks the process as debugged, so it can map executable memory until it exits. Only development-signed apps (`get-task-allow`) can be attached.
 - **Location** (`simulate_location`): DVT location simulation. The device keeps a simulated location only while the connection is open, so the op holds the tunnel and re-sends the coordinate every few seconds until `altload_location_stop`. It runs on its own queue so AltServer's device ops aren't blocked.
 
 ## Entitlements
 
-Settings › Entitlements lists App Store Connect capabilities (free-team ones and paid-only ones). Before `sign_app`, `enable_capabilities` in `rust/src/install.rs` finds or registers the App ID `sign_app` will use (`<bundle id>.<team id>`) and enables each capability with the same JSON:API call isideload uses for Increased Memory Limit. The provisioning profile Apple then issues carries the entitlements, and the signature uses the profile's entitlements.
+Settings › Entitlements lists App Store Connect capabilities (free-team ones and paid-only ones). Before `sign_app`, `enable_capabilities` in `rust/src/install/bundle.rs` finds or registers the App ID `sign_app` will use (`<bundle id>.<team id>`) and enables each capability with the same JSON:API call isideload uses for Increased Memory Limit. The provisioning profile Apple then issues carries the entitlements, and the signature uses the profile's entitlements.

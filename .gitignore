@@ -53,3 +53,6 @@ rp_pairing_file*.plist
 .vscode/
 *.swp
 *~
+
+# ---- Claude Code: personal settings stay local ----
+.claude/settings.local.json
