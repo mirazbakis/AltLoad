@@ -1,11 +1,22 @@
 name: Build IPA
 
+# Runs only when started by hand: Actions › Build IPA › Run workflow.
+# Pushes, tags and pull requests don't start it.
 on:
-  push:
-    branches: ["**"]
-    tags: ["v*"]
-  pull_request:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "What to do with the IPA"
+        type: choice
+        options:
+          - Build only
+          - Release
+          - Nightly
+        default: Build only
+      version:
+        description: "Release tag, e.g. v1.1.0 (only for Release). Notes come from docs/releases/<tag>.md"
+        type: string
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,6 +30,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+
+      - name: Check release inputs
+        if: inputs.publish == 'Release'
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Set version to a tag like v1.1.0"; exit 1
+          fi
+          if [[ ! -f "docs/releases/$VERSION.md" ]]; then
+            echo "::error::Add release notes at docs/releases/$VERSION.md first"; exit 1
+          fi
 
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -100,30 +124,32 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-      # A v* tag is a full release (not a prerelease), marked as the latest one.
-      # Its notes come from docs/releases/<tag>.md.
-      - name: Attach IPA to release
-        if: startsWith(github.ref, 'refs/tags/v')
+      # A full release (not a prerelease), marked as the latest one. Creates the
+      # tag on the commit this run built if it doesn't exist yet.
+      - name: Publish release
+        if: inputs.publish == 'Release'
         uses: softprops/action-gh-release@v3
         with:
-          name: AltLoad ${{ github.ref_name }}
-          body_path: docs/releases/${{ github.ref_name }}.md
+          tag_name: ${{ inputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: AltLoad ${{ inputs.version }}
+          body_path: docs/releases/${{ inputs.version }}.md
           files: AltLoad.ipa
           prerelease: false
           draft: false
           make_latest: true
 
-      # Keeps a public "Nightly build" release pointing at the newest main build,
+      # Points the public "Nightly build" release at the commit this run built,
       # so anyone can download the IPA without a GitHub account.
       - name: Publish nightly build
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: inputs.publish == 'Nightly'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           git tag -f nightly
           git push -f origin refs/tags/nightly
-          NOTES="Latest unsigned build of \`main\` (commit ${GITHUB_SHA::7}). Updated automatically on every push. Sign it with your own tool before installing. For stable builds, use the versioned releases."
+          NOTES="Latest unsigned build of \`${GITHUB_REF_NAME}\` (commit ${GITHUB_SHA::7}). Sign it with your own tool before installing. For stable builds, use the versioned releases."
           # Recreate the release each time so its date shows when this build was made.
           gh release delete nightly --yes >/dev/null 2>&1 || true
           gh release create nightly AltLoad.ipa --prerelease --title "Nightly build" --notes "$NOTES"

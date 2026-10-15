@@ -43,7 +43,7 @@ AltLoad simulates AltServer using some advanced tools introduced in the **iOS 27
 
 ## Install AltLoad
 
-1. Download **`AltLoad.ipa`** from the [**latest release**](https://github.com/mirazbakis/AltLoad/releases/latest). The newest build of `main` is also available as [**Nightly**](https://github.com/mirazbakis/AltLoad/releases/tag/nightly), but it's untested.
+1. Download **`AltLoad.ipa`** from the [**latest release**](https://github.com/mirazbakis/AltLoad/releases/latest). A newer, untested build is sometimes available as [**Nightly**](https://github.com/mirazbakis/AltLoad/releases/tag/nightly).
 2. Sideload it once with any signing tool you already use.
 3. If iOS says the developer isn't trusted, go to **Settings › General › VPN & Device Management** and trust your Apple ID.
 
@@ -82,7 +82,7 @@ project.yml               XcodeGen project definition
 
 ## Build it yourself
 
-**On GitHub (no Mac needed):** fork the repository, enable Actions in your fork, run **Build IPA**, and download `AltLoad.ipa` from the run's artifacts. Pushing a `v*` tag publishes a release.
+**On GitHub (no Mac needed):** fork the repository, enable Actions in your fork, run **Build IPA** (it only runs when started by hand), and download `AltLoad.ipa` from the run's artifacts. Choose **Release** and a version like `v1.1.0` to publish a release (notes come from `docs/releases/<version>.md`), or **Nightly** to update the Nightly build.
 
 **On a Mac** with Xcode 27, [Homebrew](https://brew.sh) and [Rust](https://rustup.rs):
 
