@@ -146,6 +146,6 @@ AltLoad downloads these apps from their own sources and doesn't redistribute the
 
 ## License
 
-**Copyright (c) 2026 mirazbakis. All rights reserved.** See the [AltLoad License](LICENSE) for what you may do (personal use, building it yourself, contributing). Parts derived from StikPair, idevice and isideload stay under their own licenses, listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+**Copyright (c) 2026 mirazbakis. All rights reserved.** See the [AltLoad License](LICENSE.md) for what you may do (personal use, building it yourself, contributing). Parts derived from StikPair, idevice and isideload stay under their own licenses, listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Using AltLoad means you agree to the [Terms of Service](https://mirazbakis.github.io/terms.html).

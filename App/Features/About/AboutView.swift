@@ -53,7 +53,7 @@ struct AboutView: View {
                     VStack(spacing: 0) {
                         link("Terms of Service", symbol: "doc.text.fill", url: "https://mirazbakis.github.io/terms.html")
                         divider
-                        link("AltLoad License", symbol: "checkmark.seal.fill", url: "https://github.com/mirazbakis/AltLoad/blob/main/LICENSE")
+                        link("AltLoad License", symbol: "checkmark.seal.fill", url: "https://github.com/mirazbakis/AltLoad/blob/main/LICENSE.md")
                         divider
                         link("Third-Party Notices", symbol: "list.bullet.rectangle.fill", url: "https://github.com/mirazbakis/AltLoad/blob/main/THIRD_PARTY_NOTICES.md")
                         divider

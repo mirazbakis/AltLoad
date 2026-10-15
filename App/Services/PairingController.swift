@@ -1,4 +1,4 @@
-// Pairing flow adapted from StikPair (c) 2026 StephenDev0 — see LICENSE.
+// Pairing flow adapted from StikPair (c) 2026 StephenDev0 — see LICENSE.md and THIRD_PARTY_NOTICES.md.
 import BackgroundTasks
 import CoreLocation
 import Combine
