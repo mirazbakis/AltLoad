@@ -14,8 +14,9 @@ final class AnisetteServers: ObservableObject {
 
     static let listURL = URL(string: "https://servers.sidestore.io/servers.json")!
 
-    /// Used when the live list can't be fetched. SideStore's servers first.
+    /// Used when the live list can't be fetched. The default server first.
     static let builtIn: [AnisetteServer] = [
+        AnisetteServer(name: "jkcoxson (default)", address: "https://ani.jkcoxson.com"),
         AnisetteServer(name: "SideStore", address: "https://ani.sidestore.io"),
         AnisetteServer(name: "SideStore (.app)", address: "https://ani.sidestore.app"),
         AnisetteServer(name: "SideStore (.zip)", address: "https://ani.sidestore.zip"),

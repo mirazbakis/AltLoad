@@ -92,7 +92,7 @@ struct InstallFlowView: View {
         VStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Aurora.violet.opacity(0.5))
+                    .fill(Aurora.accent.opacity(0.5))
                     .frame(width: 130, height: 130)
                     .blur(radius: 42)
                 AppIconView(url: iconURL, symbol: symbol, size: 104)
@@ -128,7 +128,7 @@ struct InstallFlowView: View {
             }
             return store.tagline
         case .ipa:
-            return "Custom IPA, signed with your Apple ID"
+            return "Signed with your Apple ID"
         }
     }
 
@@ -142,9 +142,8 @@ struct InstallFlowView: View {
     }
 
     private var actionVerb: String {
-        guard let store = target.store, controller.installed(store) != nil else {
-            return target.store == nil ? "Sign & Install" : "Install"
-        }
+        guard let store = target.store else { return "Sign & Install" }
+        guard controller.isOnDevice(store) else { return "Install" }
         return controller.updateAvailable(store) ? "Update" : "Refresh"
     }
 
@@ -177,7 +176,7 @@ struct InstallFlowView: View {
         case .needsVPN:
             VStack(spacing: 16) {
                 stepsCard(detail: nil)
-                GlassCard(tint: Aurora.violet) {
+                GlassCard(tint: Aurora.accent) {
                     VStack(alignment: .leading, spacing: 10) {
                         Label("Turn on LocalDevVPN", systemImage: "network.badge.shield.half.filled")
                             .font(.headline)
@@ -211,12 +210,12 @@ struct InstallFlowView: View {
                         if app.store == .altstore {
                             Label("AltStore uses AltLoad as its AltServer. Keep AltLoad open while AltStore installs or refreshes, or turn on background mode in Tools › AltServer.", systemImage: "server.rack")
                                 .font(.footnote)
-                                .foregroundStyle(Aurora.lilac)
+                                .foregroundStyle(Aurora.mist)
                         }
                         if let note = controller.pairingNote {
                             Label(note, systemImage: "doc.badge.gearshape")
                                 .font(.footnote)
-                                .foregroundStyle(Aurora.lilac)
+                                .foregroundStyle(Aurora.mist)
                         }
                         Text("First launch: if iOS says the developer isn't trusted, open **Settings › General › VPN & Device Management**, tap your Apple ID and choose **Trust**.")
                             .font(.footnote)
@@ -301,7 +300,7 @@ struct InstallFlowView: View {
                     if waitingForVPN {
                         Image(systemName: "exclamationmark.circle.fill")
                             .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(Aurora.orchid)
+                            .foregroundStyle(Aurora.sky)
                     } else {
                         ProgressRing(value: controller.stepFraction, lineWidth: 3, size: 20, showsPercent: false)
                     }
@@ -382,9 +381,7 @@ struct InstallFlowView: View {
     }
 
     private var limitNote: String {
-        target.store == nil
-            ? "With a free Apple ID the app lasts 7 days, and only 3 sideloaded apps can be active at once."
-            : "With a free Apple ID apps last 7 days."
+        "With a free Apple ID apps last 7 days."
     }
 
     private var canStart: Bool {

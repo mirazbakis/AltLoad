@@ -14,7 +14,7 @@ struct LibraryView: View {
                     ContentUnavailableView(
                         "No apps yet",
                         systemImage: "square.stack.3d.up",
-                        description: Text("Install AltStore, Catalyst or your own IPA from the Install tab."))
+                        description: Text("Install AltStore from the Install tab."))
                         .auroraRow()
                 } else {
                     ForEach(install.apps) { app in
@@ -107,7 +107,7 @@ struct LibraryView: View {
 
     private func row(_ item: SavedPairing) -> some View {
         HStack(spacing: 14) {
-            icon(item.isAppleTV ? "appletv" : "iphone.gen3", tint: Aurora.violet)
+            icon(item.isAppleTV ? "appletv" : "iphone.gen3", tint: Aurora.accent)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(item.displayName).font(.headline)
@@ -117,7 +117,7 @@ struct LibraryView: View {
                             .foregroundStyle(Aurora.frost)
                             .padding(.horizontal, 7)
                             .padding(.vertical, 3)
-                            .glassEffect(.regular.tint(Aurora.violet.opacity(0.5)), in: .capsule)
+                            .glassEffect(.regular.tint(Aurora.accent.opacity(0.5)), in: .capsule)
                     }
                 }
                 Text([item.model, item.date.formatted(date: .abbreviated, time: .shortened)]
@@ -163,8 +163,8 @@ struct LibraryView: View {
                     PillButton(title: "Refresh") { install.begin(target) }
                 }
             } else {
-                // Custom IPA whose file is gone: it has to be picked again.
-                PillButton(caption: "Expires in", title: "\(app.daysLeft ?? 0) days", tint: Aurora.lilac, prominent: false) {}
+                // An IPA whose cached file is gone: it has to be picked again.
+                PillButton(caption: "Expires in", title: "\(app.daysLeft ?? 0) days", tint: Aurora.mist, prominent: false) {}
                     .disabled(true)
             }
         }
@@ -172,10 +172,9 @@ struct LibraryView: View {
 
     private func detail(_ app: InstalledApp) -> String {
         if app.store == nil && app.refreshTarget == nil {
-            return "Version \(app.version) · Pick the IPA again in Install to refresh"
+            return "Version \(app.version) · Pick the IPA again to refresh"
         }
-        let kind = app.store == nil ? "Custom IPA" : "Version \(app.version)"
-        return "\(kind) · \(expiryText(app))"
+        return "Version \(app.version) · \(expiryText(app))"
     }
 
     private func expiryText(_ app: InstalledApp) -> String {

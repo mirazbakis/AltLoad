@@ -85,6 +85,10 @@ typedef struct {
     const char *device_name;
     const char *machine_name;
     const char *server_id;
+    /* Comma-separated App Store Connect capability IDs to enable on the app's
+       App ID before signing (e.g. "INCREASED_MEMORY_LIMIT,PUSH_NOTIFICATIONS").
+       NULL or "" for none. */
+    const char *capabilities;
 } AltLoadInstallConfig;
 
 typedef struct {
@@ -142,6 +146,10 @@ int32_t altload_device_run(const AltLoadInstallConfig *config,
                            AltLoadProgressCb progress_cb,
                            void *ctx,
                            char **out_json);
+
+/* Move / end a running {"op":"simulate_location"} (which blocks until stopped). */
+void altload_location_update(double latitude, double longitude);
+void altload_location_stop(void);
 
 #ifdef __cplusplus
 }

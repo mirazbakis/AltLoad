@@ -12,7 +12,7 @@ struct SelfEndpoint: Sendable {
 /// What an install flow signs and installs: a store's newest release, or an IPA the user picked.
 enum InstallTarget: Identifiable, Equatable {
     case store(StoreApp)
-    /// A custom IPA, already copied into the cache.
+    /// An IPA from Files, already copied into the cache.
     case ipa(URL)
 
     var id: String {
@@ -83,6 +83,15 @@ enum InstallStep: Int, CaseIterable, Identifiable, Comparable {
     static func < (a: Self, b: Self) -> Bool { a.rawValue < b.rawValue }
 }
 
+/// Whether a store app is on this iPhone, as last checked.
+enum DevicePresence: Equatable {
+    case unknown
+    case checking
+    /// `version` is nil when only the URL-scheme check could run.
+    case installed(version: String?)
+    case missing
+}
+
 /// An app AltLoad signed and installed.
 struct InstalledApp: Codable, Equatable, Identifiable {
     let bundleID: String
@@ -91,7 +100,7 @@ struct InstalledApp: Codable, Equatable, Identifiable {
     let teamID: String
     let expiration: Date?
     let installedAt: Date
-    /// For custom IPAs: the file in the IPA cache, used to refresh it later.
+    /// For IPAs from Files: the file in the IPA cache, used to refresh it later.
     var ipaFile: String? = nil
 
     var id: String { bundleID }
@@ -170,16 +179,34 @@ final class InstallController: ObservableObject {
     @Published private(set) var step: InstallStep = .download
     /// Progress inside `step`, when known.
     @Published private(set) var stepFraction: Double?
-    /// Steps this install goes through (the pairing step only for Catalyst/SideStore).
+    /// Steps this install goes through. The pairing step is added only when a
+    /// SideStore-family IPA turns out to need the pairing file.
     @Published private(set) var steps: [InstallStep] = InstallStep.allCases
-    /// Set after installing Catalyst/SideStore: whether the pairing file went in.
+    /// Set after installing a SideStore-family app: whether the pairing file went in.
     @Published private(set) var pairingNote: String?
+    /// Whether each store is really on this iPhone, from the last device check.
+    @Published private(set) var presence: [StoreApp: DevicePresence] = [:]
 
-    @Published var anisetteURL: String = UserDefaults.standard.string(forKey: "anisette.url") ?? InstallController.defaultAnisette {
+    @Published var anisetteURL: String = InstallController.savedAnisette {
         didSet { UserDefaults.standard.set(anisetteURL, forKey: "anisette.url") }
     }
 
-    static let defaultAnisette = "https://ani.sidestore.io"
+    /// isideload's default, which serves the client info Apple now expects.
+    static let defaultAnisette = "https://ani.jkcoxson.com"
+    /// The default before Apple stopped accepting Android anisette states.
+    private static let previousDefault = "https://ani.sidestore.io"
+
+    /// The saved server, moving anyone still on the old default to the new one once.
+    private static var savedAnisette: String {
+        let defaults = UserDefaults.standard
+        guard let saved = defaults.string(forKey: "anisette.url") else { return defaultAnisette }
+        if saved == previousDefault && !defaults.bool(forKey: "anisette.migrated") {
+            defaults.set(true, forKey: "anisette.migrated")
+            defaults.set(defaultAnisette, forKey: "anisette.url")
+            return defaultAnisette
+        }
+        return saved
+    }
 
     private var session: OpaquePointer?
     /// Install parked at `.needsVPN`, with the IPA already downloaded.
@@ -235,13 +262,60 @@ final class InstallController: ObservableObject {
         }
     }
 
+    /// AltLoad's own record of installing `store`. It can be stale: the app may have
+    /// been deleted since, or installed some other way. See `isOnDevice`.
     func installed(_ store: StoreApp) -> InstalledApp? {
         apps.first { $0.store == store }
     }
 
+    /// Whether `store` is on this iPhone: the device check when there is one,
+    /// otherwise AltLoad's record.
+    func isOnDevice(_ store: StoreApp) -> Bool {
+        switch presence[store] {
+        case .installed: true
+        case .missing: false
+        default: installed(store) != nil
+        }
+    }
+
+    /// The version on the device if the check read it, else the recorded one.
+    func installedVersion(_ store: StoreApp) -> String? {
+        if case .installed(let version) = presence[store], let version, !version.isEmpty { return version }
+        return installed(store)?.version
+    }
+
     func updateAvailable(_ store: StoreApp) -> Bool {
-        guard let installed = installed(store), let latest = releases[store] else { return false }
-        return latest.version.compare(installed.version, options: .numeric) == .orderedDescending
+        guard isOnDevice(store), let current = installedVersion(store), let latest = releases[store] else { return false }
+        return latest.version.compare(current, options: .numeric) == .orderedDescending
+    }
+
+    /// Looks for `store` on this iPhone instead of assuming it's there. With a pairing
+    /// file and LocalDevVPN on, reads the device's app list (which also gives the
+    /// version). Otherwise asks iOS which AltStore URL schemes open.
+    func checkDevice(_ store: StoreApp = .altstore) async {
+        guard !isBusy else { return }
+        if presence[store] == nil { presence[store] = .checking }
+
+        if PairingStore.shared.selfPairing != nil, LocalDevVPN.isActive,
+           let deviceApps = try? await DeviceOps.listApps() {
+            if let app = deviceApps.first(where: { StoreApp.matching(bundleID: $0.bundleID) == store }) {
+                presence[store] = .installed(version: app.version)
+            } else {
+                presence[store] = .missing
+            }
+            return
+        }
+
+        // AltStore registers "altstore" plus "altstore-<its bundle ID>". The second
+        // tells the builds apart; if even the first is missing, no AltStore is here.
+        let app = UIApplication.shared
+        if let own = URL(string: "altstore-\(store.bundleIdentifier)://"), app.canOpenURL(own) {
+            presence[store] = .installed(version: nil)
+        } else if let any = URL(string: "altstore://"), !app.canOpenURL(any) {
+            presence[store] = .missing
+        } else {
+            presence[store] = .unknown
+        }
     }
 
     /// Stops listing an app. It stays on the iPhone until the user deletes it there.
@@ -270,7 +344,7 @@ final class InstallController: ObservableObject {
     }
 
     private func configureSteps(for target: InstallTarget) {
-        steps = InstallStep.allCases.filter { $0 != .pairing || target.store == .catalyst }
+        steps = InstallStep.allCases.filter { $0 != .pairing }
         step = .download
         stepFraction = nil
     }
@@ -423,7 +497,7 @@ final class InstallController: ObservableObject {
         switch outcome {
         case .installed(var app):
             if case .ipa(let url) = target { app.ipaFile = url.lastPathComponent }
-            // Catalyst/SideStore need this iPhone's pairing file in their Documents.
+            // SideStore-family apps need this iPhone's pairing file in their Documents.
             if PairingDestination.isSideStoreFamily(app.bundleID) {
                 await placePairingFile(in: app.bundleID, pairing: pairing.fileURL)
             }
@@ -431,6 +505,7 @@ final class InstallController: ObservableObject {
             apps.insert(app, at: 0)
             save()
             scheduleExpiryReminder(for: app)
+            if let store = app.store { presence[store] = .installed(version: app.version) }
             phase = .success(app)
         case .failed(let message):
             if message == "Cancelled." {
@@ -465,6 +540,7 @@ final class InstallController: ObservableObject {
         let anisette = anisetteURL.isEmpty ? Self.defaultAnisette : anisetteURL
         let serverID = Self.serverID
         let deviceName = UIDevice.current.name
+        let capabilities = EntitlementSettings.shared.requestValue
 
         let outcome: Outcome = await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
@@ -499,7 +575,8 @@ final class InstallController: ObservableObject {
                     ipa_path: c(ipa.path),
                     device_name: c(deviceName),
                     machine_name: c("AltLoad"),
-                    server_id: c(serverID))
+                    server_id: c(serverID),
+                    capabilities: c(capabilities))
 
                 var result = AltLoadInstallResult()
                 let rc = altload_install_session_run(
@@ -545,7 +622,7 @@ final class InstallController: ObservableObject {
 
     // MARK: - Callbacks from Rust (hopped to main)
 
-    /// Copies the pairing file into a freshly installed Catalyst/SideStore. Not fatal:
+    /// Copies the pairing file into a freshly installed SideStore-family app. Not fatal:
     /// the app still works once the file is added from Tools › Pairing File to Apps.
     private func placePairingFile(in bundleID: String, pairing: URL) async {
         enter(.pairing)
@@ -564,7 +641,8 @@ final class InstallController: ObservableObject {
         let lower = stage.lowercased()
         if lower.hasPrefix("signing in") || lower.hasPrefix("registering") {
             enter(.signIn, value)
-        } else if lower.hasPrefix("signing") || lower.hasPrefix("preparing catalyst") {
+        } else if lower.hasPrefix("signing") || lower.hasPrefix("enabling entitlements")
+                    || lower.hasPrefix("preparing altstore") {
             enter(.sign, value)
         } else if lower.hasPrefix("installing") {
             enter(.install, value)

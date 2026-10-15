@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Copies this iPhone's pairing file into another installed app (Catalyst,
-/// SideStore, StikDebug…) over house_arrest, through LocalDevVPN.
+/// Copies this iPhone's pairing file into another installed app (SideStore,
+/// StikDebug…) over house_arrest, through LocalDevVPN.
 struct PairingToAppsView: View {
     @ObservedObject private var pairings = PairingStore.shared
 
@@ -26,7 +26,7 @@ struct PairingToAppsView: View {
         AuroraScreen {
             GlassCard(padding: 20) {
                 HStack(spacing: 14) {
-                    GlassBadge(systemImage: "doc.badge.gearshape", tint: Aurora.violet, size: 56)
+                    GlassBadge(systemImage: "doc.badge.gearshape", tint: Aurora.accent, size: 56)
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Pairing file to apps")
                             .font(.headline)
@@ -103,7 +103,7 @@ struct PairingToAppsView: View {
             Button("Other File Name…") { customTarget = app }
             Button("Cancel", role: .cancel) {}
         } message: { app in
-            Text("\(app.bundleID)\nCatalyst and SideStore read PairingFile_RemoteRP.plist. StikDebug and other idevice apps read rp_pairing_file.plist.")
+            Text("\(app.bundleID)\nSideStore reads PairingFile_RemoteRP.plist. StikDebug and other idevice apps read rp_pairing_file.plist.")
         }
         .alert("File name inside the app", isPresented: Binding(get: { customTarget != nil }, set: { if !$0 { customTarget = nil } })) {
             TextField("Documents/pairingFile.plist", text: $customName)
@@ -145,7 +145,7 @@ struct PairingToAppsView: View {
                 ProgressRing(value: nil, lineWidth: 3, size: 28, showsPercent: false)
                     .frame(minWidth: 72)
             } else {
-                PillButton(title: "Place", tint: Aurora.violet, prominent: app.debuggable || app.fileSharing) {
+                PillButton(title: "Place", tint: Aurora.accent, prominent: app.debuggable || app.fileSharing) {
                     chosen = app
                 }
                 .disabled(working != nil)

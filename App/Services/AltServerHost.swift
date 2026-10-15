@@ -51,7 +51,8 @@ final class AltServerHost: ObservableObject {
     }
 
     /// Plays silent audio so AltLoad keeps answering AltStore from the background.
-    @Published var keepAwake: Bool = UserDefaults.standard.bool(forKey: "altserver.keepAwake") {
+    /// On by default, so AltStore finds AltServer without AltLoad open.
+    @Published var keepAwake: Bool = UserDefaults.standard.object(forKey: "altserver.keepAwake") as? Bool ?? true {
         didSet {
             UserDefaults.standard.set(keepAwake, forKey: "altserver.keepAwake")
             applyKeepAwake()

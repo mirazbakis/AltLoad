@@ -7,16 +7,26 @@
 //     (installation_proxy, AFC, misagent), including its free-account profile
 //     juggling for the 3-active-apps limit.
 //   * Copying a pairing file into an installed app's container (house_arrest).
+//   * Tools › JIT and Location: mounting the Developer Disk Image (cryptexd),
+//     launching an app under debugserver and detaching so it keeps JIT, and
+//     simulating a location through DVT.
 //
-// One op per call; each call opens its own tunnel.
+// One op per call; each call opens its own tunnel. `simulate_location` keeps its
+// tunnel open until `altload_location_stop`, so Swift runs it on its own thread.
 
 use std::collections::{HashMap, HashSet};
 use std::ffi::{c_char, c_void};
 use std::path::{Path, PathBuf};
 use std::ptr;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use idevice::afc::opcode::AfcFopenMode;
+use idevice::cryptexd::{install_ddi, installed_ddi, Cryptex1Assets};
+use idevice::debug_proxy::{DebugProxyClient, DebugserverCommand};
+use idevice::dvt::location_simulation::LocationSimulationClient;
+use idevice::dvt::process_control::ProcessControlClient;
+use idevice::dvt::remote_server::RemoteServerClient;
 use idevice::house_arrest::HouseArrestClient;
 use idevice::installation_proxy::InstallationProxyClient;
 use idevice::misagent::MisagentClient;
@@ -39,6 +49,12 @@ use super::{
 ///   {"op":"install_profiles","paths":["/…/a.mobileprovision",…],"activeProfiles":[…]|null}
 ///   {"op":"remove_profiles","bundleIds":["com.x",…]}
 ///   {"op":"remove_app","bundleId":"com.x"}
+///   {"op":"ddi_status"} → {"mounted":bool}
+///   {"op":"mount_ddi","dir":"/…/DDI"} (BuildManifest.plist + the cryptex files)
+///   {"op":"enable_jit","bundleId":"com.x","ddiDir":"/…/DDI"} → {"pid":n}
+///   {"op":"simulate_location","lat":f,"lon":f,"ddiDir":"/…/DDI"}: blocks, re-sending
+///   the location every few seconds, until `altload_location_stop`. Move it with
+///   `altload_location_update`.
 ///   {"op":"list_apps"}
 ///   {"op":"place_file","bundleId":"com.x","source":"/…/file","name":"Documents/File.plist"}
 ///
@@ -175,6 +191,33 @@ async fn run(
             ip.uninstall(bundle_id, None)
                 .await
                 .map_err(|e| err("Couldn't remove the app", e))?;
+            Ok(serde_json::json!({ "ok": true }))
+        }
+        "ddi_status" => {
+            let mounted = installed_ddi(&mut adapter, &mut handshake)
+                .await
+                .map_err(|e| err("Couldn't read the Developer Disk Image state", e))?
+                .is_some();
+            Ok(serde_json::json!({ "mounted": mounted }))
+        }
+        "mount_ddi" => {
+            let dir = string_field(&request, "dir")?;
+            ensure_ddi(&mut adapter, &mut handshake, &dir, cbs).await?;
+            Ok(serde_json::json!({ "mounted": true }))
+        }
+        "enable_jit" => {
+            let bundle_id = string_field(&request, "bundleId")?;
+            let dir = string_field(&request, "ddiDir")?;
+            ensure_ddi(&mut adapter, &mut handshake, &dir, cbs).await?;
+            let pid = enable_jit(&mut adapter, &mut handshake, &bundle_id, cbs).await?;
+            Ok(serde_json::json!({ "pid": pid }))
+        }
+        "simulate_location" => {
+            let lat = request.get("lat").and_then(|v| v.as_f64()).ok_or("Missing latitude.")?;
+            let lon = request.get("lon").and_then(|v| v.as_f64()).ok_or("Missing longitude.")?;
+            let dir = string_field(&request, "ddiDir")?;
+            ensure_ddi(&mut adapter, &mut handshake, &dir, cbs).await?;
+            simulate_location(&mut adapter, &mut handshake, lat, lon, cbs).await?;
             Ok(serde_json::json!({ "ok": true }))
         }
         "list_apps" => {
@@ -529,4 +572,140 @@ fn string_list(v: &serde_json::Value, key: &str) -> Vec<String> {
 /// `None` when the key is missing or null (AltStore's "don't manage profiles").
 fn string_set(v: &serde_json::Value, key: &str) -> Option<HashSet<String>> {
     v.get(key).and_then(|x| x.as_array()).map(|a| a.iter().filter_map(|s| s.as_str().map(str::to_string)).collect())
+}
+
+// MARK: - Developer Disk Image, JIT, location
+
+/// Mounts the cryptex Developer Disk Image (iOS 17+ needs it for DVT and
+/// debugserver) unless it's already there. Personalised for this device via TSS.
+async fn ensure_ddi(
+    adapter: &mut AdapterHandle,
+    handshake: &mut RsdHandshake,
+    dir: &str,
+    cbs: Callbacks,
+) -> Result<(), String> {
+    cbs.progress("Checking the Developer Disk Image…", -1.0);
+    let installed = installed_ddi(adapter, handshake)
+        .await
+        .map_err(|e| err("Couldn't read the Developer Disk Image state", e))?;
+    if installed.is_some() {
+        return Ok(());
+    }
+    cbs.progress("Mounting the Developer Disk Image…", -1.0);
+    let assets = Cryptex1Assets::load(dir)
+        .await
+        .map_err(|e| err("Couldn't read the Developer Disk Image files", e))?;
+    install_ddi(adapter, handshake, &assets)
+        .await
+        .map_err(|e| err("Couldn't mount the Developer Disk Image", e))?;
+    Ok(())
+}
+
+/// Launches `bundle_id` suspended, attaches debugserver and detaches again. The
+/// attach marks the process as debugged, which is what lets it map executable
+/// memory (JIT) for the rest of its life.
+async fn enable_jit(
+    adapter: &mut AdapterHandle,
+    handshake: &mut RsdHandshake,
+    bundle_id: &str,
+    cbs: Callbacks,
+) -> Result<u64, String> {
+    cbs.progress("Launching the app…", -1.0);
+    let mut server = RemoteServerClient::connect_rsd(adapter, handshake)
+        .await
+        .map_err(|e| err("Couldn't open the instruments service", e))?;
+    server
+        .read_message(0)
+        .await
+        .map_err(|e| err("The instruments service didn't answer", e))?;
+    let pid = {
+        let mut process = ProcessControlClient::new(&mut server)
+            .await
+            .map_err(|e| err("Couldn't open process control", e))?;
+        process
+            .launch_app(bundle_id, None, None, true, true)
+            .await
+            .map_err(|e| err("Couldn't launch the app", e))?
+    };
+
+    cbs.progress("Attaching the debugger…", -1.0);
+    let mut debug = DebugProxyClient::connect_rsd(adapter, handshake)
+        .await
+        .map_err(|e| err("Couldn't open debugserver", e))?;
+    let attach = DebugserverCommand::new(format!("vAttach;{pid:x}"), Vec::new());
+    let reply = debug
+        .send_command(attach)
+        .await
+        .map_err(|e| err("Couldn't attach to the app", e))?;
+    if let Some(reply) = reply.as_deref() {
+        if reply.starts_with('E') {
+            return Err(format!("debugserver refused to attach ({reply}). The app has to be signed for development."));
+        }
+    }
+    debug
+        .send_command(DebugserverCommand::new("D".to_string(), Vec::new()))
+        .await
+        .map_err(|e| err("Couldn't detach from the app", e))?;
+    Ok(pid)
+}
+
+static LOCATION_RUNNING: AtomicBool = AtomicBool::new(false);
+static LOCATION_LAT: AtomicU64 = AtomicU64::new(0);
+static LOCATION_LON: AtomicU64 = AtomicU64::new(0);
+
+/// Holds the simulated location until `altload_location_stop`. The device drops it
+/// when the connection closes, so it's re-sent every few seconds.
+async fn simulate_location(
+    adapter: &mut AdapterHandle,
+    handshake: &mut RsdHandshake,
+    lat: f64,
+    lon: f64,
+    cbs: Callbacks,
+) -> Result<(), String> {
+    LOCATION_LAT.store(lat.to_bits(), Ordering::SeqCst);
+    LOCATION_LON.store(lon.to_bits(), Ordering::SeqCst);
+    LOCATION_RUNNING.store(true, Ordering::SeqCst);
+
+    let mut server = RemoteServerClient::connect_rsd(adapter, handshake)
+        .await
+        .map_err(|e| err("Couldn't open the instruments service", e))?;
+    server
+        .read_message(0)
+        .await
+        .map_err(|e| err("The instruments service didn't answer", e))?;
+    let mut location = LocationSimulationClient::new(&mut server)
+        .await
+        .map_err(|e| err("Couldn't open location simulation", e))?;
+
+    cbs.progress("Simulating location", -1.0);
+    while LOCATION_RUNNING.load(Ordering::SeqCst) {
+        let lat = f64::from_bits(LOCATION_LAT.load(Ordering::SeqCst));
+        let lon = f64::from_bits(LOCATION_LON.load(Ordering::SeqCst));
+        location
+            .set(lat, lon)
+            .await
+            .map_err(|e| err("Couldn't set the location", e))?;
+        // Wake often enough to pick up a stop or a new location quickly.
+        for _ in 0..12 {
+            if !LOCATION_RUNNING.load(Ordering::SeqCst) {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(250)).await;
+        }
+    }
+    let _ = location.clear().await;
+    Ok(())
+}
+
+/// Moves a running `simulate_location` to a new coordinate.
+#[no_mangle]
+pub extern "C" fn altload_location_update(latitude: f64, longitude: f64) {
+    LOCATION_LAT.store(latitude.to_bits(), Ordering::SeqCst);
+    LOCATION_LON.store(longitude.to_bits(), Ordering::SeqCst);
+}
+
+/// Ends a running `simulate_location`, which then clears the location and returns.
+#[no_mangle]
+pub extern "C" fn altload_location_stop() {
+    LOCATION_RUNNING.store(false, Ordering::SeqCst);
 }

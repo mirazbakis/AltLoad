@@ -2,12 +2,12 @@ import SwiftUI
 
 // MARK: - Buttons & cards
 
-/// Full-width Liquid Glass action. Prominent actions get violet-tinted glass.
+/// Full-width Liquid Glass action. Prominent actions get blue-tinted glass.
 struct GlassActionButton: View {
     let title: LocalizedStringKey
     var systemImage: String? = nil
     var prominent = false
-    var tint: Color = Aurora.violet
+    var tint: Color = Aurora.accent
     let action: () -> Void
 
     var body: some View {
@@ -38,8 +38,7 @@ struct GlassActionButton: View {
     }
 }
 
-/// Catalyst-style card: Liquid Glass tinted with Catalyst's #140C20 plum and a
-/// faint violet hairline, like its "Signing with…" banner on My Apps.
+/// Card: Liquid Glass with a faint navy tint and a hairline, or a status tint.
 struct GlassCard<Content: View>: View {
     var tint: Color? = nil
     var padding: CGFloat = 18
@@ -54,12 +53,12 @@ struct GlassCard<Content: View>: View {
             .glassEffect(.regular.tint(tint.map { $0.opacity(0.22) } ?? Aurora.card.opacity(0.6)), in: .rect(cornerRadius: radius))
             .overlay {
                 RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .strokeBorder((tint ?? Aurora.violet).opacity(0.25), lineWidth: 1)
+                    .strokeBorder(tint.map { $0.opacity(0.25) } ?? Aurora.hairline, lineWidth: 1)
             }
     }
 }
 
-/// Catalyst's section header: 13pt semibold, uppercase, white at 60%.
+/// Section header: 13pt semibold, uppercase, white at 60%.
 struct SectionLabel: View {
     let title: LocalizedStringKey
     var trailing: String? = nil
@@ -81,7 +80,110 @@ struct SectionLabel: View {
     }
 }
 
-// MARK: - App cells (Catalyst / SideStore style)
+/// A titled card: icon + headline, then its rows.
+struct CardSection<Content: View>: View {
+    let title: LocalizedStringKey
+    let symbol: String
+    var tint: Color? = nil
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        GlassCard(tint: tint) {
+            VStack(alignment: .leading, spacing: 12) {
+                Label(title, systemImage: symbol)
+                    .font(.headline)
+                    .foregroundStyle(Aurora.frost)
+                content
+            }
+        }
+    }
+}
+
+/// Title on the left, value on the right.
+struct InfoRow: View {
+    let title: LocalizedStringKey
+    let value: String
+    var symbol: String? = nil
+    var monospaced = false
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            if let symbol {
+                Image(systemName: symbol).foregroundStyle(Aurora.secondaryText).frame(width: 22)
+            }
+            Text(title).foregroundStyle(Aurora.secondaryText)
+            Spacer(minLength: 12)
+            Text(value.isEmpty ? "—" : value)
+                .fontWeight(.medium)
+                .fontDesign(monospaced ? .monospaced : .default)
+                .multilineTextAlignment(.trailing)
+                .textSelection(.enabled)
+        }
+        .font(.subheadline)
+    }
+}
+
+/// A glass row that opens another screen: icon, title, optional value, chevron.
+struct LinkCard<Destination: View>: View {
+    let title: LocalizedStringKey
+    let symbol: String
+    var value: String? = nil
+    @ViewBuilder var destination: () -> Destination
+
+    var body: some View {
+        NavigationLink(destination: destination) {
+            HStack {
+                Label(title, systemImage: symbol)
+                    .font(.headline)
+                    .foregroundStyle(Aurora.frost)
+                Spacer()
+                if let value {
+                    Text(value).foregroundStyle(Aurora.secondaryText)
+                }
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Aurora.secondaryText.opacity(0.6))
+            }
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .glassEffect(.regular.tint(Aurora.card.opacity(0.6)).interactive(), in: .rect(cornerRadius: 20))
+        .overlay {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(Aurora.hairline, lineWidth: 1)
+        }
+    }
+}
+
+/// Small number-over-caption tile for a card's summary row.
+struct StatTile: View {
+    let title: LocalizedStringKey
+    let value: String
+
+    var body: some View {
+        VStack(spacing: 1) {
+            Text(value).font(.headline).monospacedDigit().foregroundStyle(Aurora.frost)
+            Text(title).font(.caption2).foregroundStyle(Aurora.secondaryText)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(Color.white.opacity(0.06), in: .rect(cornerRadius: 14, style: .continuous))
+    }
+}
+
+extension View {
+    /// Plain field for use inside glass cards (avoids glass-on-glass).
+    func inputField() -> some View {
+        self
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(Color.white.opacity(0.07), in: .rect(cornerRadius: 14, style: .continuous))
+    }
+}
+
+// MARK: - App cells (AltStore style)
 
 /// App icon from a source, or a gradient tile with a symbol while it loads.
 struct AppIconView: View {
@@ -110,12 +212,12 @@ struct AppIconView: View {
     }
 }
 
-/// Catalyst's capsule button: a tiny caption over a bold value ("EXPIRES IN" / "5 DAYS"),
+/// AltStore-style capsule button: a tiny caption over a bold value ("EXPIRES IN" / "5 DAYS"),
 /// or a single word ("GET", "OPEN", "UPDATE").
 struct PillButton: View {
     var caption: String? = nil
     let title: String
-    var tint: Color = Aurora.violet
+    var tint: Color = Aurora.accent
     var prominent = true
     let action: () -> Void
 
@@ -140,7 +242,7 @@ struct PillButton: View {
     }
 }
 
-/// An app row in the style of Catalyst's AppBannerView: icon, name, detail line
+/// An app row in the style of AltStore's app banners: icon, name, detail line
 /// and a pill on the right.
 struct AppBannerRow<Trailing: View>: View {
     let name: String
@@ -189,7 +291,7 @@ struct GuideStep: View {
                 .font(.caption.bold())
                 .foregroundStyle(Aurora.frost)
                 .frame(width: 24, height: 24)
-                .glassEffect(.regular.tint(Aurora.violet.opacity(0.6)), in: .circle)
+                .glassEffect(.regular.tint(Aurora.accent.opacity(0.6)), in: .circle)
             Text(text)
                 .font(.subheadline)
                 .fixedSize(horizontal: false, vertical: true)
@@ -233,7 +335,7 @@ struct StatusRow: View {
     private var color: Color {
         switch state {
         case .done: Aurora.success
-        case .pending: Aurora.lilac
+        case .pending: Aurora.mist
         case .attention: Aurora.danger
         }
     }
@@ -255,7 +357,7 @@ struct GlassCodeView: View {
                         .monospacedDigit()
                         .foregroundStyle(Aurora.frost)
                         .frame(width: 44, height: 60)
-                        .glassEffect(.regular.tint(Aurora.violet.opacity(0.25)).interactive(), in: .rect(cornerRadius: 14))
+                        .glassEffect(.regular.tint(Aurora.accent.opacity(0.25)).interactive(), in: .rect(cornerRadius: 14))
                         .glassEffectUnion(id: index < 3 ? "left" : "right", namespace: ns)
                 }
             }
@@ -284,7 +386,7 @@ struct ProgressRing: View {
                 Circle()
                     .trim(from: 0, to: value.map { max(0.02, min($0, 1)) } ?? 0.28)
                     .stroke(
-                        AngularGradient(colors: [Aurora.orchid, Aurora.violet, Aurora.orchid], center: .center),
+                        AngularGradient(colors: [Aurora.sky, Aurora.accent, Aurora.sky], center: .center),
                         style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                     .rotationEffect(.degrees(spin - 90))
                     .animation(.spring(duration: 0.4), value: value)
@@ -304,7 +406,7 @@ struct ProgressRing: View {
     }
 }
 
-/// Linear progress in a glass capsule, violet fill with a soft glow.
+/// Linear progress in a glass capsule, blue fill with a soft glow.
 struct GlassProgressBar: View {
     var value: Double
     var height: CGFloat = 10
@@ -317,7 +419,7 @@ struct GlassProgressBar: View {
                 Capsule()
                     .fill(Aurora.accentGradient)
                     .frame(width: max(height, geo.size.width * min(max(value, 0), 1)))
-                    .shadow(color: Aurora.violet.opacity(0.6), radius: 8)
+                    .shadow(color: Aurora.accent.opacity(0.6), radius: 8)
             }
         }
         .frame(height: height)
@@ -335,7 +437,7 @@ struct GlassProgressBar: View {
 /// Symbol in a glass disc, used for status icons.
 struct GlassBadge: View {
     let systemImage: String
-    var tint: Color = Aurora.violet
+    var tint: Color = Aurora.accent
     var size: CGFloat = 96
 
     var body: some View {
@@ -358,7 +460,7 @@ struct GlassBadge: View {
 struct GlassChip: View {
     let text: String
     var systemImage: String? = nil
-    var tint: Color = Aurora.violet
+    var tint: Color = Aurora.accent
 
     var body: some View {
         HStack(spacing: 6) {
@@ -382,7 +484,7 @@ struct AltLoadMark: View {
         ZStack {
             RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
                 .fill(Aurora.markGradient)
-            RadialGradient(colors: [Aurora.lilac.opacity(0.5), .clear],
+            RadialGradient(colors: [Aurora.mist.opacity(0.5), .clear],
                            center: .init(x: 0.5, y: 0.47), startRadius: 0, endRadius: size * 0.42)
 
             Circle()
@@ -414,7 +516,7 @@ struct AltLoadMark: View {
         }
         .frame(width: size, height: size)
         .clipShape(.rect(cornerRadius: size * 0.225, style: .continuous))
-        .shadow(color: Aurora.violet.opacity(0.55), radius: size * 0.22, y: size * 0.06)
+        .shadow(color: Aurora.accent.opacity(0.55), radius: size * 0.22, y: size * 0.06)
         .accessibilityLabel("AltLoad")
     }
 }
@@ -468,7 +570,7 @@ private struct MarkShape: Shape {
 
 // MARK: - Scaffold
 
-/// Screen scaffold: black + glow background edge to edge, scrolling content column.
+/// Screen scaffold: midnight background edge to edge, scrolling content column.
 struct AuroraScreen<Content: View>: View {
     @ViewBuilder var content: Content
 

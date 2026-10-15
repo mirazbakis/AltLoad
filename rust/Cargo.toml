@@ -18,11 +18,18 @@ idevice = { version = "0.1.61", default-features = false, features = [
   "installation_proxy",
   "misagent",
   "house_arrest",
+  # Tools › JIT and Location: Developer Disk Image (cryptex), DVT, debugserver.
+  "cryptexd",
+  "dvt",
+  "location_simulation",
+  "debug_proxy",
   "tcp",
   "ring",
 ] }
 # Apple ID sign-in (GSA + anisette), developer portal (cert, device, App IDs, profiles), code signing.
-isideload = { version = "0.4.0", default-features = false, features = ["install", "keyring-storage", "tokio-mt"] }
+# 0.4.5+ is needed for sign-in: Apple stopped accepting the old Android anisette
+# states, so it resets them, takes client info from the server and re-provisions on -45061.
+isideload = { version = "0.4.6", default-features = false, features = ["install", "keyring-storage", "tokio-mt"] }
 rootcause = "0.12.0"
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
 tokio = { version = "1", features = ["rt-multi-thread", "net", "macros", "fs", "time", "sync"] }

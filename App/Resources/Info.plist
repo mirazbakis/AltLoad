@@ -55,6 +55,10 @@
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>localdevvpn</string>
+        <!-- To see whether AltStore (and which build) is on this iPhone. -->
+        <string>altstore</string>
+        <string>altstore-com.rileytestut.AltStore</string>
+        <string>altstore-com.rileytestut.AltStore.Beta</string>
     </array>
     <key>NSLocalNetworkUsageDescription</key>
     <string>AltLoad uses your local network to discover devices and complete pairing.</string>
@@ -82,5 +86,31 @@
     <string>AltLoad can use location to keep running in the background while you complete pairing in Settings.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>AltLoad can use location to keep running in the background while you complete pairing in Settings.</string>
+    <!-- Declares .ipa so Files lets it be picked instead of greying it out. -->
+    <key>UTImportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeIdentifier</key>
+            <string>com.apple.itunes.ipa</string>
+            <key>UTTypeDescription</key>
+            <string>iOS App</string>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.zip-archive</string>
+                <string>public.data</string>
+            </array>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>ipa</string>
+                </array>
+                <key>public.mime-type</key>
+                <array>
+                    <string>application/octet-stream</string>
+                </array>
+            </dict>
+        </dict>
+    </array>
 </dict>
 </plist>

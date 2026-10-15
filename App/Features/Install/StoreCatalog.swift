@@ -1,16 +1,22 @@
 import Foundation
 import SwiftUI
+import UniformTypeIdentifiers
 
-/// The stores AltLoad can install. AltStore is the default.
+extension UTType {
+    /// .ipa, declared in Info.plist so Files lets it be picked.
+    static let ipa = UTType(importedAs: "com.apple.itunes.ipa", conformingTo: .zip)
+}
+
+/// The AltStore builds AltLoad installs. The release build is the default.
 enum StoreApp: String, CaseIterable, Identifiable, Codable {
     case altstore
-    case catalyst
+    case altstoreBeta
 
     var id: String { rawValue }
 
     static let defaultsKey = "store.selected"
 
-    /// The store picked on the Install tab. AltStore unless the user changed it.
+    /// The build picked on the Install tab. AltStore unless the user changed it.
     static var selected: StoreApp {
         get { UserDefaults.standard.string(forKey: defaultsKey).flatMap(StoreApp.init(rawValue:)) ?? .altstore }
         set { UserDefaults.standard.set(newValue.rawValue, forKey: defaultsKey) }
@@ -19,36 +25,40 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
     var name: String {
         switch self {
         case .altstore: "AltStore"
-        case .catalyst: "Catalyst"
+        case .altstoreBeta: "AltStore Beta"
+        }
+    }
+
+    /// Short label for the picker.
+    var channel: String {
+        switch self {
+        case .altstore: "Release"
+        case .altstoreBeta: "Beta"
         }
     }
 
     var tagline: String {
         switch self {
         case .altstore: "The original alternative app store"
-        case .catalyst: "SideStore fork with Apple ID and Enterprise signing"
+        case .altstoreBeta: "Early builds of AltStore's next version"
         }
     }
 
     var bundleIdentifier: String {
         switch self {
         case .altstore: "com.rileytestut.AltStore"
-        case .catalyst: "com.mirazbakis.Catalyst"
+        case .altstoreBeta: "com.rileytestut.AltStore.Beta"
         }
     }
 
-    var defaultSourceURL: URL {
-        switch self {
-        case .altstore: URL(string: "https://apps.altstore.io")!
-        case .catalyst: URL(string: "https://raw.githubusercontent.com/mirazbakis/Catalyst/master/source.json")!
-        }
-    }
+    /// Both builds are listed in AltStore's official source.
+    var defaultSourceURL: URL { URL(string: "https://apps.altstore.io")! }
 
     /// Shown until the source's icon loads.
     var fallbackSymbol: String {
         switch self {
         case .altstore: "square.stack.3d.up.fill"
-        case .catalyst: "sparkles"
+        case .altstoreBeta: "testtube.2"
         }
     }
 
@@ -63,9 +73,12 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
     }
 
     /// The store an installed bundle ID belongs to. Signing appends the team ID
-    /// (com.rileytestut.AltStore.ABCDE12345), so match on the prefix.
+    /// (com.rileytestut.AltStore.ABCDE12345), so match on the prefix, longest
+    /// identifier first so AltStore Beta isn't taken for AltStore.
     static func matching(bundleID: String) -> StoreApp? {
-        allCases.first { bundleID == $0.bundleIdentifier || bundleID.hasPrefix($0.bundleIdentifier + ".") }
+        allCases
+            .sorted { $0.bundleIdentifier.count > $1.bundleIdentifier.count }
+            .first { bundleID == $0.bundleIdentifier || bundleID.hasPrefix($0.bundleIdentifier + ".") }
     }
 }
 
@@ -192,13 +205,20 @@ enum StoreCatalog {
         }
     }
 
-    /// Copies a user-picked IPA into the cache so it can be re-signed later.
+    /// Copies an IPA picked in Files into the cache so it can be re-signed later.
     static func importIPA(from url: URL) throws -> URL {
+        guard url.pathExtension.lowercased() == "ipa" else { throw CatalogError.notAnIPA }
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         let destination = cacheDirectory.appendingPathComponent("Imported-\(url.lastPathComponent)")
         try? FileManager.default.removeItem(at: destination)
-        try FileManager.default.copyItem(at: url, to: destination)
+        // Coordinate the read so a file still downloading from iCloud Drive arrives whole.
+        var coordinationError: NSError?
+        var copyError: Error?
+        NSFileCoordinator().coordinate(readingItemAt: url, options: [], error: &coordinationError) { readable in
+            do { try FileManager.default.copyItem(at: readable, to: destination) } catch { copyError = error }
+        }
+        if let error = coordinationError ?? copyError { throw error }
         return destination
     }
 
@@ -209,9 +229,11 @@ enum StoreCatalog {
     enum CatalogError: LocalizedError {
         case http(StoreApp, Int)
         case notListed(StoreApp)
+        case notAnIPA
 
         var errorDescription: String? {
             switch self {
+            case .notAnIPA: "That file isn't an .ipa."
             case .http(let store, let code): "The \(store.name) source returned HTTP \(code)."
             case .notListed(let store): "\(store.name) isn't listed in the configured source."
             }

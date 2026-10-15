@@ -72,7 +72,7 @@ struct CertificatesView: View {
 
     private var header: some View {
         VStack(spacing: 12) {
-            GlassBadge(systemImage: "checkmark.seal", tint: Aurora.violet, size: 84)
+            GlassBadge(systemImage: "checkmark.seal", tint: Aurora.accent, size: 84)
             Text("Your certificates")
                 .font(.title2.bold())
                 .foregroundStyle(Aurora.frost)
@@ -248,7 +248,7 @@ struct CertificatesView: View {
                     }
                     Spacer(minLength: 0)
                     if cert.isAltLoad {
-                        GlassChip(text: "This app", tint: Aurora.violet)
+                        GlassChip(text: "This app", tint: Aurora.accent)
                     }
                 }
 
@@ -297,7 +297,7 @@ struct CertificatesView: View {
                         title: "Free up a slot",
                         detail: "Revoke the oldest certificate",
                         systemImage: "clock.arrow.circlepath",
-                        tint: Aurora.violet,
+                        tint: Aurora.accent,
                         disabled: overview.certificates.isEmpty || controller.isBusy
                     ) {
                         if let oldest = overview.certificates.min(by: { ($0.expiration ?? .distantFuture) < ($1.expiration ?? .distantFuture) }) {
@@ -309,7 +309,7 @@ struct CertificatesView: View {
                         title: "Sign out",
                         detail: AppleIDStore.email,
                         systemImage: "person.crop.circle.badge.xmark",
-                        tint: Aurora.lilac,
+                        tint: Aurora.mist,
                         disabled: controller.isBusy
                     ) {
                         controller.signOut()
@@ -324,7 +324,7 @@ struct CertificatesView: View {
     private func appIdRow(_ appID: DevAppID) -> some View {
         HStack(spacing: 10) {
             Image(systemName: "app.badge")
-                .foregroundStyle(Aurora.lilac)
+                .foregroundStyle(Aurora.mist)
             VStack(alignment: .leading, spacing: 1) {
                 Text(appID.name).font(.subheadline.weight(.medium))
                 Text(appID.identifier).font(.caption.monospaced()).foregroundStyle(.secondary)
@@ -337,7 +337,7 @@ struct CertificatesView: View {
     private func deviceRow(_ device: DevDevice) -> some View {
         HStack(spacing: 10) {
             Image(systemName: "iphone.gen3")
-                .foregroundStyle(Aurora.lilac)
+                .foregroundStyle(Aurora.mist)
             VStack(alignment: .leading, spacing: 1) {
                 Text(device.name.isEmpty ? "Device" : device.name).font(.subheadline.weight(.medium))
                 Text(device.udid).font(.caption.monospaced()).foregroundStyle(.secondary)

@@ -10,13 +10,14 @@
 //   3. Use the free developer portal API to register this device's UDID, create
 //      or reuse a development certificate, register App IDs and app groups, and
 //      download provisioning profiles.
-//   4. Inject AltStore's runtime keys (ALTDeviceID, ALTServerID, ALTCertificate.p12,
-//      ALTCertificateID, ALTAppGroups) and re-sign every bundle in the IPA.
+//   4. Enable any capabilities the user picked on the App ID (so the profile grants
+//      their entitlements), inject AltStore's runtime keys (ALTDeviceID, ALTServerID,
+//      ALTCertificate.p12, ALTCertificateID, ALTAppGroups) and re-sign every bundle.
 //   5. Upload the signed .app to PublicStaging over AFC and ask
 //      installation_proxy to install it. Both go through the RSD tunnel.
 //
-// Catalyst (a SideStore fork, com.mirazbakis.Catalyst) gets the same step-4 keys
-// that isideload adds for AltStore and SideStore; see `inject_store_keys`.
+// AltStore Beta (com.rileytestut.AltStore.Beta) gets the step-4 keys isideload only
+// adds for the exact AltStore bundle ID; see `inject_store_keys`.
 //
 // Steps 2-5 come from `isideload` (nab138, MIT). Step 1 uses `idevice` (jkcoxson, MIT).
 
@@ -83,6 +84,8 @@ pub struct AltLoadInstallConfig {
     pub device_name: *const c_char,
     pub machine_name: *const c_char,
     pub server_id: *const c_char,
+    /// Comma-separated capability IDs to enable on the App ID, or null.
+    pub capabilities: *const c_char,
 }
 
 #[repr(C)]
@@ -188,6 +191,7 @@ struct Config {
     device_name: String,
     machine_name: String,
     server_id: String,
+    capabilities: Vec<String>,
 }
 
 impl Config {
@@ -207,7 +211,7 @@ impl Config {
         Ok(Self {
             apple_id: req(c.apple_id, "Apple ID")?,
             password: req(c.password, "password")?,
-            anisette_url: opt(c.anisette_url, "https://ani.sidestore.io"),
+            anisette_url: opt(c.anisette_url, "https://ani.jkcoxson.com"),
             pairing_file_path: req(c.pairing_file_path, "pairing file")?,
             host_name: opt(c.host_name, "AltLoad"),
             endpoints,
@@ -215,6 +219,11 @@ impl Config {
             device_name: opt(c.device_name, "iPhone"),
             machine_name: opt(c.machine_name, "AltLoad"),
             server_id: opt(c.server_id, "AltLoad"),
+            capabilities: opt(c.capabilities, "")
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect(),
         })
     }
 }
@@ -462,11 +471,11 @@ async fn sign_and_install(
         .map_err(|e| err("Couldn't register this device", e))?;
     check()?;
 
-    // 4b. isideload only recognises AltStore/SideStore by their original bundle IDs.
-    // Catalyst has its own, so give it the same keys here: the certificate (so it
-    // refreshes apps with it instead of making a new one) and its app group.
-    if bundle_id_of(&app_dir) == CATALYST_BUNDLE_ID {
-        cbs.progress("Preparing Catalyst…", -1.0);
+    // 4b. isideload only recognises AltStore by its exact bundle ID. AltStore Beta
+    // needs the same keys: the certificate (so it refreshes apps with it instead of
+    // making a new one) and its app group.
+    if bundle_id_of(&app_dir) == ALTSTORE_BETA_BUNDLE_ID {
+        cbs.progress("Preparing AltStore Beta…", -1.0);
         let storage = KeyringStorage::new("AltLoad".to_string());
         let cert = CertificateIdentity::retrieve(
             &cfg.machine_name,
@@ -478,7 +487,15 @@ async fn sign_and_install(
         )
         .await
         .map_err(|e| err("Couldn't get a signing certificate", e))?;
-        inject_store_keys(&app_dir, &team.team_id, &cert).await?;
+        inject_store_keys(&app_dir, ALTSTORE_BETA_BUNDLE_ID, &team.team_id, &cert).await?;
+        check()?;
+    }
+
+    // 4c. Capabilities the user switched on. Enabled on the App ID before signing,
+    // so the provisioning profile sign_app downloads grants their entitlements.
+    if !cfg.capabilities.is_empty() {
+        cbs.progress("Enabling entitlements…", -1.0);
+        enable_capabilities(sideloader.get_dev_session(), &team, &app_dir, &cfg.capabilities).await?;
         check()?;
     }
 
@@ -704,7 +721,7 @@ fn prepare_app(ipa_path: &str, udid: &str, server_id: &str) -> Result<(PathBuf, 
     Ok((work, app_dir))
 }
 
-const CATALYST_BUNDLE_ID: &str = "com.mirazbakis.Catalyst";
+const ALTSTORE_BETA_BUNDLE_ID: &str = "com.rileytestut.AltStore.Beta";
 
 fn bundle_id_of(app: &Path) -> String {
     plist::from_file::<_, plist::Dictionary>(app.join("Info.plist"))
@@ -713,15 +730,116 @@ fn bundle_id_of(app: &Path) -> String {
         .unwrap_or_default()
 }
 
-/// What isideload's `apply_special_app_behavior` writes for AltStore/SideStore:
+/// Enables `capabilities` (App Store Connect capability IDs) on the App ID that
+/// `sign_app` will use for this bundle, creating the App ID if it doesn't exist yet.
+/// Same JSON:API call isideload makes for INCREASED_MEMORY_LIMIT, one capability
+/// at a time so the error names the one Apple refused (paid-only ones fail on a
+/// free Apple ID).
+async fn enable_capabilities(
+    dev: &mut DeveloperSession,
+    team: &DeveloperTeam,
+    app: &Path,
+    capabilities: &[String],
+) -> Result<(), String> {
+    let bundle_id = bundle_id_of(app);
+    if bundle_id.is_empty() {
+        return Err("Couldn't read the app's bundle ID.".into());
+    }
+    // sign_app registers the main app as <bundle id>.<team id>.
+    let identifier = format!("{bundle_id}.{}", team.team_id);
+    let name = plist::from_file::<_, plist::Dictionary>(app.join("Info.plist"))
+        .ok()
+        .and_then(|info| {
+            info.get("CFBundleDisplayName")
+                .or_else(|| info.get("CFBundleName"))
+                .and_then(|v| v.as_string())
+                .map(str::to_string)
+        })
+        .unwrap_or_else(|| bundle_id.clone());
+
+    let existing = dev
+        .list_app_ids(team, None::<DeveloperDeviceType>)
+        .await
+        .map_err(|e| err("Couldn't list App IDs", e))?;
+    let app_id = match existing.app_ids.into_iter().find(|a| a.identifier == identifier) {
+        Some(app_id) => app_id,
+        None => dev
+            .add_app_id(team, &name, &identifier, None::<DeveloperDeviceType>)
+            .await
+            .map_err(|e| err("Couldn't register the App ID", e))?,
+    };
+
+    for capability in capabilities {
+        let body = serde_json::json!({
+            "data": {
+                "type": "bundleIds",
+                "id": app_id.app_id_id,
+                "attributes": {
+                    "identifier": app_id.identifier,
+                    "seedId": team.team_id,
+                    "teamId": team.team_id,
+                    "name": app_id.name,
+                    "bundleType": "bundle",
+                    "hasExclusiveManagedCapabilities": false
+                },
+                "relationships": {
+                    "bundleIdCapabilities": {
+                        "data": [{
+                            "type": "bundleIdCapabilities",
+                            "attributes": { "enabled": true, "settings": [] },
+                            "relationships": {
+                                "capability": { "data": { "type": "capabilities", "id": capability } }
+                            }
+                        }]
+                    }
+                }
+            }
+        });
+
+        let mut headers = dev
+            .get_headers()
+            .await
+            .map_err(|e| err("Couldn't get anisette headers", e))?;
+        headers.insert("Content-Type", "application/vnd.api+json".parse().expect("static header"));
+        headers.insert("Accept", "application/vnd.api+json".parse().expect("static header"));
+
+        let url = format!(
+            "https://developerservices2.apple.com/services/v1/bundleIds/{}",
+            app_id.app_id_id
+        );
+        let response = dev
+            .get_grandslam_client()
+            .patch(&url)
+            .map_err(|e| err("Couldn't build the request", e))?
+            .headers(headers)
+            .body(body.to_string())
+            .send()
+            .await
+            .map_err(|e| err(&format!("Couldn't enable {capability}"), e))?;
+        if !response.status().is_success() {
+            let status = response.status();
+            let text = response.text().await.unwrap_or_default();
+            let detail = serde_json::from_str::<serde_json::Value>(&text)
+                .ok()
+                .and_then(|v| v["errors"][0]["detail"].as_str().map(str::to_string))
+                .unwrap_or_else(|| format!("HTTP {status}"));
+            return Err(format!(
+                "Apple wouldn't enable {capability}: {detail}\n\nSome entitlements need a paid Apple Developer account. Turn it off in Settings › Entitlements and try again."
+            ));
+        }
+    }
+    Ok(())
+}
+
+/// What isideload's `apply_special_app_behavior` writes for AltStore:
 /// ALTAppGroups (the group isideload registers, `group.<bundle id>.<team>`),
 /// ALTCertificateID and ALTCertificate.p12 (password: the certificate's machine ID).
 /// Runs before `sign_app`, which reads the bundle from disk, so it all gets signed.
-async fn inject_store_keys(app: &Path, team_id: &str, cert: &CertificateIdentity) -> Result<(), String> {
+async fn inject_store_keys(app: &Path, bundle_id: &str, team_id: &str, cert: &CertificateIdentity) -> Result<(), String> {
     let info_path = app.join("Info.plist");
     let mut info: plist::Dictionary =
         plist::from_file(&info_path).map_err(|e| err("Couldn't read Info.plist", e))?;
-    let group = format!("group.{CATALYST_BUNDLE_ID}.{team_id}");
+    let group = format!("group.{bundle_id}.{team_id}");
     info.insert(
         "ALTAppGroups".into(),
         plist::Value::Array(vec![plist::Value::String(group)]),
@@ -876,7 +994,7 @@ pub unsafe extern "C" fn altload_account_session_run(
     };
     let apple_id = match req(apple_id, "Apple ID") { Ok(v) => v, Err(e) => return fail(e) };
     let password = match req(password, "password") { Ok(v) => v, Err(e) => return fail(e) };
-    let anisette = opt(anisette_url, "https://ani.sidestore.io");
+    let anisette = opt(anisette_url, "https://ani.jkcoxson.com");
     let request: serde_json::Value = serde_json::from_str(&opt(request_json, "{}"))
         .unwrap_or_else(|_| serde_json::json!({}));
 

@@ -3,8 +3,9 @@ import Foundation
 
 /// Runs one device operation (install an app, manage provisioning profiles,
 /// list apps, copy a file into an app) through the LocalDevVPN tunnel, with no
-/// Apple ID involved. Backs the on-device AltServer and Tools › Pairing File to Apps.
-/// Operations run one at a time.
+/// Apple ID involved. Backs the on-device AltServer and Tools (Pairing File to Apps,
+/// JIT, Location). Operations run one at a time, except a location session, which
+/// holds its tunnel open and so runs on its own queue.
 enum DeviceOps {
     enum OpError: LocalizedError {
         case noPairing
@@ -20,12 +21,14 @@ enum DeviceOps {
         }
     }
 
-    private static let queue = DispatchQueue(label: "altload.device-ops", qos: .userInitiated)
+    static let queue = DispatchQueue(label: "altload.device-ops", qos: .userInitiated)
+    static let longRunningQueue = DispatchQueue(label: "altload.device-ops.long", qos: .userInitiated)
 
     /// `progress(stage, fraction)`; fraction is nil when indeterminate. Called on the main actor.
     @discardableResult
     static func run(
         _ request: [String: Any],
+        on queue: DispatchQueue = DeviceOps.queue,
         progress: @escaping @MainActor (String, Double?) -> Void = { _, _ in }
     ) async throws -> Any {
         let pairingPath: String? = await MainActor.run { PairingStore.shared.selfPairing?.fileURL.path }
@@ -58,7 +61,8 @@ enum DeviceOps {
                         host_name: c("AltLoad"),
                         endpoints: endpointPointer,
                         endpoint_count: 1,
-                        ipa_path: nil, device_name: nil, machine_name: nil, server_id: nil)
+                        ipa_path: nil, device_name: nil, machine_name: nil, server_id: nil,
+                        capabilities: nil)
                     let ctx = Unmanaged.passUnretained(box).toOpaque()
                     return altload_device_run(&config, json, deviceProgressCallback, ctx, &out)
                 }
@@ -100,6 +104,16 @@ enum DeviceOps {
         }
     }
 
+    /// Launches `bundleID` under debugserver and detaches, which leaves it able to JIT.
+    /// Mounts the Developer Disk Image first if needed. Returns the app's pid.
+    @discardableResult
+    static func enableJIT(_ bundleID: String,
+                          progress: @escaping @MainActor (String, Double?) -> Void = { _, _ in }) async throws -> Int {
+        let dir = try await DeveloperDiskImage.ensureDownloaded(progress: progress)
+        let result = try await run(["op": "enable_jit", "bundleId": bundleID, "ddiDir": dir.path], progress: progress)
+        return (result as? [String: Any])?["pid"] as? Int ?? 0
+    }
+
     /// Copies a local file into an installed app's container at `name`
     /// (e.g. "Documents/PairingFile_RemoteRP.plist").
     static func placeFile(_ source: URL, in bundleID: String, as name: String,
@@ -110,7 +124,7 @@ enum DeviceOps {
 
 /// Where each kind of app looks for its pairing file.
 enum PairingDestination {
-    /// Catalyst and SideStore read Documents/PairingFile_RemoteRP.plist.
+    /// SideStore-family apps read Documents/PairingFile_RemoteRP.plist.
     static let sideStoreName = "Documents/PairingFile_RemoteRP.plist"
     /// StikDebug and other idevice-based apps use rp_pairing_file.plist.
     static let idevice = "Documents/\(PairingPaths.fileName)"

@@ -12,7 +12,7 @@ struct AltServerView: View {
             header
 
             if let activity = host.activity {
-                GlassCard(tint: Aurora.violet) {
+                GlassCard(tint: Aurora.accent) {
                     VStack(alignment: .leading, spacing: 12) {
                         Text(activity.title).font(.headline)
                         GlassProgressBar(value: activity.fraction ?? 0)
@@ -125,7 +125,7 @@ struct AltServerView: View {
     private var header: some View {
         GlassCard(padding: 22) {
             HStack(spacing: 16) {
-                GlassBadge(systemImage: "server.rack", tint: host.isRunning ? Aurora.success : Aurora.violet, size: 64)
+                GlassBadge(systemImage: "server.rack", tint: host.isRunning ? Aurora.success : Aurora.accent, size: 64)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(host.isRunning ? "AltServer is running" : "AltServer is off")
                         .font(.title3.bold())
@@ -171,7 +171,7 @@ struct AltServerView: View {
 
     private func color(_ kind: AltServerHost.Event.Kind) -> Color {
         switch kind {
-        case .info: Aurora.lilac
+        case .info: Aurora.mist
         case .success: Aurora.success
         case .failure: Aurora.danger
         }

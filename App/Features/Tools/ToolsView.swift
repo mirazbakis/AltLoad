@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum ToolRoute: Hashable {
-    case altServer, pair, pairingToApps, library, certificates
+    case altServer, pair, pairingToApps, library, certificates, jit, location
 }
 
 /// Lets other screens open a tool (e.g. "Go to Pair" from Install).
@@ -12,13 +12,14 @@ final class ToolsRouter: ObservableObject {
     private init() {}
 }
 
-/// One tab for everything that isn't installing: AltServer, pairing, pairing
-/// files for other apps, the library and the Apple ID's certificates.
+/// One tab for everything that isn't installing: AltServer, JIT, location,
+/// pairing, pairing files for other apps, the library and the Apple ID's certificates.
 struct ToolsView: View {
     @ObservedObject private var router = ToolsRouter.shared
     @ObservedObject private var altServer = AltServerHost.shared
     @ObservedObject private var pairings = PairingStore.shared
     @ObservedObject private var install = InstallController.shared
+    @ObservedObject private var location = LocationSpoofer.shared
 
     var body: some View {
         NavigationStack(path: $router.path) {
@@ -27,7 +28,16 @@ struct ToolsView: View {
                     SectionLabel(title: "AltStore")
                     toolRow(.altServer, symbol: "server.rack", title: "AltServer",
                             detail: altServerDetail,
-                            tint: altServer.isRunning ? Aurora.success : Aurora.violet)
+                            tint: altServer.isRunning ? Aurora.success : Aurora.accent)
+                }
+
+                VStack(spacing: 10) {
+                    SectionLabel(title: "Developer")
+                    toolRow(.jit, symbol: "bolt.fill", title: "JIT",
+                            detail: "Open an emulator or other JIT app with JIT enabled")
+                    toolRow(.location, symbol: "location.fill", title: "Location",
+                            detail: locationDetail,
+                            tint: location.isRunning ? Aurora.success : Aurora.accent)
                 }
 
                 VStack(spacing: 10) {
@@ -35,7 +45,7 @@ struct ToolsView: View {
                     toolRow(.pair, symbol: "antenna.radiowaves.left.and.right", title: "Pair",
                             detail: pairings.selfPairing.map { "This iPhone: \($0.displayName)" } ?? "Create this iPhone's pairing file")
                     toolRow(.pairingToApps, symbol: "doc.badge.gearshape", title: "Pairing File to Apps",
-                            detail: "Put the pairing file inside Catalyst, SideStore, StikDebug and others")
+                            detail: "Put the pairing file inside SideStore, StikDebug and others")
                 }
 
                 VStack(spacing: 10) {
@@ -55,6 +65,8 @@ struct ToolsView: View {
                 case .pairingToApps: PairingToAppsView()
                 case .library: LibraryView()
                 case .certificates: CertificatesView()
+                case .jit: JITView()
+                case .location: LocationView()
                 }
             }
         }
@@ -68,13 +80,20 @@ struct ToolsView: View {
         return "Running · AltStore can find it on this iPhone"
     }
 
+    private var locationDetail: String {
+        if case .active(let c) = location.state {
+            return String(format: "Simulating %.4f, %.4f", c.latitude, c.longitude)
+        }
+        return "Make this iPhone report another location"
+    }
+
     private var libraryDetail: String {
         let n = install.apps.count
         let files = pairings.items.count
         return "\(n) app\(n == 1 ? "" : "s") · \(files) pairing file\(files == 1 ? "" : "s")"
     }
 
-    private func toolRow(_ route: ToolRoute, symbol: String, title: String, detail: String, tint: Color = Aurora.violet) -> some View {
+    private func toolRow(_ route: ToolRoute, symbol: String, title: String, detail: String, tint: Color = Aurora.accent) -> some View {
         NavigationLink(value: route) {
             HStack(spacing: 14) {
                 Image(systemName: symbol)

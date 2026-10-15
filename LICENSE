@@ -1,101 +1,104 @@
 AltLoad License
-Version 1.0, September 2026
+Version 2.0, October 2026
 
-Copyright (c) 2026 mirazbakis and AltLoad contributors
+Copyright (c) 2026 mirazbakis. All rights reserved.
 
-AltLoad contains code derived from other projects. Those portions stay under
-their original licenses, which are reproduced in THIRD_PARTY_NOTICES.md:
+AltLoad's source code, documentation, artwork (including the AltLoad name and
+logo) and builds made from them (together, the "Software") are owned by
+mirazbakis. The source is published so people can read it, check what it
+does, and build it for themselves. Publishing it does not give away any
+rights except the ones written below.
+
+-------------------------------------------------------------------------------
+1. What you may do
+-------------------------------------------------------------------------------
+
+As long as you follow section 2, you may, free of charge:
+
+  a. Use. Download, install and use official AltLoad builds on devices you
+     own or are authorised to manage, for your own personal, non-commercial
+     purposes.
+
+  b. Build. Build the Software from this source, including in your own
+     GitHub fork using GitHub Actions, and install that build on your own
+     devices, for the same purposes.
+
+  c. Fork and contribute. Fork the repository on GitHub, as GitHub's Terms
+     of Service allow, and modify your fork in order to propose changes back
+     to AltLoad. By sending a contribution (for example a pull request), you
+     agree that mirazbakis may use, change and distribute it as part of the
+     Software under this license or any later version of it.
+
+  d. Read and refer. Read and study the source, and quote short parts of it
+     with credit when discussing or reviewing AltLoad.
+
+-------------------------------------------------------------------------------
+2. What you may not do without written permission
+-------------------------------------------------------------------------------
+
+  a. Redistribute the Software or builds of it, modified or not, outside of
+     GitHub's own fork feature. Link people to the official repository,
+     releases or website instead.
+
+  b. Publish a modified version as a separate app or project, or present one
+     as the official AltLoad.
+
+  c. Use the Software commercially: sell it or builds of it, charge for
+     access to it, include it in a paid product, subscription, signing,
+     "certificate" or sideloading service or app store, put downloads behind
+     ads, link shorteners or donations, or use it to provide a paid service.
+
+  d. Use the AltLoad name or logo for anything other than referring to
+     AltLoad accurately, or in a way that suggests endorsement.
+
+  e. Remove or change this license, the copyright notice or
+     THIRD_PARTY_NOTICES.md in any copy of the Software, including builds.
+
+  f. Use the Software to install, distribute or facilitate apps you don't
+     have the right to use, such as pirated or cracked apps, or to access
+     devices or accounts you aren't authorised to access.
+
+To ask for permission, open an issue at https://github.com/mirazbakis/AltLoad
+or contact mirazbakis through GitHub.
+
+If you break these terms, every permission in section 1 ends automatically.
+It is restored if you fix the breach within 30 days of becoming aware of it.
+
+-------------------------------------------------------------------------------
+3. Third-party code
+-------------------------------------------------------------------------------
+
+Some parts of AltLoad come from other projects. Those parts stay under their
+original licenses, reproduced in THIRD_PARTY_NOTICES.md, and nothing in this
+license limits or adds to the rights those licenses give:
 
   - StikPair, Copyright (c) 2026 StephenDev0, StikPair License (MIT,
-    Non-Commercial). AltLoad's pairing flow (App/PairingController.swift,
-    App/KeepAlive.swift, App/LocalNetworkAuthorization.swift,
-    App/AppleTVDiscovery.swift, rust/src/lib.rs and the build scripts)
-    is derived from it.
+    Non-Commercial). AltLoad's pairing flow (App/Services/PairingController.swift,
+    App/Services/KeepAlive.swift, App/Services/LocalNetworkAuthorization.swift,
+    App/Services/AppleTVDiscovery.swift, rust/src/lib.rs and
+    scripts/build-rust.sh) is derived from it.
   - idevice, Copyright 2026 Jackson Coxson, MIT License. rust/src/lib.rs is
     derived from its ffi/src/pairable_host.rs.
 
-Nothing in this license grants more rights to those portions than their
-original licenses do.
-
--------------------------------------------------------------------------------
-1. Definitions
--------------------------------------------------------------------------------
-
-"Software" means the AltLoad source code, documentation, artwork (including
-the AltLoad name and logo) and any builds made from them.
-
-"Non-Commercial" means not primarily intended for or directed towards
-commercial advantage or monetary compensation. The following are Commercial,
-and therefore NOT permitted under this license:
-
-  a. selling the Software, or builds of it, or charging for access to them;
-  b. including the Software in a paid product, subscription, paid signing
-     service, paid "certificate" or sideloading service, or paid app store;
-  c. distributing the Software, or builds of it, in a way that earns money,
-     for example behind ad walls, link shorteners, paid downloads or
-     donation-gated downloads;
-  d. using the Software to provide a service to others for payment.
-
-Personal use, study, modification, and sharing the Software for free are
-Non-Commercial.
-
--------------------------------------------------------------------------------
-2. Permissions
--------------------------------------------------------------------------------
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of the Software to use, copy, modify, merge, publish and distribute the
-Software for Non-Commercial purposes, and to permit persons to whom the
-Software is furnished to do so, subject to the conditions in section 3.
-
--------------------------------------------------------------------------------
-3. Conditions
--------------------------------------------------------------------------------
-
-3.1 Notices. This license, the copyright notices above and
-    THIRD_PARTY_NOTICES.md must be included in all copies or substantial
-    portions of the Software, including builds (for example in an "About"
-    or "Licenses" screen, or a file shipped alongside the build).
-
-3.2 Modified versions. If you distribute a modified version, you must state
-    clearly that it is modified and must not present it as the official
-    AltLoad. You may say it is "based on AltLoad".
-
-3.3 Name and logo. The AltLoad name and logo identify the official project.
-    You may use them to refer to AltLoad accurately. You may not use them as
-    the name or icon of a modified version, or in a way that suggests
-    endorsement by the AltLoad authors, without written permission.
-
-3.4 Lawful use. You may not use the Software to install, distribute or
-    facilitate apps you do not have the right to use, such as pirated or
-    cracked apps, or to access devices or accounts you are not authorized to
-    access.
-
-3.5 Non-Commercial only. Any Commercial use requires prior written
-    permission from the AltLoad authors. For the StikPair-derived portions,
-    it also requires permission from StephenDev0
-    (StephenDev0@outlook.com), as required by the StikPair License.
-
-If you break any of these conditions, your rights under this license end
-automatically. They are restored if you fix the breach within 30 days of
-becoming aware of it.
+Builds also include Rust crates under their own licenses (mostly MIT and/or
+Apache-2.0), including isideload by nab138 (MIT).
 
 -------------------------------------------------------------------------------
 4. No affiliation
 -------------------------------------------------------------------------------
 
 AltLoad is an independent project. It is not affiliated with, endorsed by or
-sponsored by Apple Inc., AltStore, Riley Testut, SideStore or StikDebug.
-All trademarks belong to their respective owners.
+sponsored by Apple Inc., AltStore or Riley Testut. All trademarks belong to
+their respective owners.
 
 -------------------------------------------------------------------------------
-5. Disclaimer of warranty and limitation of liability
+5. No warranty, limitation of liability
 -------------------------------------------------------------------------------
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE, INCLUDING ANY LOSS OF DATA, LOSS OF ACCESS TO AN APPLE ACCOUNT, OR

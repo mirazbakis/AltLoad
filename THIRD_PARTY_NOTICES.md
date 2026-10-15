@@ -5,12 +5,12 @@ AltLoad includes or is derived from the following software. Each is used under t
 | Project | How AltLoad uses it | License |
 |---|---|---|
 | [StikPair](https://github.com/StephenDev0/StikPair) by StephenDev0 | On-device pairing flow, pairing host FFI, build scripts | StikPair License (MIT, Non-Commercial) |
-| [idevice](https://github.com/jkcoxson/idevice) by Jackson Coxson | Device pairing, tunnel, AFC and installation_proxy. `rust/src/lib.rs` is derived from its `ffi/src/pairable_host.rs` | MIT |
+| [idevice](https://github.com/jkcoxson/idevice) by Jackson Coxson | Device pairing, tunnel, AFC, installation_proxy, Developer Disk Image mounting, debugserver (JIT) and location simulation. `rust/src/lib.rs` is derived from its `ffi/src/pairable_host.rs` | MIT |
 | [isideload](https://github.com/nab138/isideload) by nab138 | Apple ID sign-in, developer services and code signing (compiled into builds) | MIT |
 
 Builds also include the Rust crates these projects depend on. Each is under its own license, mostly MIT and/or Apache-2.0. Run `cargo about generate` or `cargo license` in `rust/` to see the full list.
 
-AltLoad does **not** include or redistribute [AltStore](https://altstore.io) or [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN). AltStore is downloaded from its official source when you install it, and LocalDevVPN is installed separately from the App Store.
+AltLoad does **not** include or redistribute [AltStore](https://altstore.io), [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN) or Apple's Developer Disk Image. AltStore is downloaded from its official source when you install it, LocalDevVPN is installed separately from the App Store, and the Developer Disk Image is downloaded from [doronz88/DeveloperDiskImage](https://github.com/doronz88/DeveloperDiskImage) the first time you use JIT or Location.
 
 ---
 

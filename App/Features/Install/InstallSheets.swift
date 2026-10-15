@@ -158,7 +158,7 @@ struct RevokeSheet: View {
                                 }
                                 Spacer()
                                 Image(systemName: selected.contains(cert.serial) ? "checkmark.circle.fill" : "circle")
-                                    .foregroundStyle(Aurora.violet)
+                                    .foregroundStyle(Aurora.accent)
                             }
                         }
                         .foregroundStyle(.primary)

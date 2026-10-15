@@ -30,7 +30,7 @@ AltLoad handles sensitive things: your Apple ID sign-in, a development certifica
 
 **In scope:** code in this repository, including:
 
-- handling of Apple ID credentials and 2FA (`App/AppleIDStore.swift`, `App/InstallSheets.swift`, `rust/src/install.rs`),
+- handling of Apple ID credentials and 2FA (`App/Services/AppleIDStore.swift`, `App/Features/Install/InstallSheets.swift`, `rust/src/install.rs`),
 - storage and handling of pairing files, certificates and private keys,
 - the tunnel to the device and the install pipeline,
 - how AltLoad talks to anisette servers, the AltStore source and LocalDevVPN,

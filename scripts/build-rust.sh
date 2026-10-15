@@ -4,7 +4,7 @@
 set -euo pipefail
 
 export DEVELOPER_DIR="${DEVELOPER_DIR:-$(xcode-select -p)}"
-ROOT="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT/rust"
 
 echo "==> Building Rust static libs (release)"

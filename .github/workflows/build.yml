@@ -39,7 +39,7 @@ jobs:
           workspaces: rust
 
       - name: Build Rust FFI xcframework
-        run: bash ./build-rust.sh
+        run: bash ./scripts/build-rust.sh
 
       - name: Generate Xcode project
         run: xcodegen generate

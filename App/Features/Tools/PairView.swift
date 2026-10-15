@@ -152,7 +152,7 @@ struct PairView: View {
                         appleTVPin = String(value.filter(\.isNumber).prefix(6))
                     }
                     .padding(.vertical, 14)
-                    .glassEffect(.regular.tint(Aurora.indigo.opacity(0.3)).interactive(), in: .rect(cornerRadius: 22))
+                    .glassEffect(.regular.tint(Aurora.navy.opacity(0.3)).interactive(), in: .rect(cornerRadius: 22))
                 GlassActionButton(title: "Pair", systemImage: "link", prominent: true) {
                     controller.submitAppleTVPin(appleTVPin)
                 }
@@ -193,7 +193,7 @@ struct PairView: View {
                         .padding(.vertical, 6)
                 }
                 .buttonStyle(.glassProminent)
-                .tint(Aurora.violet)
+                .tint(Aurora.accent)
                 .controlSize(.extraLarge)
 
                 footnote(saved.isAppleTV
@@ -229,18 +229,18 @@ struct PairView: View {
     private var locationGuidance: some View {
         switch controller.locationAuthorization {
         case .notDetermined:
-            GlassCard(tint: Aurora.violet) {
+            GlassCard(tint: Aurora.accent) {
                 HStack(spacing: 12) {
                     Image(systemName: "location.circle.fill")
                         .font(.title2)
-                        .foregroundStyle(Aurora.violet)
+                        .foregroundStyle(Aurora.accent)
                     Text("When iOS asks, tap **Allow While Using App** so pairing keeps running while you're in Settings.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
             }
         case .authorizedWhenInUse:
-            GlassCard(tint: Aurora.violet) {
+            GlassCard(tint: Aurora.accent) {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("For the most reliable pairing, allow location **Always**.")
                         .font(.footnote)
@@ -269,7 +269,7 @@ struct PairView: View {
                 Image(systemName: "doc.badge.gearshape")
                     .font(.title2)
                     .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(Aurora.lilac)
+                    .foregroundStyle(Aurora.mist)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Last pairing")
                         .font(.caption)
@@ -349,7 +349,7 @@ struct PairView: View {
         switch controller.phase {
         case .success: Aurora.success
         case .failed: Aurora.danger
-        default: Aurora.violet
+        default: Aurora.accent
         }
     }
 
