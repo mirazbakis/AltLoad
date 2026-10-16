@@ -67,6 +67,20 @@ ENTITLEMENTS="$WORK/entitlements.plist"
 security cms -D -i "$PROFILE" > "$WORK/profile.plist"
 pb -x -c "Print :Entitlements" "$WORK/profile.plist" > "$ENTITLEMENTS"
 
+# --- Revoked/expired identity: codesign won't use it, so sign with rcodesign -
+# RCODESIGN_P12 / RCODESIGN_PASSWORD are set by the workflow for those packs.
+# rcodesign signs nested bundles itself; unscoped entitlements apply to the app.
+if [ -n "${RCODESIGN_P12:-}" ]; then
+  echo ">> Signing with rcodesign (identity isn't valid for codesign)"
+  printf '%s' "${RCODESIGN_PASSWORD:-}" > "$WORK/p12pw"
+  rcodesign sign \
+    --p12-file "$RCODESIGN_P12" \
+    --p12-password-file "$WORK/p12pw" \
+    --entitlements-xml-file "$ENTITLEMENTS" \
+    "$APP_PATH"
+  rm -f "$WORK/p12pw"
+else
+
 # --- Sign nested code first, then the app ---------------------------------
 echo ">> Signing nested frameworks / dylibs"
 find "$APP_PATH" \( -name "*.framework" -o -name "*.dylib" \) -print0 \
@@ -90,6 +104,7 @@ codesign --force --sign "$IDENTITY" \
 
 echo ">> Verifying signature"
 codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+fi
 
 echo ">> Repacking -> $(basename "$OUTPUT_IPA")"
 mkdir -p "$(dirname "$OUTPUT_IPA")"

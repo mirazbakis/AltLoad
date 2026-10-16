@@ -62,6 +62,25 @@ jobs:
           curl -fL --retry 3 -o "$RUNNER_TEMP/AltLoad.ipa" "$IPA_URL"
           ls -lh "$RUNNER_TEMP/AltLoad.ipa"
 
+      # Apple's codesign refuses revoked or expired identities, so those packs are
+      # signed with rcodesign, which reads the .p12 directly. Pinned and checked
+      # against the release's published SHA-256.
+      - name: Install rcodesign
+        run: |
+          set -euo pipefail
+          V=0.29.0
+          F="apple-codesign-$V-macos-universal.tar.gz"
+          SHA=d98372d5524226ccf9dc0eda03d4e4f5826182dabb2fc3f2bd303ed9113a748d
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/$F" \
+            "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign/$V/$F"
+          echo "$SHA  $RUNNER_TEMP/$F" | shasum -a 256 -c -
+          mkdir -p "$RUNNER_TEMP/rcodesign"
+          tar -xzf "$RUNNER_TEMP/$F" -C "$RUNNER_TEMP/rcodesign"
+          BIN="$(find "$RUNNER_TEMP/rcodesign" -type f -name rcodesign | head -n1)"
+          chmod +x "$BIN"
+          echo "$(dirname "$BIN")" >> "$GITHUB_PATH"
+          "$BIN" --version
+
       - name: Sign every cert pack & build manifests
         env:
           DEFAULT_P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
@@ -89,16 +108,20 @@ jobs:
           # trailing "!" (the cert pack's readme says "Passwords are WSF!"). macOS
           # can't read .p12 files written with OpenSSL 3's default encryption, so if
           # a direct import fails, re-export the pack in the legacy format first.
+          # On success SIGN_P12/SIGN_PW name the file and password that worked, for
+          # rcodesign to reuse.
           import_identity() {
-            local p12="$1" kc="$2" pw tmp="$RUNNER_TEMP/legacy-$$"
+            local p12="$1" kc="$2" pw tmp="$RUNNER_TEMP/legacy-$(basename "$1" .p12)"
             for pw in "$DEFAULT_P12_PASSWORD" "${DEFAULT_P12_PASSWORD}!"; do
-              security import "$p12" -P "$pw" -A -t cert -f pkcs12 -k "$kc" && return 0
+              if security import "$p12" -P "$pw" -A -t cert -f pkcs12 -k "$kc"; then
+                SIGN_P12="$p12"; SIGN_PW="$pw"; return 0
+              fi
               if [ -x "$OPENSSL" ] \
                 && "$OPENSSL" pkcs12 -in "$p12" -passin "pass:$pw" -nodes -out "$tmp.pem" 2>/dev/null \
                 && "$OPENSSL" pkcs12 -export -legacy -in "$tmp.pem" -out "$tmp.p12" -passout "pass:$pw"; then
                 rm -f "$tmp.pem"
                 if security import "$tmp.p12" -P "$pw" -A -t cert -f pkcs12 -k "$kc"; then
-                  rm -f "$tmp.p12"; return 0
+                  SIGN_P12="$tmp.p12"; SIGN_PW="$pw"; return 0
                 fi
               fi
               rm -f "$tmp.pem" "$tmp.p12"
@@ -138,7 +161,12 @@ jobs:
               echo "no codesigning identity in $(basename "$p12") after import" >&2; return 1
             fi
 
-            ota/scripts/resign.sh "$SRC_IPA" "$profile" "$HASH" "$bundle_id" "$RUNNER_TEMP/$slug.ipa"
+            if [ "$STATUS" = "valid" ]; then
+              ota/scripts/resign.sh "$SRC_IPA" "$profile" "$HASH" "$bundle_id" "$RUNNER_TEMP/$slug.ipa"
+            else
+              RCODESIGN_P12="$SIGN_P12" RCODESIGN_PASSWORD="$SIGN_PW" \
+                ota/scripts/resign.sh "$SRC_IPA" "$profile" "$HASH" "$bundle_id" "$RUNNER_TEMP/$slug.ipa"
+            fi
             ota/scripts/build-manifest.sh "$RUNNER_TEMP/$slug.ipa" "$BASE_URL" "_site" "$slug" "$ICON"
             echo "STATUS=$STATUS" >> "_site/installs/$slug/meta.txt"
           }
