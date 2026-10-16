@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configure Pages
         id: pages
@@ -68,7 +68,11 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           BASE_URL: ${{ steps.pages.outputs.base_url }}
         run: |
-          set -euo pipefail
+          # No -e here: a pack that fails is skipped so the others (and the site)
+          # still go out. Each pack runs in its own subshell with -e instead.
+          # (Actions starts bash with -e, so it has to be switched off here.)
+          set +e
+          set -uo pipefail
           : "${DEFAULT_P12_PASSWORD:=WSF}"
           : "${KEYCHAIN_PASSWORD:=ota-signing-temp}"
           chmod +x ota/scripts/*.sh
@@ -79,46 +83,87 @@ jobs:
           mkdir -p "$PROFILES_DIR"
           SRC_IPA="$RUNNER_TEMP/AltLoad.ipa"
           ICON="web/AltLoad.png"
+          OPENSSL="$(brew --prefix openssl@3 2>/dev/null)/bin/openssl"
 
-          FOUND=0
-          for dir in ota/certs/*/; do
-            n="$(basename "$dir")"
-            p12s=( "$dir"*.p12 );             p12="${p12s[0]:-}"
-            profs=( "$dir"*.mobileprovision ); profile="${profs[0]:-}"
+          # Import a .p12 into a keychain. Tries the password as given and with a
+          # trailing "!" (the cert pack's readme says "Passwords are WSF!"). macOS
+          # can't read .p12 files written with OpenSSL 3's default encryption, so if
+          # a direct import fails, re-export the pack in the legacy format first.
+          import_identity() {
+            local p12="$1" kc="$2" pw tmp="$RUNNER_TEMP/legacy-$$"
+            for pw in "$DEFAULT_P12_PASSWORD" "${DEFAULT_P12_PASSWORD}!"; do
+              security import "$p12" -P "$pw" -A -t cert -f pkcs12 -k "$kc" && return 0
+              if [ -x "$OPENSSL" ] \
+                && "$OPENSSL" pkcs12 -in "$p12" -passin "pass:$pw" -nodes -out "$tmp.pem" 2>/dev/null \
+                && "$OPENSSL" pkcs12 -export -legacy -in "$tmp.pem" -out "$tmp.p12" -passout "pass:$pw"; then
+                rm -f "$tmp.pem"
+                if security import "$tmp.p12" -P "$pw" -A -t cert -f pkcs12 -k "$kc"; then
+                  rm -f "$tmp.p12"; return 0
+                fi
+              fi
+              rm -f "$tmp.pem" "$tmp.p12"
+            done
+            echo "could not import $(basename "$p12"): password isn't WSF or WSF!, or the .p12 is unreadable" >&2
+            return 1
+          }
 
-            if [ -z "$p12" ] || [ -z "$profile" ]; then
-              echo "::warning::Skipping cert pack '$n' — needs one .p12 and one .mobileprovision"
-              continue
-            fi
-
-            slug="altload${n}"
-            bundle_id="com.mirazbakis.altload${n}"
-            FOUND=$((FOUND+1))
-            echo "::group::Signing $slug ($bundle_id)"
-
+          sign_one() {
+            local n="$1" p12="$2" profile="$3"
+            local slug="altload${n}" bundle_id="com.mirazbakis.altload${n}"
+            local KC="$RUNNER_TEMP/kc-$n.keychain-db"
             # Dedicated keychain per cert so the identity is unambiguous.
-            KC="$RUNNER_TEMP/kc-$n.keychain-db"
             security create-keychain -p "$KEYCHAIN_PASSWORD" "$KC"
             security set-keychain-settings -lut 21600 "$KC"
             security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KC"
-            security import "$p12" -P "$DEFAULT_P12_PASSWORD" -A -t cert -f pkcs12 -k "$KC"
+            import_identity "$p12" "$KC"
             security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KC" >/dev/null
             security list-keychain -d user -s "$KC" login.keychain-db
             cp "$profile" "$PROFILES_DIR/$slug.mobileprovision"
 
-            HASH="$(security find-identity -v -p codesigning "$KC" | awk 'NR==1{print $2}')"
+            local HASH
+            HASH="$(security find-identity -v -p codesigning "$KC" | awk 'NR==1 && $2 ~ /^[0-9A-F]+$/ {print $2}')"
             if [ -z "$HASH" ]; then
-              echo "::error::No codesigning identity in $p12 (wrong password?)"; exit 1
+              echo "no codesigning identity in $(basename "$p12") after import" >&2; return 1
             fi
 
             ota/scripts/resign.sh "$SRC_IPA" "$profile" "$HASH" "$bundle_id" "$RUNNER_TEMP/$slug.ipa"
             ota/scripts/build-manifest.sh "$RUNNER_TEMP/$slug.ipa" "$BASE_URL" "_site" "$slug" "$ICON"
+          }
 
+          echo "| Cert pack | Bundle id | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          SIGNED=0; FAILED=0
+          for dir in ota/certs/*/; do
+            n="$(basename "$dir")"
+            p12s=( "$dir"*.p12 );             p12="${p12s[0]:-}"
+            profs=( "$dir"*.mobileprovision ); profile="${profs[0]:-}"
+            if [ -z "$p12" ] || [ -z "$profile" ]; then
+              echo "::warning title=Cert pack $n skipped::needs one .p12 and one .mobileprovision"
+              continue
+            fi
+
+            echo "::group::Signing altload$n"
+            LOG="$RUNNER_TEMP/sign-$n.log"
+            ( set -euo pipefail; sign_one "$n" "$p12" "$profile" ) 2>&1 | tee "$LOG"
+            rc=${PIPESTATUS[0]}
             echo "::endgroup::"
+
+            if [ "$rc" -eq 0 ]; then
+              SIGNED=$((SIGNED+1))
+              echo "| $n | com.mirazbakis.altload$n | signed |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              FAILED=$((FAILED+1))
+              rm -rf "_site/installs/altload$n"
+              # Annotations are readable without signing in, unlike step logs.
+              msg="$(grep -v '^>>' "$LOG" | grep -v '^ *$' | tail -n 4 | tr '\n' ' ' | cut -c1-500)"
+              echo "::warning title=Cert pack $n skipped::$msg"
+              echo "| $n | com.mirazbakis.altload$n | failed: ${msg//|/ } |" >> "$GITHUB_STEP_SUMMARY"
+            fi
           done
 
-          if [ "$FOUND" -eq 0 ]; then
-            echo "::error::No cert packs found under ota/certs/*/ — nothing to sign."; exit 1
+          echo "Signed $SIGNED pack(s), $FAILED failed."
+          if [ "$SIGNED" -eq 0 ]; then
+            echo "::warning::No cert pack could be signed. Deploying the site without install buttons."
           fi
 
       - name: Build OTA site
