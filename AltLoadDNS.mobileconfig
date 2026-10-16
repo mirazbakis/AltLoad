@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ConsentText</key>
+	<dict>
+		<key>default</key>
+		<string>This is AltLoad's official configuration profile. Feel free to uninstall this as soon as you install AltStore.</string>
+	</dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerURL</key>
+				<string>https://da9c98.dns.nextdns.io/da9c98</string>
+			</dict>
+			<key>PayloadDescription</key>
+			<string>AltLoad</string>
+			<key>PayloadDisplayName</key>
+			<string>AltLoad</string>
+			<key>PayloadIdentifier</key>
+			<string>com.apple.dnsSettings.managed.58491917-701b-4e8a-bd87-64f543a15d50</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>58491917-701b-4e8a-bd87-64f543a15d50</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>This is AltLoad's official configuration profile. Feel free to uninstall this as soon as you install AltStore.</string>
+	<key>PayloadDisplayName</key>
+	<string>AltLoad</string>
+	<key>PayloadIdentifier</key>
+	<string>be25522a-9d89-480c-8aaf-d4e06ec0408d</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>be25522a-9d89-480c-8aaf-d4e06ec0408d</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>
