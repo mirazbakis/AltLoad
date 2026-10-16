@@ -1,20 +1,18 @@
-/* AltLoad pages (index.html, terms.html). A solid
-   midnight-blue page, dark translucent cards with a hairline edge, and blue
-   gradient buttons. */
+/* AltLoad pages (terms.html). Midnight navy with mint accents, matching index.html. */
 :root{
-  --night:#011a5c;
-  --night-top:#011a5c;
-  --card:rgba(15,22,40,.62);
-  --card-2:rgba(15,22,40,.8);
-  --edge:rgba(255,255,255,.10);
-  --edge-2:rgba(255,255,255,.18);
-  --accent:#2170f5;
-  --accent-2:#4dadff;
-  --valid:#34d399;
-  --ink:#f4f6fb;
-  --ink-2:#c6cee0;
-  --ink-3:#a5aec4;
-  --sans:-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",Inter,Roboto,sans-serif;
+  --night:#060d24;
+  --night-top:#060d24;
+  --card:#0b1533;
+  --card-2:#101d44;
+  --edge:rgba(140,170,255,.14);
+  --edge-2:rgba(140,170,255,.30);
+  --accent:#1fb57d;
+  --accent-2:#3ee0a1;
+  --valid:#3ee0a1;
+  --ink:#eef2ff;
+  --ink-2:rgba(214,224,255,.72);
+  --ink-3:rgba(214,224,255,.48);
+  --sans:-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",Roboto,sans-serif;
   /* terms.html still uses these names */
   --line:var(--edge);
   --line-2:var(--edge-2);
@@ -27,7 +25,7 @@ html{background:var(--night);scroll-behavior:smooth;overflow-x:clip}
 body{
   font-family:var(--sans);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;
   min-height:100vh;overflow-x:clip;
-  background:radial-gradient(520px 340px at 50% 40px,rgba(77,173,255,.22),rgba(77,173,255,0) 70%) no-repeat,var(--night);
+  background:radial-gradient(700px 500px at 12% -10%,rgba(62,224,161,.16),transparent 70%) no-repeat,radial-gradient(800px 600px at 100% 0%,rgba(90,169,255,.16),transparent 70%) no-repeat,var(--night);
 }
 a{color:inherit}
 img{display:block;max-width:100%}
