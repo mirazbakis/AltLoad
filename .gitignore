@@ -57,6 +57,10 @@ rp_pairing_file*.plist
 # ---- Claude Code: personal settings stay local ----
 .claude/settings.local.json
 
+# ---- Signed installs are published by the signing workflow, not source ----
+# A local copy may be pulled in just to preview the site; never commit it.
+web/installs/
+
 # ---- OTA ad-hoc signing packs: intentionally committed ----
 # These ad-hoc .p12/.mobileprovision are deliberately tracked (owner's choice,
 # public repo). They only produce installs for UDIDs already in each profile.

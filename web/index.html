@@ -9,114 +9,114 @@
 <meta property="og:description" content="AltStore, SideStore and LiveContainer, installed on the iPhone itself. Tap to install.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://mirazbakis.github.io/AltLoad/AltLoad.png">
-<meta name="theme-color" content="#03050b">
+<meta name="theme-color" content="#061436">
 <link rel="icon" type="image/png" href="AltLoad.png">
 <link rel="apple-touch-icon" href="AltLoad.png">
 <link rel="stylesheet" href="assets/altload.css">
 <style>
-  /* ---- layout: app card beside the install list, stacked on narrow screens ---- */
-  /* On a phone the order is app, install list, requirements, so Install stays near the top. */
-  .shell{display:grid;grid-template-columns:340px minmax(0,1fr);grid-template-areas:"app list" "need list";grid-template-rows:auto 1fr;gap:20px;align-items:start;padding-top:28px}
-  .app{grid-area:app}.list{grid-area:list}.need-card{grid-area:need}
-  @media (max-width:860px){.shell{grid-template-columns:1fr;grid-template-areas:"app" "list" "need";grid-template-rows:auto;gap:14px;padding-top:12px}}
+  main.wrap{padding-top:18px}
 
-  /* ---- app card ---- */
-  .app{padding:26px}
-  @media (max-width:860px){.app{text-align:center;padding:22px}}
-  .app .icon{width:92px;height:92px;border-radius:22px;box-shadow:0 18px 44px rgba(0,0,0,.55),0 0 70px -8px rgba(46,212,127,.5),0 0 0 1px rgba(255,255,255,.07)}
-  @media (max-width:860px){.app .icon{margin:0 auto;width:76px;height:76px;border-radius:18px}.app h1{font-size:34px;margin-top:14px}.app .sub{margin:10px 0 16px}}
-  .app h1{font-size:40px;font-weight:800;letter-spacing:-.035em;margin:18px 0 4px}
-  .app .ver{font-size:14.5px;color:var(--ink-3);font-weight:600}
-  .app .sub{font-size:15.5px;color:var(--ink-2);margin:14px 0 20px;line-height:1.5}
-  .app .btns{display:grid;gap:10px}
-  .app .btn{min-height:46px;border-radius:14px;font-weight:700;font-size:15.5px}
-  .need-card{padding:20px 26px 10px}
-  .need-card h2{font-size:17px;font-weight:800;margin-bottom:6px}
-  .need{list-style:none}
-  .need li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
-  .need li:last-child{border-bottom:0}
-  .need li span:first-child{font-weight:700}
-  .need li span:last-child{color:var(--ink-2);text-align:right}
-  .need a{color:var(--accent);text-decoration:none}
+  /* ---- hero ---- */
+  .hero{text-align:center;padding:30px 0 8px}
+  .hero-icon{position:relative;width:132px;height:132px;margin:0 auto 22px}
+  .hero-icon::after{content:"";position:absolute;inset:-30% -30% -22%;z-index:-1;border-radius:50%;
+    background:radial-gradient(closest-side,rgba(77,173,255,.55),rgba(77,173,255,0) 72%);filter:blur(6px)}
+  .hero-icon img{width:132px;height:132px;filter:drop-shadow(0 24px 44px rgba(0,0,0,.6))}
+  .hero h1{font-size:52px;font-weight:850;letter-spacing:-.04em;margin-bottom:8px}
+  .hero .sub{font-size:17px;color:var(--ink-2);max-width:460px;margin:0 auto 18px;line-height:1.5}
+  .hero .chips{margin-bottom:22px}
+  .hero-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:440px;margin:0 auto}
+  @media (max-width:480px){.hero h1{font-size:42px}.hero-btns{grid-template-columns:1fr}}
 
-  /* ---- install list ---- */
-  .list{overflow:hidden}
-  .list-head{display:flex;align-items:center;gap:12px;padding:20px 20px 14px}
-  .list-head h2{font-size:22px;font-weight:800;flex:1}
+  /* ---- install card ---- */
+  .list{overflow:hidden;margin-top:30px}
+  .list-head{display:flex;align-items:center;gap:12px;padding:22px 22px 16px}
+  .list-head h2{font-size:21px;font-weight:800;flex:1}
   .list-head h2 span{color:var(--ink-3);font-weight:700;margin-left:4px}
-  .icon-btn{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:999px;border:1px solid var(--line);background:var(--raised);color:var(--ink);cursor:pointer}
+  .icon-btn{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:999px;border:1px solid var(--line-2);
+    background:var(--glass);color:var(--ink);cursor:pointer;transition:background .15s}
+  .icon-btn:hover{background:var(--glass-2)}
   .icon-btn svg{width:18px;height:18px}
-  .icon-btn[aria-expanded="true"]{background:var(--accent);border-color:transparent}
-  .search{display:none;padding:0 20px 14px}
+  .icon-btn[aria-expanded="true"]{background:var(--accent);border-color:transparent;color:#fff}
+  .search{display:none;padding:0 22px 14px}
   .search.open{display:block}
-  .search input{width:100%;height:44px;padding:0 14px 0 40px;border-radius:12px;border:1px solid var(--line-2);background:var(--raised) no-repeat 13px 50%/17px;
+  .search input{width:100%;height:46px;padding:0 14px 0 42px;border-radius:13px;border:1px solid var(--line-2);background:var(--glass) no-repeat 14px 50%/17px;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23eef3fb' stroke-opacity='.5' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
     color:var(--ink);font:500 16px var(--sans);outline:none}
   .search input:focus{border-color:var(--accent)}
 
-  .tos{display:flex;gap:11px;align-items:center;padding:13px 20px;border-top:1px solid var(--line);font-size:15px;font-weight:600;cursor:pointer;transition:background .3s}
-  .tos input{width:20px;height:20px;flex:none;accent-color:var(--accent);margin:0}
-  .tos a{color:var(--accent);text-decoration:none}
-  .tos.nudge{background:rgba(46,212,127,.17)}
+  .tos{display:flex;gap:12px;align-items:center;padding:15px 22px;border-top:1px solid var(--line);font-size:15px;font-weight:600;cursor:pointer;transition:background .3s}
+  .tos input{width:21px;height:21px;flex:none;accent-color:var(--accent);margin:0}
+  .tos a{color:var(--accent);text-decoration:none;font-weight:700}
+  .tos.nudge{background:rgba(47,123,246,.22)}
 
+  /* step label shared by the DNS step and the signed-install list */
+  .step-line{padding:17px 22px 7px;border-top:1px solid var(--line)}
+  .kicker{display:block;font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-2);margin-bottom:4px}
+  .step-line h3{font-size:17px;font-weight:800;letter-spacing:-.02em}
+
+  /* ---- DNS step ---- */
+  .dns{padding:4px 22px 20px}
+  .dns-name{font-size:18px;font-weight:800;letter-spacing:-.02em}
+  .dns-sub{font-size:14px;color:var(--ink-2);margin-top:3px;line-height:1.5}
+  .dns-btn{display:flex;width:100%;justify-content:center;gap:10px;min-height:52px;margin-top:15px;border-radius:16px;
+    color:#fff;font-weight:800;font-size:15.5px;text-decoration:none;align-items:center;border:1px solid rgba(255,255,255,.26);
+    background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.38) inset,0 16px 32px -12px rgba(47,123,246,.7);transition:filter .15s,transform .15s}
+  .dns-btn svg{width:18px;height:18px;flex:none}
+  .dns-btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+  .dns-btn[aria-disabled="true"]{opacity:.45;pointer-events:none;filter:saturate(.6)}
+  .dns-guide{margin-top:13px;border:1px solid var(--line);border-radius:14px;background:var(--glass);overflow:hidden}
+  .dns-guide summary{list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;font-size:14.5px;display:flex;justify-content:space-between;gap:12px}
+  .dns-guide summary::-webkit-details-marker{display:none}
+  .dns-guide summary::after{content:"+";color:var(--ink-3);font-weight:700}
+  .dns-guide[open] summary::after{content:"–"}
+  .dns-guide ol{margin:0;padding:0 18px 15px 36px;color:var(--ink-2);font-size:14px;line-height:1.55}
+  .dns-guide li{padding:3px 0}
+  .dns-guide li b{color:var(--ink)}
+
+  /* ---- signed-install rows ---- */
   .rows{list-style:none}
-  .rowi{display:flex;align-items:center;gap:14px;padding:13px 20px;border-top:1px solid var(--line)}
-  .rowi .ico{width:46px;height:46px;border-radius:11px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.07)}
+  .rowi{display:flex;align-items:center;gap:14px;padding:14px 22px;border-top:1px solid var(--line)}
+  .rowi .ico{width:46px;height:46px;border-radius:12px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.07)}
   .rowi .txt{flex:1;min-width:0}
   .rowi .name{font-size:17px;font-weight:800;letter-spacing:-.02em}
   .rowi .det{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink-3);margin-top:1px}
   .rowi .ok{display:inline-flex;align-items:center;gap:5px;color:var(--leaf);font-weight:700}
-  .rowi .ok::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--leaf)}
-  .get{flex:none;display:inline-flex;align-items:center;min-height:34px;padding:0 18px;border-radius:999px;font-weight:800;font-size:14.5px;
-    color:#042016;background:linear-gradient(180deg,var(--accent),var(--accent-deep));text-decoration:none;transition:opacity .15s,transform .15s,filter .15s;
-    box-shadow:0 1px 0 rgba(255,255,255,.28) inset,0 6px 16px -7px rgba(46,212,127,.55)}
+  .rowi .ok::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--leaf);box-shadow:0 0 8px var(--leaf)}
+  .get{flex:none;display:inline-flex;align-items:center;min-height:36px;padding:0 20px;border-radius:999px;font-weight:800;font-size:14.5px;
+    color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));text-decoration:none;
+    border:1px solid rgba(255,255,255,.26);transition:filter .15s,transform .15s;
+    box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 8px 18px -8px rgba(47,123,246,.7)}
   .get:hover{filter:brightness(1.05)}
   .get:active{transform:scale(.96)}
-  /* Locked until the Terms box is ticked. Still clickable so a tap can point at the box. */
-  .get[aria-disabled="true"],.btn[aria-disabled="true"]{opacity:.38;pointer-events:auto;cursor:not-allowed}
-  .note{padding:26px 20px;border-top:1px solid var(--line);color:var(--ink-2);font-size:15px;text-align:center}
+  .get[aria-disabled="true"],.dns-btn[aria-disabled="true"],.btn[aria-disabled="true"]{opacity:.45;pointer-events:auto;cursor:not-allowed}
+  .note{padding:28px 22px;border-top:1px solid var(--line);color:var(--ink-2);font-size:15px;text-align:center}
   .note b{color:var(--ink)}
 
-  /* ---- DNS profile step (sits between Terms and the signed installs) ---- */
-  .dns{padding:4px 20px 18px}
-  .dns-head{display:flex;align-items:flex-start;gap:12px}
-  .step-badge{flex:none;display:grid;place-items:center;width:26px;height:26px;margin-top:1px;border-radius:999px;
-    background:linear-gradient(180deg,var(--accent),var(--accent-deep));color:#042016;font-size:13px;font-weight:800;
-    box-shadow:0 1px 0 rgba(255,255,255,.28) inset}
-  .dns-name{font-size:17px;font-weight:800;letter-spacing:-.02em}
-  .dns-sub{font-size:14px;color:var(--ink-2);margin-top:3px;line-height:1.5}
-  /* The big DNS button reuses the gradient from .get but spans the card. */
-  .dns-btn{display:flex;width:100%;justify-content:center;gap:9px;min-height:46px;margin-top:14px;
-    border-radius:14px;padding:0 18px;font-size:15.5px}
-  .dns-btn svg{width:18px;height:18px;flex:none}
-  .dns-guide{margin-top:12px;border:1px solid var(--line);border-radius:12px;background:var(--raised)}
-  .dns-guide summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:700;font-size:14.5px;
-    display:flex;justify-content:space-between;gap:12px}
-  .dns-guide summary::-webkit-details-marker{display:none}
-  .dns-guide summary::after{content:"+";color:var(--ink-3);font-weight:700}
-  .dns-guide[open] summary::after{content:"–"}
-  .dns-guide ol{margin:0;padding:0 16px 14px 34px;color:var(--ink-2);font-size:14px;line-height:1.55}
-  .dns-guide li{padding:3px 0}
-  .dns-guide li b{color:var(--ink)}
+  /* liquid-glass edge: a soft light on the rounded corners of the pills and guide */
+  .get,.dns-btn,.dns-guide{position:relative}
+  .get::after,.dns-btn::after,.dns-guide::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;padding:1px;
+    background:linear-gradient(135deg,rgba(255,255,255,.6) 0%,rgba(255,255,255,.1) 26%,rgba(255,255,255,0) 50%,rgba(255,255,255,0) 72%,rgba(255,255,255,.22) 100%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+    mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
 
-  /* step label shared by the DNS step and the signed-install list */
-  .step-line{display:flex;align-items:center;gap:12px;padding:14px 20px 4px;border-top:1px solid var(--line)}
-  .step-line .step-badge{margin-top:0}
-  .step-line h3{font-size:15px;font-weight:800;letter-spacing:-.01em}
+  /* ---- you'll need ---- */
+  .needs{margin:26px auto 0;text-align:center}
+  .needs .label{margin-bottom:12px}
 
   /* ---- FAQ ---- */
-  .faq{max-width:760px;margin:0 auto;padding-top:64px}
-  .faq h2{font-size:24px;font-weight:800;margin-bottom:10px}
+  .faq{margin:0 auto;padding-top:56px}
+  .faq h2{font-size:24px;font-weight:800;margin-bottom:10px;text-align:center}
   details{border-top:1px solid var(--line)}
   details:last-of-type{border-bottom:1px solid var(--line)}
-  summary{list-style:none;cursor:pointer;padding:16px 0;font-weight:700;font-size:16.5px;display:flex;justify-content:space-between;gap:16px}
+  summary{list-style:none;cursor:pointer;padding:17px 2px;font-weight:700;font-size:16px;display:flex;justify-content:space-between;gap:16px}
   summary::-webkit-details-marker{display:none}
   summary::after{content:"+";font-weight:700;color:var(--ink-3)}
   details[open] summary::after{content:"–"}
-  details p{color:var(--ink-2);padding:0 0 16px;font-size:15px}
+  details p{color:var(--ink-2);padding:0 2px 17px;font-size:15px}
 
-  @media (max-width:420px){
-    .app{padding:22px 18px}
+  @media (max-width:440px){
     .list-head,.search{padding-left:16px;padding-right:16px}
     .tos,.rowi,.step-line,.dns{padding-left:16px;padding-right:16px}
     .rowi{gap:12px}
@@ -137,76 +137,70 @@
 </header>
 
 <main class="wrap">
-  <div class="shell">
-    <!-- ===== The app ===== -->
-    <aside class="app surface">
-      <img class="icon" src="AltLoad.png" alt="AltLoad icon">
-      <h1>AltLoad</h1>
-      <div class="ver" id="ver">Free · iOS 27 or later</div>
-      <p class="sub">Signs and installs AltStore, SideStore and LiveContainer with your own Apple ID, right on the iPhone. No computer.</p>
-      <div class="btns">
-        <a class="btn btn-quiet" id="dlBtn" aria-disabled="true" href="https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
-          Download IPA
-        </a>
-        <a class="btn btn-quiet" href="https://github.com/mirazbakis/AltLoad">View on GitHub</a>
-      </div>
-    </aside>
 
-    <aside class="need-card surface" aria-labelledby="needTitle">
-      <h2 id="needTitle">You'll need</h2>
-      <ul class="need">
-        <li><span>iOS</span><span>27 or later</span></li>
-        <li><span>Developer Mode</span><span>On</span></li>
-        <li><span>LocalDevVPN</span><span><a href="https://apps.apple.com/app/id6755608044">App Store</a></span></li>
-        <li><span>Apple ID</span><span>Free works</span></li>
-      </ul>
-    </aside>
+  <!-- ===== Hero ===== -->
+  <section class="hero">
+    <div class="hero-icon"><img src="AltLoad.png" alt="AltLoad icon"></div>
+    <h1>AltLoad</h1>
+    <p class="sub">Signs and installs AltStore, SideStore and LiveContainer with your own Apple ID, right on the iPhone. No computer.</p>
+    <div class="chips">
+      <span class="chip" id="ver"><span class="dot"></span> Free · iOS 27 or later</span>
+      <span class="chip">Open source</span>
+    </div>
+    <div class="hero-btns">
+      <a class="btn btn-primary" id="dlBtn" aria-disabled="true" href="https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+        Download IPA
+      </a>
+      <a class="btn btn-quiet" href="https://github.com/mirazbakis/AltLoad">View on GitHub</a>
+    </div>
+  </section>
 
-    <!-- ===== Signed installs ===== -->
-    <section class="list surface" id="install" aria-labelledby="installTitle">
-      <div class="list-head">
-        <h2 id="installTitle">Install<span id="count"></span></h2>
-        <button class="icon-btn" id="searchBtn" type="button" aria-label="Search" aria-expanded="false" aria-controls="searchBox">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        </button>
-      </div>
-      <div class="search" id="searchBox">
-        <input id="q" type="search" placeholder="Search" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search">
-      </div>
-      <label class="tos" id="tosRow"><input type="checkbox" id="tos"> <span>I have accepted the <a href="terms.html">Terms of Service</a></span></label>
+  <!-- ===== Install flow: Terms → DNS → signed install ===== -->
+  <section class="list surface" id="install" aria-labelledby="installTitle">
+    <div class="list-head">
+      <h2 id="installTitle">Install<span id="count"></span></h2>
+    </div>
 
-      <!-- ===== Step 1: DNS profile (install this before the signed install) ===== -->
-      <!-- TODO: fill in the real name and description below. The profile is NextDNS. -->
-      <div class="step-line"><span class="step-badge" aria-hidden="true">1</span><h3>Set up DNS</h3></div>
-      <div class="dns" id="dnsStep">
-        <div class="dns-head">
-          <div>
-            <div class="dns-name" id="dnsName">DNS Profile Name</div>
-            <p class="dns-sub" id="dnsDesc">Short description of what this profile does and why it's needed, for you to fill in.</p>
-          </div>
-        </div>
-        <a class="get dns-btn" id="dnsBtn" aria-disabled="true" href="https://mirazbakis.github.io/AltLoadDNS.mobileconfig">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
-          Install DNS Profile
-        </a>
-        <details class="dns-guide">
-          <summary>Trust it in Settings</summary>
-          <ol>
-            <li>Tap <b>Install DNS Profile</b>, then tap <b>Allow</b> when Safari offers to download the profile.</li>
-            <li>Open <b>Settings</b> and tap <b>Profile Downloaded</b> near the top — or go to <b>General › VPN &amp; Device Management</b> — then tap <b>Install</b>, enter your passcode and confirm.</li>
-            <li>In <b>General › VPN &amp; Device Management</b>, open <b>DNS</b> and choose the profile. Leave it on until the install below is finished.</li>
-          </ol>
-        </details>
-      </div>
+    <label class="tos" id="tosRow"><input type="checkbox" id="tos"> <span>I have accepted the <a href="terms.html">Terms of Service</a></span></label>
 
-      <!-- ===== Step 2: the signed install ===== -->
-      <div class="step-line"><span class="step-badge" aria-hidden="true">2</span><h3>Install the app</h3></div>
-      <ul class="rows" id="rows">
-        <li class="note">Loading…</li>
-      </ul>
-    </section>
-  </div>
+    <!-- ===== Step 1: DNS profile ===== -->
+    <!-- TODO: fill in the real name and description below. The profile is NextDNS. -->
+    <div class="step-line"><span class="kicker">Step 1</span><h3>Set up DNS</h3></div>
+    <div class="dns" id="dnsStep">
+      <div class="dns-name" id="dnsName">DNS Profile Name</div>
+      <p class="dns-sub" id="dnsDesc">Short description of what this profile does and why it's needed, for you to fill in.</p>
+      <a class="dns-btn" id="dnsBtn" aria-disabled="true" href="https://mirazbakis.github.io/AltLoadDNS.mobileconfig">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+        Install DNS Profile
+      </a>
+      <details class="dns-guide">
+        <summary>Trust it in Settings</summary>
+        <ol>
+          <li>Tap <b>Install DNS Profile</b>, then tap <b>Allow</b> when Safari offers to download the profile.</li>
+          <li>Open <b>Settings</b> and tap <b>Profile Downloaded</b> near the top — or go to <b>General › VPN &amp; Device Management</b> — then tap <b>Install</b>, enter your passcode and confirm.</li>
+          <li>In <b>General › VPN &amp; Device Management</b>, open <b>DNS</b> and choose the profile. Leave it on until the install below is finished.</li>
+        </ol>
+      </details>
+    </div>
+
+    <!-- ===== Step 2: the signed install ===== -->
+    <div class="step-line"><span class="kicker">Step 2</span><h3>Install the app</h3></div>
+    <ul class="rows" id="rows">
+      <li class="note">Loading…</li>
+    </ul>
+  </section>
+
+  <!-- ===== You'll need ===== -->
+  <section class="needs" aria-labelledby="needTitle">
+    <div class="label" id="needTitle">You'll need</div>
+    <div class="chips">
+      <span class="chip"><b>iOS</b> 27 or later</span>
+      <span class="chip"><b>Developer Mode</b> on</span>
+      <a class="chip" href="https://apps.apple.com/app/id6755608044"><b>LocalDevVPN</b> · App Store</a>
+      <span class="chip"><b>Apple ID</b> free works</span>
+    </div>
+  </section>
 
   <!-- ===== Questions ===== -->
   <section class="faq" id="faq">
@@ -221,7 +215,6 @@
 
 <footer>
   <div class="wrap">
-    <a class="brand" href="index.html"><img src="AltLoad.png" alt="">AltLoad</a>
     <nav>
       <a href="https://github.com/mirazbakis/AltLoad/releases">Releases</a>
       <a href="https://github.com/mirazbakis/AltLoad/blob/main/docs/HOW-IT-WORKS.md">How it works</a>
@@ -238,9 +231,6 @@
   var rows = document.getElementById('rows');
   var countEl = document.getElementById('count');
   var verEl = document.getElementById('ver');
-  var q = document.getElementById('q');
-  var searchBtn = document.getElementById('searchBtn');
-  var searchBox = document.getElementById('searchBox');
   var tos = document.getElementById('tos');
   var tosRow = document.getElementById('tosRow');
   var dl = document.getElementById('dlBtn');
@@ -254,7 +244,7 @@
   // ---- Terms gate (remembered on this device) ----
   function gate(){
     var ok = tos.checked;
-    [].forEach.call(document.querySelectorAll('.get'), function(a){ a.setAttribute('aria-disabled', ok ? 'false' : 'true'); });
+    [].forEach.call(document.querySelectorAll('.get, #dnsBtn'), function(a){ a.setAttribute('aria-disabled', ok ? 'false' : 'true'); });
     dl.setAttribute('aria-disabled', ok ? 'false' : 'true');
   }
   try{ tos.checked = localStorage.getItem(KEY)==='1'; }catch(e){}
@@ -264,7 +254,7 @@
   });
   // A tap on a locked button points at the Terms box instead of doing nothing.
   document.addEventListener('click', function(e){
-    var a = e.target.closest && e.target.closest('.get, #dlBtn');
+    var a = e.target.closest && e.target.closest('.get, #dnsBtn, #dlBtn');
     if(!a || tos.checked) return;
     e.preventDefault();
     tosRow.scrollIntoView({behavior:'smooth', block:'center'});
@@ -278,16 +268,7 @@
       rows.innerHTML = '<li class="note"><b>Nothing to install yet.</b><br>Check back soon, or download the IPA.</li>';
       return;
     }
-    var terms = (q.value||'').trim().toLowerCase().split(/\s+/).filter(Boolean);
-    var shown = slots.filter(function(s){
-      var hay = ('altload valid version v' + s.version + ' ' + s.version).toLowerCase();
-      return terms.every(function(t){ return hay.indexOf(t) > -1; });
-    });
-    if(!shown.length){
-      rows.innerHTML = '<li class="note">Nothing matches “' + esc(q.value) + '”.</li>';
-      return;
-    }
-    rows.innerHTML = shown.map(function(s){
+    rows.innerHTML = slots.map(function(s){
       return '<li class="rowi">'
         + '<img class="ico" src="' + esc(s.iconUrl || 'AltLoad.png') + '" alt="">'
         + '<div class="txt">'
@@ -300,16 +281,6 @@
     gate();
   }
 
-  // ---- Search ----
-  searchBtn.addEventListener('click', function(){
-    var open = !searchBox.classList.contains('open');
-    searchBox.classList.toggle('open', open);
-    searchBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if(open){ q.focus(); } else { q.value = ''; render(); }
-  });
-  q.addEventListener('input', render);
-  q.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ searchBtn.click(); } });
-
   // ---- Load what the signing workflow published ----
   fetch('installs/index.json', {cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
@@ -317,7 +288,7 @@
       slots = ((d && d.slots) || []).slice().sort(function(a,b){ return num(a.slug) - num(b.slug); });
       if(slots.length){
         countEl.textContent = slots.length;
-        if(slots[0].version) verEl.textContent = 'Version ' + slots[0].version + ' · Free · iOS 27 or later';
+        if(slots[0].version) verEl.innerHTML = '<span class="dot"></span> Version ' + esc(slots[0].version) + ' · Free · iOS 27+';
       }
       render();
     })
