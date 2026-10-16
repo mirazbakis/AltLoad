@@ -17,7 +17,7 @@ App (iOS 18+, on-device pairing on iOS 27+) that signs and installs AltStore, Si
 - `ios/App/UI/`: `Theme.swift` (palette, still named `Aurora`), `Background.swift`, `Components.swift` (shared views; some keep old `Glass*` names).
 - `core/src/lib.rs`: pairing host FFI. `core/src/install/`: install and account sessions, split into `sign_in`, `storage`, `tunnel`, `bundle`, `extensions` (keep / main profile / remove), `prompts`, `account`, `device`.
 - `core/include/altload.h`: the C header Swift imports as `AltLoadFFI`. Keep it in sync with every `#[no_mangle]` function and `#[repr(C)]` struct.
-- `site/`: the GitHub Pages install page (midnight blue, SideInstaller-style steps). `signing/`: cert packs (never open them) and the scripts both signing workflows use.
+- `site/`: the GitHub Pages install page (styled closely after sideinstaller.net). `signing/`: cert packs (never open them) and the scripts both signing workflows use.
 - `docs/releases/<tag>.md`: release notes, used as the GitHub release body.
 
 ## Build
