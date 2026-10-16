@@ -26,6 +26,8 @@ jobs:
   build:
     permissions:
       contents: write
+      # To start "Sign IPAs & Deploy OTA" after a stable release.
+      actions: write
     runs-on: xcode-27
 
     steps:
@@ -144,6 +146,15 @@ jobs:
           prerelease: ${{ contains(inputs.version, '-') }}
           draft: false
           make_latest: ${{ !contains(inputs.version, '-') }}
+
+      # A release made with the workflow token doesn't fire the "release" event, so
+      # sign-ota.yml's own trigger never sees it. Start it here instead: it
+      # re-signs the new stable IPA and redeploys the site as github-actions[bot].
+      - name: Refresh the install site
+        if: inputs.publish == 'Release' && !contains(inputs.version, '-')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run sign-ota.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME"
 
       # Points the public "Nightly build" release at the commit this run built,
       # so anyone can download the IPA without a GitHub account.

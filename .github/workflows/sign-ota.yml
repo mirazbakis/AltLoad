@@ -27,7 +27,8 @@ on:
       - "signing/**"
       - "site/**"
       - ".github/workflows/sign-ota.yml"
-  # A new AltLoad release goes out on the page straight away.
+  # A release published by hand. Releases made by build.yml start this workflow
+  # themselves, since workflow-token releases don't fire this event.
   release:
     types: [published]
   # Re-sign and rewrite every manifest.plist and installs/index.json once a week,
