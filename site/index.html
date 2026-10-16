@@ -114,7 +114,7 @@
   .notice{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:11px 14px;border-radius:14px;font-size:13.5px;color:var(--ink-2);
     background:rgba(255,181,71,.08);border:1px solid rgba(255,181,71,.25)}
   .notice svg{width:17px;height:17px;flex:none;color:var(--warn);margin-top:1px}
-  .copies{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:14px}
+  .copies{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:14px}
   .copy{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:var(--card-hi);border:1px solid var(--edge);transition:border-color .15s}
   .copy:hover{border-color:var(--edge-hi)}
   .copy img{width:42px;height:42px;border-radius:11px;flex:none}
@@ -125,6 +125,14 @@
   .get:hover{filter:brightness(1.07)}
   .get[aria-disabled="true"]{opacity:.4;cursor:not-allowed}
   .copy.empty{grid-column:1/-1;justify-content:center;color:var(--ink-2);padding:24px}
+  .copy .n{white-space:nowrap}
+  @media (max-width:420px){
+    .box{padding:18px 14px}
+    .copy{gap:10px;padding:10px}
+    .copy img{width:38px;height:38px}
+    .copy .n{font-size:14px}
+    .get{padding:7px 12px;font-size:13px}
+  }
 
   /* ---- features ---- */
   .feats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:30px}
@@ -189,7 +197,7 @@
       <div class="eyebrow">How it works</div>
       <h2>Three steps, all on the phone.</h2>
       <ol class="how">
-        <li><h3>Install AltLoad</h3><p>Add the DNS profile, then tap any copy below. Trust it in Settings once it lands.</p></li>
+        <li><h3>Install AltLoad</h3><p>Add the DNS profile, then tap any signed install below. Trust it in Settings once it lands.</p></li>
         <li><h3>Pair it with itself</h3><p>Tools › Pair shows a code in your Dynamic Island. Type it into Settings › Developer.</p></li>
         <li><h3>Pick a store</h3><p>Turn on LocalDevVPN, choose AltStore, SideStore or LiveContainer, sign in, done.</p></li>
       </ol>
@@ -224,10 +232,10 @@
         </div>
 
         <div class="box">
-          <div class="copies-head"><h3><i>2</i>Pick a copy</h3><span class="count" id="count"></span></div>
+          <div class="copies-head"><h3><i>2</i>Pick a signed install</h3><span class="count" id="count"></span></div>
           <div class="notice">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg>
-            <span>Each copy is signed with a different certificate. If one won't install or open, its certificate may have been revoked. Try another.</span>
+            <span>Each signed install uses a different certificate. If one won't install or open, its certificate may have been revoked. Try another.</span>
           </div>
           <ul class="copies" id="copies"><li class="copy empty">Loading…</li></ul>
         </div>
@@ -270,8 +278,8 @@
     <div class="wrap faq">
       <div class="eyebrow">Help</div>
       <h2>Questions</h2>
-      <details><summary>Tapping a copy does nothing.</summary><p>Open this page in Safari, accept the Terms and add the DNS profile first. If a copy still won't install, its certificate may be revoked. Pick another one.</p></details>
-      <details><summary>It installed but won't open.</summary><p>Trust it in Settings › General › VPN &amp; Device Management. If it still closes right away, that copy's certificate was revoked. Delete it and install another copy.</p></details>
+      <details><summary>Tapping Install does nothing.</summary><p>Open this page in Safari, accept the Terms and add the DNS profile first. If a signed install still won't install, its certificate may be revoked. Pick another one.</p></details>
+      <details><summary>It installed but won't open.</summary><p>Trust it in Settings › General › VPN &amp; Device Management. If it still closes right away, that install's certificate was revoked. Delete it and pick another signed install.</p></details>
       <details><summary>Sign-in fails inside AltLoad.</summary><p>Keep Settings › Anisette on Automatic. If it keeps failing, tap Reset Anisette Data and try again a few minutes later.</p></details>
       <details><summary>"Not enough available App IDs".</summary><p>A free Apple ID gets 10 a week. Set App Extensions to Keep, Use Main Profile or Remove Extensions before installing, and check Tools › App IDs to see when the next one frees up.</p></details>
       <details><summary>Does AltLoad see my password?</summary><p>No. It goes only to Apple, and a remembered one stays in your iPhone's Keychain.</p></details>
@@ -320,18 +328,18 @@
     setTimeout(function(){ tosRow.classList.remove('nudge'); }, 900);
   });
 
-  // Every signed copy, always shown.
+  // Every signed install, always shown.
   function render(slots){
     if(!slots.length){
-      list.innerHTML = '<li class="copy empty">No signed copies right now. Download the IPA instead.</li>';
+      list.innerHTML = '<li class="copy empty">No signed installs right now. Download the IPA instead.</li>';
       return;
     }
-    countEl.textContent = slots.length + (slots.length === 1 ? ' copy' : ' copies');
+    countEl.textContent = slots.length + ' available';
     list.innerHTML = slots.map(function(s, i){
       return '<li class="copy"><img src="' + esc(s.iconUrl || 'AltLoad.png') + '" alt="">'
-        + '<div class="t"><div class="n">Copy ' + (i + 1) + '</div>'
-        + '<div class="v">' + (s.version ? 'v' + esc(s.version) : 'AltLoad') + '</div></div>'
-        + '<a class="get" href="' + esc(s.installUrl) + '">GET</a></li>';
+        + '<div class="t"><div class="n">Signed Install ' + (i + 1) + '</div>'
+        + '<div class="v">AltLoad' + (s.version ? ' · v' + esc(s.version) : '') + '</div></div>'
+        + '<a class="get" href="' + esc(s.installUrl) + '">Install</a></li>';
     }).join('');
     gate();
   }
