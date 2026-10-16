@@ -9,9 +9,9 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "1.2.0"
-    CURRENT_PROJECT_VERSION: "3"
+    CURRENT_PROJECT_VERSION: "4"
     # Shown after the version in About ("1.2.0 beta 1"). Empty for a final release.
-    ALTLOAD_PRERELEASE: "beta 1"
+    ALTLOAD_PRERELEASE: ""
     TARGETED_DEVICE_FAMILY: "1,2"
     EXCLUDED_ARCHS[sdk=iphonesimulator*]: x86_64
 
