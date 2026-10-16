@@ -23,7 +23,7 @@
   /* ---- app card ---- */
   .app{padding:26px}
   @media (max-width:860px){.app{text-align:center;padding:22px}}
-  .app .icon{width:92px;height:92px;border-radius:22px;box-shadow:0 18px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.07)}
+  .app .icon{width:92px;height:92px;border-radius:22px;box-shadow:0 18px 44px rgba(0,0,0,.55),0 0 70px -8px rgba(46,212,127,.5),0 0 0 1px rgba(255,255,255,.07)}
   @media (max-width:860px){.app .icon{margin:0 auto;width:76px;height:76px;border-radius:18px}.app h1{font-size:34px;margin-top:14px}.app .sub{margin:10px 0 16px}}
   .app h1{font-size:40px;font-weight:800;letter-spacing:-.035em;margin:18px 0 4px}
   .app .ver{font-size:14.5px;color:var(--ink-3);font-weight:600}
@@ -57,7 +57,7 @@
   .tos{display:flex;gap:11px;align-items:center;padding:13px 20px;border-top:1px solid var(--line);font-size:15px;font-weight:600;cursor:pointer;transition:background .3s}
   .tos input{width:20px;height:20px;flex:none;accent-color:var(--accent);margin:0}
   .tos a{color:var(--accent);text-decoration:none}
-  .tos.nudge{background:rgba(60,122,227,.16)}
+  .tos.nudge{background:rgba(46,212,127,.17)}
 
   .rows{list-style:none}
   .rowi{display:flex;align-items:center;gap:14px;padding:13px 20px;border-top:1px solid var(--line)}
@@ -68,12 +68,41 @@
   .rowi .ok{display:inline-flex;align-items:center;gap:5px;color:var(--leaf);font-weight:700}
   .rowi .ok::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--leaf)}
   .get{flex:none;display:inline-flex;align-items:center;min-height:34px;padding:0 18px;border-radius:999px;font-weight:800;font-size:14.5px;
-    color:#fff;background:linear-gradient(var(--accent),var(--accent-deep));text-decoration:none;transition:opacity .15s,transform .15s}
+    color:#042016;background:linear-gradient(180deg,var(--accent),var(--accent-deep));text-decoration:none;transition:opacity .15s,transform .15s,filter .15s;
+    box-shadow:0 1px 0 rgba(255,255,255,.28) inset,0 6px 16px -7px rgba(46,212,127,.55)}
+  .get:hover{filter:brightness(1.05)}
   .get:active{transform:scale(.96)}
   /* Locked until the Terms box is ticked. Still clickable so a tap can point at the box. */
   .get[aria-disabled="true"],.btn[aria-disabled="true"]{opacity:.38;pointer-events:auto;cursor:not-allowed}
   .note{padding:26px 20px;border-top:1px solid var(--line);color:var(--ink-2);font-size:15px;text-align:center}
   .note b{color:var(--ink)}
+
+  /* ---- DNS profile step (sits between Terms and the signed installs) ---- */
+  .dns{padding:4px 20px 18px}
+  .dns-head{display:flex;align-items:flex-start;gap:12px}
+  .step-badge{flex:none;display:grid;place-items:center;width:26px;height:26px;margin-top:1px;border-radius:999px;
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep));color:#042016;font-size:13px;font-weight:800;
+    box-shadow:0 1px 0 rgba(255,255,255,.28) inset}
+  .dns-name{font-size:17px;font-weight:800;letter-spacing:-.02em}
+  .dns-sub{font-size:14px;color:var(--ink-2);margin-top:3px;line-height:1.5}
+  /* The big DNS button reuses the gradient from .get but spans the card. */
+  .dns-btn{display:flex;width:100%;justify-content:center;gap:9px;min-height:46px;margin-top:14px;
+    border-radius:14px;padding:0 18px;font-size:15.5px}
+  .dns-btn svg{width:18px;height:18px;flex:none}
+  .dns-guide{margin-top:12px;border:1px solid var(--line);border-radius:12px;background:var(--raised)}
+  .dns-guide summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:700;font-size:14.5px;
+    display:flex;justify-content:space-between;gap:12px}
+  .dns-guide summary::-webkit-details-marker{display:none}
+  .dns-guide summary::after{content:"+";color:var(--ink-3);font-weight:700}
+  .dns-guide[open] summary::after{content:"–"}
+  .dns-guide ol{margin:0;padding:0 16px 14px 34px;color:var(--ink-2);font-size:14px;line-height:1.55}
+  .dns-guide li{padding:3px 0}
+  .dns-guide li b{color:var(--ink)}
+
+  /* step label shared by the DNS step and the signed-install list */
+  .step-line{display:flex;align-items:center;gap:12px;padding:14px 20px 4px;border-top:1px solid var(--line)}
+  .step-line .step-badge{margin-top:0}
+  .step-line h3{font-size:15px;font-weight:800;letter-spacing:-.01em}
 
   /* ---- FAQ ---- */
   .faq{max-width:760px;margin:0 auto;padding-top:64px}
@@ -89,7 +118,7 @@
   @media (max-width:420px){
     .app{padding:22px 18px}
     .list-head,.search{padding-left:16px;padding-right:16px}
-    .tos,.rowi{padding-left:16px;padding-right:16px}
+    .tos,.rowi,.step-line,.dns{padding-left:16px;padding-right:16px}
     .rowi{gap:12px}
   }
 </style>
@@ -146,6 +175,33 @@
         <input id="q" type="search" placeholder="Search" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search">
       </div>
       <label class="tos" id="tosRow"><input type="checkbox" id="tos"> <span>I have accepted the <a href="terms.html">Terms of Service</a></span></label>
+
+      <!-- ===== Step 1: DNS profile (install this before the signed install) ===== -->
+      <!-- TODO: fill in the real name and description below. The profile is NextDNS. -->
+      <div class="step-line"><span class="step-badge" aria-hidden="true">1</span><h3>Set up DNS</h3></div>
+      <div class="dns" id="dnsStep">
+        <div class="dns-head">
+          <div>
+            <div class="dns-name" id="dnsName">DNS Profile Name</div>
+            <p class="dns-sub" id="dnsDesc">Short description of what this profile does and why it's needed, for you to fill in.</p>
+          </div>
+        </div>
+        <a class="get dns-btn" id="dnsBtn" aria-disabled="true" href="https://mirazbakis.github.io/AltLoadDNS.mobileconfig">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+          Install DNS Profile
+        </a>
+        <details class="dns-guide">
+          <summary>Trust it in Settings</summary>
+          <ol>
+            <li>Tap <b>Install DNS Profile</b>, then tap <b>Allow</b> when Safari offers to download the profile.</li>
+            <li>Open <b>Settings</b> and tap <b>Profile Downloaded</b> near the top — or go to <b>General › VPN &amp; Device Management</b> — then tap <b>Install</b>, enter your passcode and confirm.</li>
+            <li>In <b>General › VPN &amp; Device Management</b>, open <b>DNS</b> and choose the profile. Leave it on until the install below is finished.</li>
+          </ol>
+        </details>
+      </div>
+
+      <!-- ===== Step 2: the signed install ===== -->
+      <div class="step-line"><span class="step-badge" aria-hidden="true">2</span><h3>Install the app</h3></div>
       <ul class="rows" id="rows">
         <li class="note">Loading…</li>
       </ul>
