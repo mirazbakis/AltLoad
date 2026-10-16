@@ -3,7 +3,7 @@ name: Sign IPAs & Deploy OTA
 # Downloads the latest NON-beta AltLoad release IPA, re-signs it once per cert
 # pack under signing/certs/<N>/ (rewriting the bundle id to com.mirazbakis.altload<N>),
 # writes a manifest.plist per slot, and publishes the AltLoad OTA install page to
-# GitHub Pages — one "Install" button per signed copy (sideinstaller.net style).
+# GitHub Pages — one "Install" button per signed copy.
 #
 # Each cert pack folder signing/certs/<N>/ holds:
 #   <N>.p12               the signing certificate + private key

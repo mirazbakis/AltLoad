@@ -2,7 +2,7 @@
 
 Signs the latest **non-beta** AltLoad release with your own ad-hoc certificates and
 publishes a tap-to-install page to GitHub Pages — one **Install** button per cert
-pack (sideinstaller.net style), each the same app under its own bundle id.
+pack, each the same app under its own bundle id.
 
 ```
 signing/
