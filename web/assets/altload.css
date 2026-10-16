@@ -1,4 +1,4 @@
-/* AltLoad pages (AltLoad.html, terms.html). Same look as the app: a full midnight
+/* AltLoad pages (index.html, terms.html). Same look as the app: a full midnight
    background with one dark navy spotlight from the top, solid navy surfaces with
    hairline edges, a deep blue accent, and the icon's dark green for small touches. */
 :root{
@@ -17,13 +17,17 @@
   --ink-3:rgba(238,243,251,.5);
   --line:rgba(255,255,255,.07);
   --line-2:rgba(255,255,255,.14);
-  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  /* The system font (SF Pro on iPhone) everywhere. --mono used to be JetBrains
+     Mono for labels and numbers; it now points at the same sans so those bits
+     stop looking thin. */
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:var(--sans);
   color-scheme:dark;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:var(--night);scroll-behavior:smooth;overflow-x:clip}
 body{
-  font-family:'Instrument Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-family:var(--sans);font-variant-numeric:tabular-nums;
   color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;
   background:var(--night);min-height:100vh;overflow-x:clip;
 }
@@ -33,8 +37,8 @@ body::before{content:"";position:absolute;z-index:0;pointer-events:none;left:0;r
 a{color:inherit}
 img{display:block;max-width:100%}
 .wrap{position:relative;z-index:1;width:min(1040px,100% - 32px);margin-inline:auto}
-h1,h2,h3{letter-spacing:-.025em;line-height:1.1;font-weight:700}
-.label{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+h1,h2,h3{letter-spacing:-.025em;line-height:1.1;font-weight:800}
+.label{font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
 .surface{background:var(--card);border:1px solid var(--line);border-radius:22px}
 
 /* top bar */

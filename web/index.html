@@ -3,92 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AltLoad — install on your iPhone</title>
-<meta name="description" content="AltLoad signs and installs AltStore, SideStore and LiveContainer on your iPhone with your own Apple ID. Tap to install over the air, or download the unsigned IPA. No computer.">
+<title>AltLoad</title>
+<meta name="description" content="AltLoad signs and installs AltStore, SideStore and LiveContainer on your iPhone with your own Apple ID. Tap to install, no computer.">
 <meta property="og:title" content="AltLoad">
-<meta property="og:description" content="AltStore, SideStore and LiveContainer, installed on the iPhone itself. Tap to install over the air.">
+<meta property="og:description" content="AltStore, SideStore and LiveContainer, installed on the iPhone itself. Tap to install.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://mirazbakis.github.io/AltLoad/AltLoad.png">
 <meta name="theme-color" content="#03050b">
 <link rel="icon" type="image/png" href="AltLoad.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" href="AltLoad.png">
 <link rel="stylesheet" href="assets/altload.css">
 <style>
   /* ---- hero ---- */
-  .hero{text-align:center;padding:64px 0 8px}
-  .hero .icon{width:120px;height:120px;margin:0 auto;border-radius:28px;box-shadow:0 30px 70px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06)}
-  .hero h1{font-size:clamp(46px,8.5vw,88px);margin:26px 0 14px}
-  .hero p.sub{font-size:clamp(17px,2.2vw,21px);color:var(--ink-2);max-width:600px;margin:0 auto}
-  .hero .actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:30px}
-  .hero .meta{margin-top:16px}
+  .hero{text-align:center;padding:52px 0 0}
+  .hero .icon{width:116px;height:116px;margin:0 auto;border-radius:27px;box-shadow:0 26px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.07)}
+  .hero h1{font-size:clamp(44px,9vw,76px);font-weight:800;letter-spacing:-.035em;margin:22px 0 10px}
+  .hero p.sub{font-size:clamp(16.5px,2.2vw,19px);color:var(--ink-2);max-width:520px;margin:0 auto}
+  .stats{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px;min-height:36px}
+  .stat{padding:7px 14px;border-radius:999px;background:var(--raised);border:1px solid var(--line);font-size:14px;color:var(--ink-2)}
+  .stat b{color:var(--ink);font-weight:800}
+  .hero .actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:22px}
+  .hero .actions .btn{min-height:46px;border-radius:999px;padding:0 20px;font-weight:700}
 
-  /* ---- section frame ---- */
-  section{padding:76px 0 0;scroll-margin-top:16px}
-  .head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
-  .head h2{font-size:clamp(26px,3.6vw,34px)}
-  .lead{color:var(--ink-2);font-size:16px;max-width:680px;margin:0 0 26px}
+  /* ---- certificate list ---- */
+  #install{padding-top:40px;scroll-margin-top:12px}
+  .list{max-width:720px;margin:0 auto;overflow:hidden}
+  .list-head{display:flex;align-items:center;gap:12px;padding:18px 18px 14px}
+  .list-head h2{font-size:21px;font-weight:800;flex:1}
+  .list-head h2 span{color:var(--ink-3);font-weight:700}
+  .icon-btn{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:999px;border:1px solid var(--line);background:var(--raised);color:var(--ink);cursor:pointer}
+  .icon-btn svg{width:18px;height:18px}
+  .icon-btn[aria-expanded="true"]{background:var(--accent);border-color:transparent}
 
-  /* ---- install grid (the signed OTA copies) ---- */
-  .installs{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:14px}
-  .slot{display:flex;flex-direction:column;gap:14px;padding:20px}
-  .slot .top{display:flex;align-items:center;gap:13px}
-  .slot .ico{width:48px;height:48px;border-radius:13px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.07)}
-  .slot .name{font-weight:700;font-size:16.5px;letter-spacing:-.02em}
-  .slot .bid{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);word-break:break-all;margin-top:2px}
-  .slot .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .pill{font-family:var(--mono);font-size:11px;letter-spacing:.03em;padding:4px 9px;border-radius:8px;background:var(--raised);color:var(--ink-2);border:1px solid var(--line)}
-  .pill.ok{color:var(--leaf);border-color:rgba(64,194,128,.3)}
-  .slot .btn{width:100%;margin-top:auto}
-  .installs .state{grid-column:1/-1;padding:26px;text-align:center;color:var(--ink-2);font-size:15px}
-  .installs .state b{color:var(--ink)}
+  .search{display:none;padding:0 18px 14px}
+  .search.open{display:block}
+  .search input{width:100%;height:44px;padding:0 14px 0 40px;border-radius:12px;border:1px solid var(--line-2);background:var(--raised) no-repeat 13px 50%/17px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23eef3fb' stroke-opacity='.5' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
+    color:var(--ink);font:500 16px var(--sans);outline:none}
+  .search input:focus{border-color:var(--accent)}
 
-  .callout{display:flex;gap:12px;align-items:flex-start;margin-top:18px;padding:16px 18px;border-radius:14px;background:var(--raised);border:1px solid var(--line);color:var(--ink-2);font-size:14px;line-height:1.55}
-  .callout svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--leaf)}
+  .tos{display:flex;gap:12px;align-items:center;margin:0 18px 14px;padding:13px 14px;border-radius:14px;background:var(--raised);border:1px solid var(--line);font-size:15px;font-weight:600;cursor:pointer}
+  .tos input{width:22px;height:22px;flex:none;accent-color:var(--accent);margin:0}
+  .tos a{color:var(--accent);text-decoration:none}
 
-  /* ---- stores row ---- */
-  .stores{margin:30px 0 0;display:grid;grid-template-columns:repeat(3,1fr);border-radius:22px;overflow:hidden}
-  .stores > div{padding:22px 22px 20px;border-right:1px solid var(--line)}
+  .rows{list-style:none}
+  .rowi{display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid var(--line)}
+  .rowi .ico{width:54px;height:54px;border-radius:13px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.07)}
+  .rowi .txt{flex:1;min-width:0}
+  .rowi .name{display:flex;align-items:center;gap:8px;font-size:17.5px;font-weight:800;letter-spacing:-.02em}
+  .rowi .det{font-size:14px;color:var(--ink-2);margin-top:1px}
+  .valid{font-size:11.5px;font-weight:800;letter-spacing:.02em;color:var(--leaf);background:rgba(64,194,128,.13);padding:3px 8px;border-radius:999px}
+  .get{flex:none;display:inline-flex;align-items:center;min-height:36px;padding:0 18px;border-radius:999px;font-weight:800;font-size:15px;
+    color:#fff;background:linear-gradient(var(--accent),var(--accent-deep));text-decoration:none;transition:opacity .15s,transform .15s}
+  .get:active{transform:scale(.96)}
+  .get[aria-disabled="true"]{opacity:.35;pointer-events:none}
+  .note{padding:22px 18px;border-top:1px solid var(--line);color:var(--ink-2);font-size:15px;text-align:center}
+  .note b{color:var(--ink)}
+  .hint{padding:0 18px 16px;margin-top:-4px;font-size:13.5px;color:var(--ink-3)}
+
+  /* ---- stores ---- */
+  section{padding:72px 0 0;scroll-margin-top:16px}
+  .head{margin-bottom:18px}
+  .stores{display:grid;grid-template-columns:repeat(3,1fr);border-radius:22px;overflow:hidden}
+  .stores > div{padding:22px;border-right:1px solid var(--line)}
   .stores > div:last-child{border-right:0}
   .stores h3{font-size:18px;margin:10px 0 4px}
-  .stores p{font-size:14px;color:var(--ink-2)}
+  .stores p{font-size:14.5px;color:var(--ink-2)}
   .stores .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-  .tag{font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:8px;background:var(--raised);color:var(--ink-2);border:1px solid var(--line)}
+  .tag{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--raised);color:var(--ink-2);border:1px solid var(--line)}
   .tag.night{color:#b9c8ff}
   .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
   @media (max-width:760px){.stores{grid-template-columns:1fr}.stores > div{border-right:0;border-bottom:1px solid var(--line)}.stores > div:last-child{border-bottom:0}}
 
   /* ---- how it works ---- */
   .rail{list-style:none;counter-reset:s}
-  .rail li{counter-increment:s;display:grid;grid-template-columns:56px 1fr;gap:4px 18px;padding:20px 0;border-top:1px solid var(--line)}
+  .rail li{counter-increment:s;display:grid;grid-template-columns:48px 1fr;gap:4px 16px;padding:20px 0;border-top:1px solid var(--line)}
   .rail li:last-child{border-bottom:1px solid var(--line)}
-  .rail li::before{content:"0" counter(s);font-family:var(--mono);font-size:14px;color:var(--leaf);padding-top:3px;grid-row:span 2}
-  .rail b{font-size:18px}
+  .rail li::before{content:counter(s);display:grid;place-items:center;width:32px;height:32px;border-radius:999px;background:var(--raised);border:1px solid var(--line);font-weight:800;font-size:14px;color:var(--leaf);grid-row:span 2}
+  .rail b{font-size:18px;font-weight:800}
   .rail span{color:var(--ink-2);font-size:15.5px}
 
-  /* ---- download + requirements ---- */
-  .get{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
-  .get .surface{padding:26px}
-  .get h3{font-size:22px;margin-bottom:6px}
-  .get p{color:var(--ink-2);font-size:15px}
-  .agree{display:flex;gap:12px;align-items:flex-start;margin:20px 0 18px;font-size:14.5px;color:var(--ink-2);cursor:pointer}
-  .agree input{width:22px;height:22px;flex:none;accent-color:var(--accent);margin-top:1px}
-  .get .btn{width:100%}
+  /* ---- unsigned download ---- */
+  .get-ipa{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+  .get-ipa .surface{padding:24px}
+  .get-ipa h3{font-size:21px;margin-bottom:6px}
+  .get-ipa p{color:var(--ink-2);font-size:15px}
+  .get-ipa .btn{width:100%;margin-top:18px}
   .need{list-style:none}
   .need li{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
   .need li:last-child{border-bottom:0}
+  .need li span:first-child{font-weight:700}
   .need li span:last-child{color:var(--ink-2);text-align:right}
-  @media (max-width:760px){.get{grid-template-columns:1fr}}
+  @media (max-width:760px){.get-ipa{grid-template-columns:1fr}}
 
   /* ---- FAQ ---- */
   details{border-top:1px solid var(--line)}
   details:last-of-type{border-bottom:1px solid var(--line)}
-  summary{list-style:none;cursor:pointer;padding:18px 0;font-weight:600;font-size:17px;display:flex;justify-content:space-between;gap:16px}
+  summary{list-style:none;cursor:pointer;padding:18px 0;font-weight:700;font-size:17px;display:flex;justify-content:space-between;gap:16px}
   summary::-webkit-details-marker{display:none}
-  summary::after{content:"+";font-family:var(--mono);color:var(--ink-3)}
+  summary::after{content:"+";font-weight:700;color:var(--ink-3)}
   details[open] summary::after{content:"–"}
   details p{color:var(--ink-2);padding:0 0 18px;max-width:760px}
+
+  @media (max-width:420px){
+    .rowi{gap:12px;padding:13px 14px}
+    .rowi .ico{width:48px;height:48px;border-radius:12px}
+    .list-head,.search,.hint{padding-left:14px;padding-right:14px}
+    .tos{margin-left:14px;margin-right:14px}
+  }
 </style>
 </head>
 <body>
@@ -111,31 +133,41 @@
     <img class="icon" src="AltLoad.png" alt="AltLoad icon">
     <h1>AltLoad</h1>
     <p class="sub">AltStore, SideStore and LiveContainer, signed with your own Apple ID and installed on the iPhone itself. No computer.</p>
+    <div class="stats" id="stats" aria-live="polite"></div>
     <div class="actions">
       <a class="btn btn-primary" href="#install">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
-        Install on this iPhone
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+        Install
       </a>
-      <a class="btn btn-quiet" href="https://github.com/mirazbakis/AltLoad">View the source</a>
+      <a class="btn btn-quiet" href="#download">Download IPA</a>
+      <a class="btn btn-quiet" href="https://github.com/mirazbakis/AltLoad">GitHub</a>
     </div>
-    <p class="meta label">iOS 27 or later · free · no tracking</p>
   </div>
 
-  <!-- ===== Signed over-the-air installs ===== -->
-  <section id="install" class="wrap reveal">
-    <div class="head"><span class="label">Install over the air</span></div>
-    <p class="lead">Tap <strong>Install</strong> in Safari on a registered device — these builds are already signed, so they drop straight onto the Home Screen. Each button is the same AltLoad signed under a different certificate; if one stops working, use another.</p>
-
-    <div class="installs" id="installs" aria-live="polite">
-      <div class="state" id="installState">Loading signed builds…</div>
+  <!-- ===== Certificates (one install per signed copy) ===== -->
+  <div id="install" class="wrap">
+    <div class="list surface">
+      <div class="list-head">
+        <h2>Certificates <span id="count"></span></h2>
+        <button class="icon-btn" id="searchBtn" type="button" aria-label="Search certificates" aria-expanded="false" aria-controls="searchBox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </button>
+      </div>
+      <div class="search" id="searchBox">
+        <input id="q" type="search" placeholder="Search, e.g. 4 or 1.0.1" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search certificates">
+      </div>
+      <label class="tos"><input type="checkbox" class="tos-box"> <span>I have accepted the <a href="terms.html">Terms of Service</a></span></label>
+      <p class="hint" id="hint">Tick the box above to unlock Install.</p>
+      <ul class="rows" id="rows">
+        <li class="note">Loading certificates…</li>
+      </ul>
     </div>
+  </div>
 
-    <div class="callout">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
-      <span>Open this page in <strong>Safari</strong> (not Chrome or an in-app browser). These are <strong>ad-hoc</strong> builds: a device can only install if its UDID is registered in that certificate's profile. After it installs, trust the profile under <em>Settings → General → VPN &amp; Device Management</em>.</span>
-    </div>
-
-    <div class="stores surface" style="margin-top:28px">
+  <!-- ===== What it installs ===== -->
+  <section class="wrap reveal">
+    <div class="head"><span class="label">What AltLoad installs</span></div>
+    <div class="stores surface">
       <div>
         <span class="dot" style="background:#0d8a86"></span>
         <h3>AltStore</h3>
@@ -170,17 +202,17 @@
 
   <!-- ===== Unsigned download ===== -->
   <section id="download" class="wrap reveal">
-    <div class="head"><span class="label">Prefer to sign it yourself?</span></div>
-    <div class="get">
+    <div class="head"><span class="label">Sign it yourself</span></div>
+    <div class="get-ipa">
       <div class="surface">
-        <h3>Download the unsigned IPA</h3>
-        <p>The plain build. Sideload it once with any signing tool you already use; after that AltLoad keeps itself and your stores going.</p>
-        <label class="agree"><input type="checkbox" id="agree"> <span>I've read and agree to the <a href="terms.html">Terms of Service</a>.</span></label>
+        <h3>Download the IPA</h3>
+        <p>The unsigned build. Sideload it once with any signing tool you already use; after that AltLoad keeps itself and your stores going.</p>
+        <label class="tos" style="margin:18px 0 0"><input type="checkbox" class="tos-box"> <span>I have accepted the <a href="terms.html">Terms of Service</a></span></label>
         <a class="btn btn-primary" id="dlBtn" aria-disabled="true" href="https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
           Download AltLoad.ipa
         </a>
-        <p class="label" style="margin-top:14px">or browse <a href="https://github.com/mirazbakis/AltLoad/releases">all releases</a></p>
+        <p class="label" style="margin-top:14px;text-transform:none;letter-spacing:0">or browse <a href="https://github.com/mirazbakis/AltLoad/releases">all releases</a></p>
       </div>
       <div class="surface">
         <h3>You'll need</h3>
@@ -198,7 +230,7 @@
   <!-- ===== FAQ ===== -->
   <section id="faq" class="wrap reveal">
     <div class="head"><span class="label">Questions</span></div>
-    <details><summary>The Install buttons don't do anything.</summary><p>Over-the-air install only works in <strong>Safari</strong> over HTTPS, and only on a device whose UDID is registered in that certificate's provisioning profile. On any other device iOS declines the install. If no buttons appear at all, the signing workflow hasn't published builds yet — download the unsigned IPA below in the meantime.</p></details>
+    <details><summary>Install doesn't do anything.</summary><p>Open this page in Safari, tick the Terms box, then tap Install and confirm. When it's on the Home Screen, trust it under Settings › General › VPN &amp; Device Management. If one certificate doesn't work, try another.</p></details>
     <details><summary>Sign-in fails. What now?</summary><p>Since 12 October 2026 Apple turns down sign-in data from many public anisette servers. Leave Settings › Anisette on Automatic so AltLoad tries the servers that still work, and if it keeps failing, tap Reset Anisette Data and try again a few minutes later.</p></details>
     <details><summary>SideStore's repository is down.</summary><p>AltLoad tries SideStore's source, its mirror, its GitHub releases and a known-good build, in that order, and uses its own saved copy if it has one. If none answer, pick a SideStore IPA you already have with Install IPA from Files.</p></details>
     <details><summary>Does AltLoad see my password?</summary><p>It's sent only to Apple. If you choose Remember password, it stays in this iPhone's Keychain and never syncs. There's no analytics or tracking.</p></details>
@@ -222,69 +254,108 @@
 
 <script>
 (function(){
-  // ---- Signed-install buttons, loaded from the workflow's output ----
-  var box = document.getElementById('installs');
-  var state = document.getElementById('installState');
+  var rows = document.getElementById('rows');
+  var countEl = document.getElementById('count');
+  var stats = document.getElementById('stats');
+  var hint = document.getElementById('hint');
+  var q = document.getElementById('q');
+  var searchBtn = document.getElementById('searchBtn');
+  var searchBox = document.getElementById('searchBox');
+  var boxes = [].slice.call(document.querySelectorAll('.tos-box'));
+  var dl = document.getElementById('dlBtn');
+  var KEY = 'altload-terms';
+  var slots = [];
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function num(slug){ var m=/(\d+)$/.exec(slug||''); return m ? parseInt(m[1],10) : 0; }
 
-  function slotNumber(slug){ var m=/(\d+)$/.exec(slug||''); return m?m[1]:''; }
+  // ---- Terms: one answer for every box on the page, remembered on this device ----
+  function agreed(){ return boxes.length && boxes[0].checked; }
+  function gate(){
+    var ok = agreed();
+    [].forEach.call(document.querySelectorAll('.get'), function(a){
+      a.setAttribute('aria-disabled', ok ? 'false' : 'true');
+      a.tabIndex = ok ? 0 : -1;
+    });
+    dl.setAttribute('aria-disabled', ok ? 'false' : 'true');
+    dl.tabIndex = ok ? 0 : -1;
+    hint.hidden = ok;
+  }
+  var saved = false;
+  try{ saved = localStorage.getItem(KEY)==='1'; }catch(e){}
+  boxes.forEach(function(b){
+    b.checked = saved;
+    b.addEventListener('change', function(){
+      boxes.forEach(function(o){ o.checked = b.checked; });
+      try{ b.checked ? localStorage.setItem(KEY,'1') : localStorage.removeItem(KEY); }catch(e){}
+      gate();
+    });
+  });
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('.get, #dlBtn');
+    if(a && !agreed()) e.preventDefault();
+  });
 
-  function render(data){
-    var slots = (data && data.slots) || [];
+  // ---- Rendering ----
+  function render(){
+    var term = (q.value||'').trim().toLowerCase();
+    var shown = slots.filter(function(s){
+      if(!term) return true;
+      var hay = ('altload certificate ' + num(s.slug) + ' cert ' + num(s.slug) + ' v' + s.version + ' ' + s.version + ' valid').toLowerCase();
+      return term.split(/\s+/).every(function(t){ return hay.indexOf(t) > -1; });
+    });
     if(!slots.length){
-      state.innerHTML = '<b>No signed builds yet.</b><br>They appear here after the signing workflow runs. You can still download the unsigned IPA below.';
+      rows.innerHTML = '<li class="note"><b>No certificates yet.</b><br>Check back soon, or download the IPA below.</li>';
       return;
     }
-    var html = '';
-    slots.forEach(function(s){
-      var n = slotNumber(s.slug);
-      var icon = s.iconUrl ? '<img class="ico" src="'+esc(s.iconUrl)+'" alt="">'
-                           : '<img class="ico" src="AltLoad.png" alt="">';
-      html += ''
-        + '<div class="slot surface">'
-        +   '<div class="top">' + icon
-        +     '<div><div class="name">AltLoad</div>'
-        +       '<div class="bid">'+esc(s.bundleId)+'</div></div>'
-        +   '</div>'
-        +   '<div class="row">'
-        +     (n ? '<span class="pill">Cert '+esc(n)+'</span>' : '')
-        +     (s.version ? '<span class="pill">v'+esc(s.version)+'</span>' : '')
-        +     '<span class="pill ok">signed</span>'
-        +   '</div>'
-        +   '<a class="btn btn-primary" href="'+esc(s.installUrl)+'">'
-        +     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>'
-        +     'Install</a>'
-        + '</div>';
-    });
-    box.innerHTML = html;
+    if(!shown.length){
+      rows.innerHTML = '<li class="note">No certificate matches “' + esc(q.value) + '”.</li>';
+      return;
+    }
+    rows.innerHTML = shown.map(function(s){
+      return '<li class="rowi">'
+        + '<img class="ico" src="' + esc(s.iconUrl || 'AltLoad.png') + '" alt="">'
+        + '<div class="txt">'
+        +   '<div class="name">AltLoad <span class="valid">Valid</span></div>'
+        +   '<div class="det">Certificate ' + num(s.slug) + (s.version ? ' · v' + esc(s.version) : '') + '</div>'
+        + '</div>'
+        + '<a class="get" href="' + esc(s.installUrl) + '">Install</a>'
+        + '</li>';
+    }).join('');
+    gate();
   }
 
-  if(window.fetch){
-    fetch('installs/index.json', {cache:'no-store'})
-      .then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(d){ render(d); })
-      .catch(function(){
-        state.innerHTML = '<b>No signed builds yet.</b><br>They appear here after the signing workflow runs.';
-      });
-  } else {
-    state.textContent = 'Signed builds will appear here.';
+  function setStats(){
+    if(!slots.length){ stats.innerHTML = ''; countEl.textContent = ''; return; }
+    var v = slots[0].version;
+    countEl.textContent = slots.length;
+    stats.innerHTML = (v ? '<span class="stat">Version <b>' + esc(v) + '</b></span>' : '')
+      + '<span class="stat"><b>' + slots.length + '</b> certificate' + (slots.length === 1 ? '' : 's') + '</span>';
   }
 
-  // ---- Unsigned-download terms gate (remembered on this device) ----
-  var agree=document.getElementById('agree'), dl=document.getElementById('dlBtn'), KEY='altload-terms';
-  function sync(){
-    dl.setAttribute('aria-disabled', agree.checked ? 'false' : 'true');
-    dl.tabIndex = agree.checked ? 0 : -1;
-    try{ agree.checked ? localStorage.setItem(KEY,'1') : localStorage.removeItem(KEY); }catch(e){}
-  }
-  try{ agree.checked = localStorage.getItem(KEY)==='1'; }catch(e){}
-  agree.addEventListener('change',sync);
-  dl.addEventListener('click',function(e){ if(!agree.checked) e.preventDefault(); });
-  sync();
+  // ---- Search ----
+  searchBtn.addEventListener('click', function(){
+    var open = !searchBox.classList.contains('open');
+    searchBox.classList.toggle('open', open);
+    searchBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if(open){ q.focus(); } else { q.value = ''; render(); }
+  });
+  q.addEventListener('input', render);
+  q.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ searchBtn.click(); } });
 
-  // ---- Reveal-on-scroll ----
+  // ---- Load the signed copies the workflow published ----
+  fetch('installs/index.json', {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      slots = ((d && d.slots) || []).slice().sort(function(a,b){ return num(a.slug) - num(b.slug); });
+      setStats(); render();
+    })
+    .catch(function(){ slots = []; setStats(); render(); });
+
+  gate();
+
+  // ---- Reveal on scroll ----
   var els=[].slice.call(document.querySelectorAll('.reveal'));
   if(!('IntersectionObserver' in window)){ els.forEach(function(el){ el.classList.add('in'); }); return; }
   var io=new IntersectionObserver(function(entries){
