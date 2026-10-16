@@ -120,14 +120,27 @@ jobs:
             security list-keychain -d user -s "$KC" login.keychain-db
             cp "$profile" "$PROFILES_DIR/$slug.mobileprovision"
 
-            local HASH
+            local HASH ALL STATUS="valid"
             HASH="$(security find-identity -v -p codesigning "$KC" | awk 'NR==1 && $2 ~ /^[0-9A-F]+$/ {print $2}')"
+            if [ -z "$HASH" ]; then
+              # -v hides revoked and expired identities. The owner wants revoked
+              # packs published anyway, so sign with whatever identity is there
+              # and record why it wasn't listed as valid.
+              ALL="$(security find-identity -p codesigning "$KC")"
+              HASH="$(printf '%s\n' "$ALL" | awk '$1 ~ /^[0-9]+\)$/ && $2 ~ /^[0-9A-F]+$/ {print $2; exit}')"
+              case "$ALL" in
+                *REVOKED*) STATUS="revoked" ;;
+                *EXPIRED*) STATUS="expired" ;;
+                *)         STATUS="unverified" ;;
+              esac
+            fi
             if [ -z "$HASH" ]; then
               echo "no codesigning identity in $(basename "$p12") after import" >&2; return 1
             fi
 
             ota/scripts/resign.sh "$SRC_IPA" "$profile" "$HASH" "$bundle_id" "$RUNNER_TEMP/$slug.ipa"
             ota/scripts/build-manifest.sh "$RUNNER_TEMP/$slug.ipa" "$BASE_URL" "_site" "$slug" "$ICON"
+            echo "STATUS=$STATUS" >> "_site/installs/$slug/meta.txt"
           }
 
           echo "| Cert pack | Bundle id | Result |" >> "$GITHUB_STEP_SUMMARY"
@@ -150,7 +163,8 @@ jobs:
 
             if [ "$rc" -eq 0 ]; then
               SIGNED=$((SIGNED+1))
-              echo "| $n | com.mirazbakis.altload$n | signed |" >> "$GITHUB_STEP_SUMMARY"
+              st="$(grep '^STATUS=' "_site/installs/altload$n/meta.txt" | cut -d= -f2)"
+              echo "| $n | com.mirazbakis.altload$n | signed (${st:-valid}) |" >> "$GITHUB_STEP_SUMMARY"
             else
               FAILED=$((FAILED+1))
               rm -rf "_site/installs/altload$n"
