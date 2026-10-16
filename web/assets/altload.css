@@ -1,0 +1,70 @@
+/* AltLoad pages (AltLoad.html, terms.html). Same look as the app: a full midnight
+   background with one dark navy spotlight from the top, solid navy surfaces with
+   hairline edges, a deep blue accent, and the icon's dark green for small touches. */
+:root{
+  --night:#03050b;
+  --spot:#0e204a;
+  --card:#0a101e;
+  --raised:#10192c;
+  --navy:#132955;
+  --accent:#3c7ae3;
+  --accent-deep:#1f489e;
+  --forest:#176b4a;
+  --leaf:#40c280;
+  --ember:#f2a14a;
+  --ink:#eef3fb;
+  --ink-2:rgba(238,243,251,.72);
+  --ink-3:rgba(238,243,251,.5);
+  --line:rgba(255,255,255,.07);
+  --line-2:rgba(255,255,255,.14);
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--night);scroll-behavior:smooth;overflow-x:clip}
+body{
+  font-family:'Instrument Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;
+  background:var(--night);min-height:100vh;overflow-x:clip;
+}
+/* the spotlight: one soft navy cone falling from the top of the page */
+body::before{content:"";position:absolute;z-index:0;pointer-events:none;left:0;right:0;top:0;height:900px;
+  background:radial-gradient(max(560px,62%) 55% at 50% 0%,rgba(14,32,74,.95) 0%,rgba(14,32,74,.35) 55%,rgba(3,5,11,0) 100%)}
+a{color:inherit}
+img{display:block;max-width:100%}
+.wrap{position:relative;z-index:1;width:min(1040px,100% - 32px);margin-inline:auto}
+h1,h2,h3{letter-spacing:-.025em;line-height:1.1;font-weight:700}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.surface{background:var(--card);border:1px solid var(--line);border-radius:22px}
+
+/* top bar */
+.bar{position:relative;z-index:5;padding:18px 0}
+.bar .wrap{display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:17px}
+.brand img{width:30px;height:30px;border-radius:8px}
+.bar nav{margin-left:auto;display:flex;align-items:center;gap:4px}
+.bar nav a{padding:8px 12px;border-radius:10px;text-decoration:none;font-size:14.5px;color:var(--ink-2)}
+.bar nav a:hover{color:var(--ink);background:var(--raised)}
+@media (max-width:640px){.bar nav a.opt{display:none}}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:52px;padding:0 22px;border-radius:16px;
+  font:600 16px/1 inherit;font-family:inherit;text-decoration:none;border:1px solid var(--line-2);cursor:pointer;transition:transform .15s,opacity .15s}
+.btn svg{width:18px;height:18px;flex:none}
+.btn-primary{background:linear-gradient(var(--accent),var(--accent-deep));color:#fff;border-color:rgba(255,255,255,.16)}
+.btn-quiet{background:var(--raised);color:var(--ink);border-color:var(--line)}
+.btn:hover{transform:translateY(-1px)}
+.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
+
+/* footer */
+footer{position:relative;z-index:1;border-top:1px solid var(--line);margin-top:40px;padding:36px 0 48px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center}
+footer nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin-left:auto}
+footer a{color:var(--ink-2);text-decoration:none;font-size:14px}
+footer a:hover{color:var(--ink)}
+footer small{color:var(--ink-3);font-size:13px;flex-basis:100%}
+@media (max-width:640px){footer nav{margin-left:0}}
+
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}

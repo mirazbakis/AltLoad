@@ -1,0 +1,142 @@
+name: Sign IPAs & Deploy OTA
+
+# Downloads the latest NON-beta AltLoad release IPA, re-signs it once per cert
+# pack under ota/certs/<N>/ (rewriting the bundle id to com.mirazbakis.altload<N>),
+# writes a manifest.plist per slot, and publishes the AltLoad OTA install page to
+# GitHub Pages — one "Install" button per signed copy (sideinstaller.net style).
+#
+# Each cert pack folder ota/certs/<N>/ holds:
+#   <N>.p12               the signing certificate + private key
+#   <N>.mobileprovision   the ad-hoc provisioning profile (its registered UDIDs)
+#
+# Ad-hoc signing: a device can only install a slot if its UDID is in that slot's
+# profile. The default .p12 password is "WSF" (override with the P12_PASSWORD secret).
+#
+# Pages source must be set to "GitHub Actions":
+#   Settings -> Pages -> Build and deployment -> Source: GitHub Actions
+
+on:
+  workflow_dispatch:
+    inputs:
+      ipa_url:
+        description: "Override IPA URL (default: latest non-beta release)"
+        type: string
+        required: false
+  push:
+    paths:
+      - "ota/**"
+      - "web/**"
+      - ".github/workflows/sign-ota.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  sign-and-deploy:
+    runs-on: macos-14
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Download latest non-beta AltLoad IPA
+        env:
+          IPA_URL: ${{ inputs.ipa_url }}
+        run: |
+          set -euo pipefail
+          : "${IPA_URL:=https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/AltLoad.ipa}"
+          echo ">> Fetching $IPA_URL"
+          curl -fL --retry 3 -o "$RUNNER_TEMP/AltLoad.ipa" "$IPA_URL"
+          ls -lh "$RUNNER_TEMP/AltLoad.ipa"
+
+      - name: Sign every cert pack & build manifests
+        env:
+          DEFAULT_P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          set -euo pipefail
+          : "${DEFAULT_P12_PASSWORD:=WSF}"
+          : "${KEYCHAIN_PASSWORD:=ota-signing-temp}"
+          chmod +x ota/scripts/*.sh
+          mkdir -p _site/installs
+          shopt -s nullglob
+
+          PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES_DIR"
+          SRC_IPA="$RUNNER_TEMP/AltLoad.ipa"
+          ICON="web/AltLoad.png"
+
+          FOUND=0
+          for dir in ota/certs/*/; do
+            n="$(basename "$dir")"
+            p12s=( "$dir"*.p12 );             p12="${p12s[0]:-}"
+            profs=( "$dir"*.mobileprovision ); profile="${profs[0]:-}"
+
+            if [ -z "$p12" ] || [ -z "$profile" ]; then
+              echo "::warning::Skipping cert pack '$n' — needs one .p12 and one .mobileprovision"
+              continue
+            fi
+
+            slug="altload${n}"
+            bundle_id="com.mirazbakis.altload${n}"
+            FOUND=$((FOUND+1))
+            echo "::group::Signing $slug ($bundle_id)"
+
+            # Dedicated keychain per cert so the identity is unambiguous.
+            KC="$RUNNER_TEMP/kc-$n.keychain-db"
+            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KC"
+            security set-keychain-settings -lut 21600 "$KC"
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KC"
+            security import "$p12" -P "$DEFAULT_P12_PASSWORD" -A -t cert -f pkcs12 -k "$KC"
+            security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KC" >/dev/null
+            security list-keychain -d user -s "$KC" login.keychain-db
+            cp "$profile" "$PROFILES_DIR/$slug.mobileprovision"
+
+            HASH="$(security find-identity -v -p codesigning "$KC" | awk 'NR==1{print $2}')"
+            if [ -z "$HASH" ]; then
+              echo "::error::No codesigning identity in $p12 (wrong password?)"; exit 1
+            fi
+
+            ota/scripts/resign.sh "$SRC_IPA" "$profile" "$HASH" "$bundle_id" "$RUNNER_TEMP/$slug.ipa"
+            ota/scripts/build-manifest.sh "$RUNNER_TEMP/$slug.ipa" "$BASE_URL" "_site" "$slug" "$ICON"
+
+            echo "::endgroup::"
+          done
+
+          if [ "$FOUND" -eq 0 ]; then
+            echo "::error::No cert packs found under ota/certs/*/ — nothing to sign."; exit 1
+          fi
+
+      - name: Build OTA site
+        run: |
+          set -euo pipefail
+          ota/scripts/build-site.sh "web" "_site"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "_site"
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Install link
+        run: |
+          echo "### AltLoad OTA page ready :rocket:" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Open on the device in **Safari**: ${{ steps.deploy.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"
