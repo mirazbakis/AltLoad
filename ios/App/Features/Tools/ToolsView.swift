@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum ToolRoute: Hashable {
-    case altServer, pair, pairingToApps, entitlements, certificates, jit, location
+    case altServer, pair, pairingToApps, entitlements, appIDs, certificates, jit, location
 }
 
 /// Lets other screens open a tool (e.g. "Go to Pair" from Install).
@@ -19,6 +19,7 @@ struct ToolsView: View {
     @ObservedObject private var altServer = AltServerHost.shared
     @ObservedObject private var pairings = PairingStore.shared
     @ObservedObject private var entitlements = EntitlementSettings.shared
+    @ObservedObject private var account = CertificatesController.shared
     @ObservedObject private var location = LocationSpoofer.shared
 
     var body: some View {
@@ -53,6 +54,8 @@ struct ToolsView: View {
                     toolRow(.entitlements, symbol: "checkmark.shield.fill", title: "Entitlements",
                             detail: entitlements.enabled.isEmpty ? "Extra capabilities for apps AltLoad signs"
                                 : "\(entitlements.enabled.count) on · added on the next install or refresh")
+                    toolRow(.appIDs, symbol: "app.badge", title: "App IDs",
+                            detail: appIDsDetail)
                     toolRow(.certificates, symbol: "checkmark.seal.fill", title: "Certificates",
                             detail: "Your Apple ID's certificates, App IDs and devices")
                 }
@@ -66,6 +69,7 @@ struct ToolsView: View {
                 case .pair: PairView()
                 case .pairingToApps: PairingToAppsView()
                 case .entitlements: EntitlementsView()
+                case .appIDs: AppIDsView()
                 case .certificates: CertificatesView()
                 case .jit: JITView()
                 case .location: LocationView()
@@ -80,6 +84,13 @@ struct ToolsView: View {
             return "Running · AltStore connected \(date.formatted(.relative(presentation: .named)))"
         }
         return "Running · AltStore can find it on this iPhone"
+    }
+
+    private var appIDsDetail: String {
+        if let ids = account.overview?.appIds, let max = ids.max, let available = ids.available {
+            return "\(max - available) of \(max) used · \(available) available"
+        }
+        return "See which App IDs are in use and when they free up"
     }
 
     private var locationDetail: String {

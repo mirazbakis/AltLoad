@@ -11,7 +11,7 @@ App (iOS 18+, on-device pairing on iOS 27+) that signs and installs AltStore, Si
   - `Device/`: device ops over the tunnel, Developer Disk Image, LocalDevVPN, location simulation.
   - `Pairing/`: pairing host, saved pairing files, Apple TV discovery, background keep-alive, the pairing-code Live Activity.
   - `AltServer/`: the on-device AltServer AltStore talks to.
-- `ios/App/Features/<Tab>/`: SwiftUI screens only. Install shows the installed apps ("Your Apps"); Tools › Pair lists every saved pairing file; Tools › Entitlements; Tools › Pairing File to Apps only offers sideloaded (development-signed) apps.
+- `ios/App/Features/<Tab>/`: SwiftUI screens only. Install shows the installed apps ("Your Apps"); Tools › Pair lists every saved pairing file; Tools › Entitlements; Tools › App IDs (list + refresh, shares the Certificates session); Tools › Pairing File to Apps only offers sideloaded (development-signed) apps.
 - `ios/Shared/`: code compiled into both the app and the widget extension (`PairingActivityAttributes`).
 - `ios/Widgets/`: `AltLoadWidgets` extension that draws the pairing code in the Dynamic Island and on the Lock Screen.
 - `ios/App/UI/`: `Theme.swift` (palette, still named `Aurora`), `Background.swift`, `Components.swift` (shared views; some keep old `Glass*` names).
