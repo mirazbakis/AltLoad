@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AltLoad</title>
+<meta name="description" content="AltLoad signs and installs AltStore, SideStore and LiveContainer on your iPhone with your own Apple ID. Tap to install, no computer.">
+<meta property="og:title" content="AltLoad">
+<meta property="og:description" content="AltStore, SideStore and LiveContainer, installed on the iPhone itself. Follow the two steps to install.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://mirazbakis.github.io/AltLoad/AltLoad.png">
+<meta name="theme-color" content="#0a1f5c">
+<link rel="icon" type="image/png" href="AltLoad.png">
+<link rel="apple-touch-icon" href="AltLoad.png">
+<link rel="stylesheet" href="assets/altload.css">
+<style>
+  /* ---- hero ---- */
+  .hero{text-align:center;padding:26px 0 6px}
+  .hero-icon{width:112px;height:112px;margin:0 auto 20px;border-radius:26px;
+    box-shadow:0 0 0 1px rgba(160,200,255,.18),0 18px 50px -10px rgba(76,149,255,.55)}
+  .hero h1{font-size:44px;margin-bottom:8px}
+  .hero .sub{font-size:17px;color:var(--ink-2);max-width:470px;margin:0 auto 18px}
+  .hero .chips{margin-bottom:18px}
+  .hero-btns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+  .hero-btns .btn{min-height:44px;padding:0 18px;font-size:14.5px}
+
+  /* ---- terms ---- */
+  .tos{display:flex;gap:14px;align-items:center;margin-top:34px;padding:18px 20px;cursor:pointer;
+    font-size:16px;font-weight:600;transition:border-color .2s,background .2s}
+  .tos input{width:22px;height:22px;flex:none;accent-color:var(--accent);margin:0}
+  .tos a{color:var(--accent-2);text-decoration:none;font-weight:700}
+  .tos.nudge{border-color:var(--accent-2);background:var(--card-2)}
+
+  /* ---- numbered steps ---- */
+  .step{margin-top:34px}
+  .step-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .step-num{width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:11px;
+    background:var(--accent);color:#fff;font-weight:800;font-size:16px;box-shadow:0 8px 20px -8px rgba(47,109,246,.9)}
+  .step-head h2{font-size:24px}
+  .step-head .count{margin-left:auto;font-size:14px;font-weight:600;color:var(--ink-3)}
+
+  .wide{display:flex;width:100%;min-height:54px;font-size:16px;border-radius:18px}
+  .guide{margin-top:12px;padding:18px 20px}
+  .guide ol{padding-left:20px;color:var(--ink-2);font-size:15px}
+  .guide li{padding:4px 0}
+  .guide b{color:var(--ink)}
+
+  /* ---- install cards ---- */
+  .installs{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .inst{padding:18px;display:flex;flex-direction:column;gap:14px}
+  .inst-top{display:flex;align-items:center;gap:14px}
+  .inst-top img{width:52px;height:52px;border-radius:13px;flex:none;box-shadow:0 0 0 1px rgba(160,200,255,.14)}
+  .inst-name{font-size:18px;font-weight:800}
+  .inst-det{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-3)}
+  .valid{display:inline-flex;align-items:center;gap:6px;color:var(--valid);font-weight:700}
+  .inst .btn{width:100%;border-radius:16px}
+  .empty{grid-column:1/-1;padding:28px 20px;text-align:center;color:var(--ink-2)}
+  .empty b{color:var(--ink)}
+
+  /* ---- what it does ---- */
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:30px}
+  .feat{padding:18px}
+  .feat svg{width:26px;height:26px;color:var(--accent-2);margin-bottom:10px}
+  .feat h3{font-size:16px;margin-bottom:4px}
+  .feat p{font-size:14px;color:var(--ink-2);line-height:1.45}
+
+  /* ---- the rail that links the numbered steps ---- */
+  .steps{position:relative}
+  .steps::before{content:"";position:absolute;left:17px;top:52px;bottom:40px;width:2px;border-radius:2px;
+    background:linear-gradient(180deg,var(--accent-2),rgba(76,149,255,.15))}
+  .steps .step-body{padding-left:52px}
+  .step-num{position:relative;z-index:1}
+
+  /* ---- step 3 checklist ---- */
+  .finish{list-style:none;padding:6px 0}
+  .finish li{display:flex;gap:14px;align-items:flex-start;padding:14px 20px;border-top:1px solid var(--edge)}
+  .finish li:first-child{border-top:0}
+  .finish .tick{width:24px;height:24px;flex:none;border-radius:50%;display:grid;place-items:center;
+    background:rgba(76,149,255,.16);color:var(--accent-2);font-size:13px;font-weight:800;margin-top:1px}
+  .finish b{display:block;font-size:15.5px}
+  .finish span{font-size:14px;color:var(--ink-2)}
+  .finish a{color:var(--accent-2);font-weight:700;text-decoration:none}
+
+  /* ---- questions ---- */
+  .faq{margin-top:48px}
+  .faq h2{font-size:24px;margin-bottom:12px;text-align:center}
+  .faq details{border-top:1px solid var(--edge)}
+  .faq details:last-of-type{border-bottom:1px solid var(--edge)}
+  .faq summary{list-style:none;cursor:pointer;padding:16px 2px;font-weight:700;font-size:16px;display:flex;justify-content:space-between;gap:16px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";color:var(--ink-3)}
+  .faq details[open] summary::after{content:"–"}
+  .faq p{color:var(--ink-2);padding:0 2px 16px;font-size:15px}
+
+  @media (max-width:600px){
+    .installs,.features{grid-template-columns:1fr}
+    .features{gap:8px;margin-top:24px}
+    .feat{display:grid;grid-template-columns:26px 1fr;column-gap:12px;padding:12px 14px}
+    .feat svg{grid-row:span 2;margin:2px 0 0;width:22px;height:22px}
+    .feat h3{font-size:15px;margin:0}
+    .feat p{font-size:13px}
+    .steps::before{display:none}
+    .steps .step-body{padding-left:0}
+    .hero h1{font-size:38px}
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="AltLoad.png" alt="">AltLoad</a>
+    <nav>
+      <a class="opt" href="#faq">Questions</a>
+      <a href="terms.html">Terms</a>
+      <a href="https://github.com/mirazbakis/AltLoad">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <img class="hero-icon" src="AltLoad.png" alt="AltLoad icon">
+    <h1>AltLoad</h1>
+    <p class="sub">On-device sideloader for AltStore, SideStore and LiveContainer. Install it in three steps below.</p>
+    <div class="chips">
+      <span class="chip" id="ver">Version <b>…</b></span>
+      <span class="chip"><b>iOS 27</b> or later</span>
+    </div>
+    <div class="hero-btns">
+      <a class="btn btn-quiet" id="dlBtn" aria-disabled="true" href="https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+        Download IPA
+      </a>
+      <a class="btn btn-quiet" href="https://github.com/mirazbakis/AltLoad">GitHub</a>
+    </div>
+  </section>
+
+  <section class="features" aria-label="What AltLoad does">
+    <div class="feat card">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M12 8v6m0 0-2.5-2.5M12 14l2.5-2.5"/></svg>
+      <h3>No computer</h3>
+      <p>Pairs the iPhone with itself, then signs and installs your store right on it.</p>
+    </div>
+    <div class="feat card">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.7-5.6M20 12a8 8 0 0 1-13.7 5.6"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>
+      <h3>Refreshes itself</h3>
+      <p>An AltServer runs on the phone, so AltStore keeps your apps signed.</p>
+    </div>
+    <div class="feat card">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <h3>Your Apple ID only</h3>
+      <p>Your password goes to Apple and nowhere else. No accounts, no tracking.</p>
+    </div>
+  </section>
+
+  <label class="tos card" id="tosRow">
+    <input type="checkbox" id="tos">
+    <span>I have read and accept the <a href="terms.html">Terms of Service</a>.</span>
+  </label>
+
+  <div class="steps">
+  <!-- Step 1: DNS -->
+  <section class="step" aria-labelledby="s1">
+    <div class="step-head"><span class="step-num">1</span><h2 id="s1">Setup</h2></div>
+    <div class="step-body">
+    <a class="btn btn-primary wide gated" href="AltLoadDNS.mobileconfig" aria-disabled="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+      Install DNS Profile
+    </a>
+    <div class="guide card">
+      <ol>
+        <li>Tap <b>Install DNS Profile</b> and tap <b>Allow</b> when Safari asks to download it.</li>
+        <li>Open <b>Settings</b> and tap <b>Profile Downloaded</b> (or <b>General › VPN &amp; Device Management</b>), then tap <b>Install</b>.</li>
+        <li>In <b>General › VPN &amp; Device Management › DNS</b>, make sure <b>AltLoad</b> is selected. Keep it on until AltLoad is installed.</li>
+      </ol>
+    </div>
+    </div>
+  </section>
+
+  <!-- Step 2: signed installs -->
+  <section class="step" aria-labelledby="s2">
+    <div class="step-head"><span class="step-num">2</span><h2 id="s2">Installation</h2><span class="count" id="count"></span></div>
+    <div class="step-body">
+    <ul class="installs" id="installs">
+      <li class="empty card">Loading…</li>
+    </ul>
+    </div>
+  </section>
+
+  <!-- Step 3: first launch -->
+  <section class="step" aria-labelledby="s3">
+    <div class="step-head"><span class="step-num">3</span><h2 id="s3">Finish in AltLoad</h2></div>
+    <div class="step-body">
+    <ul class="finish card">
+      <li><span class="tick">1</span><div><b>Trust it</b><span>Settings › General › VPN &amp; Device Management, then trust AltLoad's developer.</span></div></li>
+      <li><span class="tick">2</span><div><b>Turn on Developer Mode</b><span>Settings › Privacy &amp; Security › Developer Mode, then restart.</span></div></li>
+      <li><span class="tick">3</span><div><b>Get LocalDevVPN</b><span>Free on the <a href="https://apps.apple.com/app/id6755608044">App Store</a>. AltLoad uses it to reach your iPhone.</span></div></li>
+      <li><span class="tick">4</span><div><b>Pair and install</b><span>Tools › Pair in AltLoad, then pick AltStore, SideStore or LiveContainer on the Install tab. A free Apple ID works.</span></div></li>
+    </ul>
+    </div>
+  </section>
+  </div>
+
+  <section class="faq" id="faq">
+    <h2>Questions</h2>
+    <details><summary>Install doesn't do anything.</summary><p>Open this page in Safari on your iPhone or iPad, accept the Terms, install the DNS profile, then tap Install and confirm. Once it's on the Home Screen, trust it in Settings › General › VPN &amp; Device Management. If one doesn't work, try another.</p></details>
+    <details><summary>Sign-in fails. What now?</summary><p>Since 12 October 2026 Apple turns down sign-in data from many public anisette servers. Leave Settings › Anisette on Automatic so AltLoad tries the servers that still work, and if it keeps failing, tap Reset Anisette Data and try again a few minutes later.</p></details>
+    <details><summary>An app has too many extensions for my free Apple ID.</summary><p>Before installing, set App Extensions to Keep, Use Main Profile (one App ID for the whole app) or Remove Extensions. A free Apple ID has 10 App IDs a week.</p></details>
+    <details><summary>Does AltLoad see my password?</summary><p>It's sent only to Apple. If you choose Remember password, it stays in this iPhone's Keychain and never syncs. There's no analytics or tracking.</p></details>
+    <details><summary>It can't connect to the iPhone.</summary><p>Check that LocalDevVPN is connected, Developer Mode is on, and this iPhone is paired in Tools › Pair. If it still fails, pair again.</p></details>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav>
+      <a href="https://github.com/mirazbakis/AltLoad/releases">Releases</a>
+      <a href="https://github.com/mirazbakis/AltLoad/blob/main/docs/HOW-IT-WORKS.md">How it works</a>
+      <a href="terms.html">Terms</a>
+      <a href="https://github.com/mirazbakis/AltLoad/blob/main/LICENSE.md">License</a>
+    </nav>
+    <small>© 2026 mirazbakis. All rights reserved. Not affiliated with AltStore, SideStore, LiveContainer or Apple.</small>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var list = document.getElementById('installs');
+  var countEl = document.getElementById('count');
+  var verEl = document.getElementById('ver');
+  var tos = document.getElementById('tos');
+  var tosRow = document.getElementById('tosRow');
+  var KEY = 'altload-terms';
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function num(slug){ var m=/(\d+)$/.exec(slug||''); return m ? parseInt(m[1],10) : 0; }
+
+  // Install, Download and the DNS profile unlock once the Terms box is ticked.
+  function gate(){
+    var state = tos.checked ? 'false' : 'true';
+    [].forEach.call(document.querySelectorAll('.gated, #dlBtn'), function(a){ a.setAttribute('aria-disabled', state); });
+  }
+  try{ tos.checked = localStorage.getItem(KEY)==='1'; }catch(e){}
+  tos.addEventListener('change', function(){
+    try{ tos.checked ? localStorage.setItem(KEY,'1') : localStorage.removeItem(KEY); }catch(e){}
+    gate();
+  });
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('.gated, #dlBtn');
+    if(!a || tos.checked) return;
+    e.preventDefault();
+    tosRow.scrollIntoView({behavior:'smooth', block:'center'});
+    tosRow.classList.add('nudge');
+    setTimeout(function(){ tosRow.classList.remove('nudge'); }, 900);
+  });
+
+  function render(slots){
+    if(!slots.length){
+      list.innerHTML = '<li class="empty card"><b>Nothing to install right now.</b><br>Check back soon, or download the IPA.</li>';
+      return;
+    }
+    countEl.textContent = slots.length + ' available';
+    list.innerHTML = slots.map(function(s){
+      return '<li class="inst card">'
+        + '<div class="inst-top"><img src="' + esc(s.iconUrl || 'AltLoad.png') + '" alt="">'
+        +   '<div><div class="inst-name">AltLoad</div>'
+        +   '<div class="inst-det"><span class="valid"><span class="dot"></span>Valid</span>'
+        +   (s.version ? '<span>· Version ' + esc(s.version) + '</span>' : '') + '</div></div></div>'
+        + '<a class="btn btn-primary gated" href="' + esc(s.installUrl) + '">'
+        +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>'
+        +   'Install</a>'
+        + '</li>';
+    }).join('');
+    gate();
+  }
+
+  // Written by the signing workflow.
+  fetch('installs/index.json', {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      var slots = ((d && d.slots) || []).slice().sort(function(a,b){ return num(a.slug) - num(b.slug); });
+      if(slots.length && slots[0].version) verEl.innerHTML = 'Version <b>' + esc(slots[0].version) + '</b>';
+      else verEl.style.display = 'none';
+      render(slots);
+    })
+    .catch(function(){ verEl.style.display = 'none'; render([]); });
+
+  gate();
+})();
+</script>
+</body>
+</html>

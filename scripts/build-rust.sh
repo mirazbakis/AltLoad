@@ -1,6 +1,6 @@
 #!/bin/bash
 # Builds the Rust FFI shim for iOS (device + Apple-Silicon simulator) and
-# repackages AltLoadFFI.xcframework. Run this whenever rust/ changes.
+# repackages AltLoadFFI.xcframework. Run this whenever core/ changes.
 set -euo pipefail
 
 export DEVELOPER_DIR="${DEVELOPER_DIR:-$(xcode-select -p)}"
@@ -8,7 +8,7 @@ export DEVELOPER_DIR="${DEVELOPER_DIR:-$(xcode-select -p)}"
 # SDK's iOS version and may not load on older devices.
 export IPHONEOS_DEPLOYMENT_TARGET=18.0
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$ROOT/rust"
+cd "$ROOT/core"
 
 echo "==> Building Rust static libs (release)"
 cargo build --release --target aarch64-apple-ios

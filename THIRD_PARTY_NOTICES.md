@@ -4,11 +4,12 @@ AltLoad includes or is derived from the following software. Each is used under t
 
 | Project | How AltLoad uses it | License |
 |---|---|---|
-| [StikPair](https://github.com/StephenDev0/StikPair) by StephenDev0 | On-device pairing flow, pairing host FFI, build scripts | StikPair License (MIT, Non-Commercial) |
-| [idevice](https://github.com/jkcoxson/idevice) by Jackson Coxson | Device pairing, tunnel, AFC, installation_proxy, Developer Disk Image mounting, debugserver (JIT) and location simulation. `rust/src/lib.rs` is derived from its `ffi/src/pairable_host.rs` | MIT |
+| [StikPair](https://github.com/StephenDev0/StikPair) by StephenDev0 | On-device pairing flow, pairing host FFI, build scripts. Derived files: `ios/App/Core/Pairing/PairingController.swift`, `KeepAlive.swift`, `LocalNetworkAuthorization.swift`, `AppleTVDiscovery.swift`, `core/src/lib.rs`, `scripts/build-rust.sh` | StikPair License (MIT, Non-Commercial) |
+| [idevice](https://github.com/jkcoxson/idevice) by Jackson Coxson | Device pairing, tunnel, AFC, installation_proxy, Developer Disk Image mounting, debugserver (JIT) and location simulation. `core/src/lib.rs` is derived from its `ffi/src/pairable_host.rs` | MIT |
 | [isideload](https://github.com/nab138/isideload) by nab138 | Apple ID sign-in, developer services and code signing (compiled into builds) | MIT |
+| [apple-codesign-quick](https://crates.io/crates/apple-codesign-quick) | Code signing, pulled in by isideload and statically linked into builds. You may modify it and relink AltLoad with your version; see LICENSE.md section 4 | LGPL-2.1-or-later |
 
-Builds also include the Rust crates these projects depend on. Each is under its own license, mostly MIT and/or Apache-2.0. Run `cargo about generate` or `cargo license` in `rust/` to see the full list.
+Builds also include the Rust crates these projects depend on. Each is under its own license, mostly MIT and/or Apache-2.0. Run `cargo about generate` or `cargo license` in `core/` to see the full list.
 
 AltLoad does **not** include or redistribute [AltStore](https://altstore.io), [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN) or Apple's Developer Disk Image. AltStore is downloaded from its official source when you install it, LocalDevVPN is installed separately from the App Store, and the Developer Disk Image is downloaded from [doronz88/DeveloperDiskImage](https://github.com/doronz88/DeveloperDiskImage) the first time you use JIT or Location.
 

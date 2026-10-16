@@ -1,11 +1,11 @@
 name: Sign IPAs & Deploy OTA
 
 # Downloads the latest NON-beta AltLoad release IPA, re-signs it once per cert
-# pack under ota/certs/<N>/ (rewriting the bundle id to com.mirazbakis.altload<N>),
+# pack under signing/certs/<N>/ (rewriting the bundle id to com.mirazbakis.altload<N>),
 # writes a manifest.plist per slot, and publishes the AltLoad OTA install page to
 # GitHub Pages — one "Install" button per signed copy (sideinstaller.net style).
 #
-# Each cert pack folder ota/certs/<N>/ holds:
+# Each cert pack folder signing/certs/<N>/ holds:
 #   <N>.p12               the signing certificate + private key
 #   <N>.mobileprovision   the ad-hoc provisioning profile (its registered UDIDs)
 #
@@ -24,9 +24,16 @@ on:
         required: false
   push:
     paths:
-      - "ota/**"
-      - "web/**"
+      - "signing/**"
+      - "site/**"
       - ".github/workflows/sign-ota.yml"
+  # A new AltLoad release goes out on the page straight away.
+  release:
+    types: [published]
+  # Re-sign and rewrite every manifest.plist and installs/index.json once a week,
+  # so the page never points at stale builds.
+  schedule:
+    - cron: "17 4 * * 1"
 
 permissions:
   contents: read
@@ -83,123 +90,48 @@ jobs:
 
       - name: Sign every cert pack & build manifests
         env:
-          DEFAULT_P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           BASE_URL: ${{ steps.pages.outputs.base_url }}
         run: |
           # No -e here: a pack that fails is skipped so the others (and the site)
-          # still go out. Each pack runs in its own subshell with -e instead.
-          # (Actions starts bash with -e, so it has to be switched off here.)
+          # still go out. (Actions starts bash with -e, so it's switched off.)
           set +e
           set -uo pipefail
-          : "${DEFAULT_P12_PASSWORD:=WSF}"
-          : "${KEYCHAIN_PASSWORD:=ota-signing-temp}"
-          chmod +x ota/scripts/*.sh
+          chmod +x signing/scripts/*.sh
           mkdir -p _site/installs
-          shopt -s nullglob
-
-          PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
-          mkdir -p "$PROFILES_DIR"
           SRC_IPA="$RUNNER_TEMP/AltLoad.ipa"
-          ICON="web/AltLoad.png"
-          OPENSSL="$(brew --prefix openssl@3 2>/dev/null)/bin/openssl"
-
-          # Import a .p12 into a keychain. Tries the password as given and with a
-          # trailing "!" (the cert pack's readme says "Passwords are WSF!"). macOS
-          # can't read .p12 files written with OpenSSL 3's default encryption, so if
-          # a direct import fails, re-export the pack in the legacy format first.
-          # On success SIGN_P12/SIGN_PW name the file and password that worked, for
-          # rcodesign to reuse.
-          import_identity() {
-            local p12="$1" kc="$2" pw tmp="$RUNNER_TEMP/legacy-$(basename "$1" .p12)"
-            for pw in "$DEFAULT_P12_PASSWORD" "${DEFAULT_P12_PASSWORD}!"; do
-              if security import "$p12" -P "$pw" -A -t cert -f pkcs12 -k "$kc"; then
-                SIGN_P12="$p12"; SIGN_PW="$pw"; return 0
-              fi
-              if [ -x "$OPENSSL" ] \
-                && "$OPENSSL" pkcs12 -in "$p12" -passin "pass:$pw" -nodes -out "$tmp.pem" 2>/dev/null \
-                && "$OPENSSL" pkcs12 -export -legacy -in "$tmp.pem" -out "$tmp.p12" -passout "pass:$pw"; then
-                rm -f "$tmp.pem"
-                if security import "$tmp.p12" -P "$pw" -A -t cert -f pkcs12 -k "$kc"; then
-                  SIGN_P12="$tmp.p12"; SIGN_PW="$pw"; return 0
-                fi
-              fi
-              rm -f "$tmp.pem" "$tmp.p12"
-            done
-            echo "could not import $(basename "$p12"): password isn't WSF or WSF!, or the .p12 is unreadable" >&2
-            return 1
-          }
-
-          sign_one() {
-            local n="$1" p12="$2" profile="$3"
-            local slug="altload${n}" bundle_id="com.mirazbakis.altload${n}"
-            local KC="$RUNNER_TEMP/kc-$n.keychain-db"
-            # Dedicated keychain per cert so the identity is unambiguous.
-            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KC"
-            security set-keychain-settings -lut 21600 "$KC"
-            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KC"
-            import_identity "$p12" "$KC"
-            security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KC" >/dev/null
-            security list-keychain -d user -s "$KC" login.keychain-db
-            cp "$profile" "$PROFILES_DIR/$slug.mobileprovision"
-
-            local HASH ALL STATUS="valid"
-            HASH="$(security find-identity -v -p codesigning "$KC" | awk 'NR==1 && $2 ~ /^[0-9A-F]+$/ {print $2}')"
-            if [ -z "$HASH" ]; then
-              # -v hides revoked and expired identities. The owner wants revoked
-              # packs published anyway, so sign with whatever identity is there
-              # and record why it wasn't listed as valid.
-              ALL="$(security find-identity -p codesigning "$KC")"
-              HASH="$(printf '%s\n' "$ALL" | awk '$1 ~ /^[0-9]+\)$/ && $2 ~ /^[0-9A-F]+$/ {print $2; exit}')"
-              case "$ALL" in
-                *REVOKED*) STATUS="revoked" ;;
-                *EXPIRED*) STATUS="expired" ;;
-                *)         STATUS="unverified" ;;
-              esac
-            fi
-            if [ -z "$HASH" ]; then
-              echo "no codesigning identity in $(basename "$p12") after import" >&2; return 1
-            fi
-
-            if [ "$STATUS" = "valid" ]; then
-              ota/scripts/resign.sh "$SRC_IPA" "$profile" "$HASH" "$bundle_id" "$RUNNER_TEMP/$slug.ipa"
-            else
-              RCODESIGN_P12="$SIGN_P12" RCODESIGN_PASSWORD="$SIGN_PW" \
-                ota/scripts/resign.sh "$SRC_IPA" "$profile" "$HASH" "$bundle_id" "$RUNNER_TEMP/$slug.ipa"
-            fi
-            ota/scripts/build-manifest.sh "$RUNNER_TEMP/$slug.ipa" "$BASE_URL" "_site" "$slug" "$ICON"
-            echo "STATUS=$STATUS" >> "_site/installs/$slug/meta.txt"
-          }
+          ICON="site/AltLoad.png"
 
           echo "| Cert pack | Bundle id | Result |" >> "$GITHUB_STEP_SUMMARY"
           echo "|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
           SIGNED=0; FAILED=0
-          for dir in ota/certs/*/; do
+          for dir in signing/certs/*/; do
             n="$(basename "$dir")"
-            p12s=( "$dir"*.p12 );             p12="${p12s[0]:-}"
-            profs=( "$dir"*.mobileprovision ); profile="${profs[0]:-}"
-            if [ -z "$p12" ] || [ -z "$profile" ]; then
-              echo "::warning title=Cert pack $n skipped::needs one .p12 and one .mobileprovision"
-              continue
-            fi
-
-            echo "::group::Signing altload$n"
+            slug="altload$n"
             LOG="$RUNNER_TEMP/sign-$n.log"
-            ( set -euo pipefail; sign_one "$n" "$p12" "$profile" ) 2>&1 | tee "$LOG"
+
+            echo "::group::Signing $slug"
+            (
+              set -euo pipefail
+              signing/scripts/sign-pack.sh "$dir" "$SRC_IPA" "com.mirazbakis.$slug" "$RUNNER_TEMP/$slug.ipa"
+              signing/scripts/build-manifest.sh "$RUNNER_TEMP/$slug.ipa" "$BASE_URL" "_site" "$slug" "$ICON"
+            ) 2>&1 | tee "$LOG"
             rc=${PIPESTATUS[0]}
             echo "::endgroup::"
 
             if [ "$rc" -eq 0 ]; then
               SIGNED=$((SIGNED+1))
-              st="$(grep '^STATUS=' "_site/installs/altload$n/meta.txt" | cut -d= -f2)"
-              echo "| $n | com.mirazbakis.altload$n | signed (${st:-valid}) |" >> "$GITHUB_STEP_SUMMARY"
+              st="$(grep '^STATUS=' "$LOG" | tail -n1 | cut -d= -f2)"
+              echo "STATUS=${st:-valid}" >> "_site/installs/$slug/meta.txt"
+              echo "| $n | com.mirazbakis.$slug | signed (${st:-valid}) |" >> "$GITHUB_STEP_SUMMARY"
             else
               FAILED=$((FAILED+1))
-              rm -rf "_site/installs/altload$n"
+              rm -rf "_site/installs/$slug"
               # Annotations are readable without signing in, unlike step logs.
               msg="$(grep -v '^>>' "$LOG" | grep -v '^ *$' | tail -n 4 | tr '\n' ' ' | cut -c1-500)"
               echo "::warning title=Cert pack $n skipped::$msg"
-              echo "| $n | com.mirazbakis.altload$n | failed: ${msg//|/ } |" >> "$GITHUB_STEP_SUMMARY"
+              echo "| $n | com.mirazbakis.$slug | failed: ${msg//|/ } |" >> "$GITHUB_STEP_SUMMARY"
             fi
           done
 
@@ -211,7 +143,7 @@ jobs:
       - name: Build OTA site
         run: |
           set -euo pipefail
-          ota/scripts/build-site.sh "web" "_site"
+          signing/scripts/build-site.sh "site" "_site"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AltLoad Terms</title>
+<meta name="description" content="The terms for using AltLoad, its builds and this website.">
+<meta name="theme-color" content="#061436">
+<link rel="icon" type="image/png" href="AltLoad.png">
+<link rel="stylesheet" href="assets/altload.css">
+<style>
+  .doc{display:grid;grid-template-columns:230px 1fr;gap:48px;padding:40px 0 0;align-items:start}
+  .toc{position:sticky;top:24px}
+  .toc ol{list-style:none;counter-reset:t;margin-top:12px;border-left:1px solid var(--line)}
+  .toc li{counter-increment:t}
+  .toc a{display:flex;gap:10px;padding:7px 0 7px 14px;margin-left:-1px;border-left:1px solid transparent;text-decoration:none;font-size:14px;color:var(--ink-2)}
+  .toc a::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);font-size:12px;color:var(--ink-3);padding-top:2px}
+  .toc a:hover,.toc a.on{color:var(--ink);border-left-color:var(--leaf)}
+  .title h1{font-size:clamp(34px,5.5vw,52px);margin:10px 0 12px}
+  .title p{color:var(--ink-2);font-size:17px}
+  .dates{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .dates span{font-family:var(--mono);font-size:12px;padding:5px 10px;border-radius:8px;background:var(--raised);border:1px solid var(--line);color:var(--ink-2)}
+  .short{margin:28px 0 8px;padding:22px 24px}
+  .short ul{margin:10px 0 0 18px;color:var(--ink-2);font-size:15px}
+  .short li{margin:4px 0}
+  article section{padding:34px 0 0;scroll-margin-top:20px}
+  article h2{display:flex;align-items:baseline;gap:14px;font-size:24px;margin-bottom:12px}
+  article h2 .n{font-family:var(--mono);font-size:14px;color:var(--leaf);font-weight:500}
+  article h3{font-size:16px;margin:18px 0 6px}
+  article p,article li{color:var(--ink-2);font-size:16px}
+  article p+p{margin-top:10px}
+  article ul{margin:8px 0 0 20px}
+  article li{margin:5px 0}
+  article a{color:var(--ink)}
+  article strong{color:var(--ink)}
+  @media (max-width:860px){.doc{grid-template-columns:1fr;gap:8px}.toc{position:static}.toc ol{columns:2;column-gap:16px}}
+  @media (max-width:480px){.toc ol{columns:1}}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="AltLoad.png" alt="">AltLoad</a>
+    <nav>
+      <a class="opt" href="index.html#install">Install</a>
+      <a href="https://github.com/mirazbakis/AltLoad">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="title">
+    <span class="label">Legal</span>
+    <h1>Terms of Service</h1>
+    <p>The terms for using AltLoad, its builds and this website.</p>
+    <div class="dates"><span>Effective 15 October 2026</span><span>Version 3.0</span></div>
+  </div>
+
+  <div class="short surface">
+    <span class="label">In short</span>
+    <ul>
+      <li>AltLoad is free. It installs AltStore, SideStore and LiveContainer on your own device with your own Apple ID.</li>
+      <li>You use it at your own risk and are responsible for your Apple ID, your device and following Apple's terms and the law.</li>
+      <li>No piracy, and no using location simulation to deceive anyone.</li>
+      <li>We collect nothing. Your password goes only to Apple.</li>
+    </ul>
+    <p class="label" style="margin-top:12px">This summary is for convenience. The sections below are what apply.</p>
+  </div>
+
+  <div class="doc">
+    <aside class="toc" aria-label="Contents">
+      <span class="label">Contents</span>
+      <ol>
+        <li><a href="#nature">Nature of AltLoad</a></li>
+        <li><a href="#risk">Assumption of risk</a></li>
+        <li><a href="#you">Your responsibilities</a></li>
+        <li><a href="#warranty">No warranty</a></li>
+        <li><a href="#liability">Limitation of liability</a></li>
+        <li><a href="#indemnity">Indemnification</a></li>
+        <li><a href="#privacy">Privacy</a></li>
+        <li><a href="#changes">Changes and termination</a></li>
+        <li><a href="#severability">Severability</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ol>
+    </aside>
+
+    <article>
+      <section id="nature">
+        <h2><span class="n">01</span>Nature of AltLoad</h2>
+        <p>These Terms apply to the AltLoad app, its source code at <a href="https://github.com/mirazbakis/AltLoad">github.com/mirazbakis/AltLoad</a>, the builds published there, and this website (together, the "Service"), provided by mirazbakis ("we", "us"). By downloading, building, installing or using AltLoad you agree to them. If you don't, don't use the Service.</p>
+        <p>AltLoad is a free iOS app that does on the device what a computer would otherwise do. It pairs your iPhone or iPad with itself, reaches it through LocalDevVPN, signs in to Apple's developer services with your Apple ID, and signs and installs AltStore, AltStore Beta, SideStore or SideStore inside LiveContainer, including their nightly builds. It can also run an AltServer for AltStore, and offers JIT, location simulation and entitlements.</p>
+        <p>We don't host, sell or distribute those apps. AltLoad downloads them from their own sources and GitHub releases, or from a file you pick. Builds of AltLoad are published unsigned; you sign and install them yourself.</p>
+        <h3>Ownership</h3>
+        <p>AltLoad is Copyright (c) 2026 mirazbakis. All rights reserved. AltLoad is not open source. The source is public only so you can see what it does, and the only rights you get are those in the <a href="https://github.com/mirazbakis/AltLoad/blob/main/LICENSE.md">AltLoad Proprietary License</a>: using official builds on your own devices for personal, non-commercial purposes, viewing the source, and forking it on GitHub only to propose a change. Copying, building, modifying and redistributing it are not allowed. Parts from other projects keep their own licenses, listed in <a href="https://github.com/mirazbakis/AltLoad/blob/main/THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a>.</p>
+        <h3>No affiliation</h3>
+        <p>AltLoad is independent and isn't affiliated with or endorsed by Apple Inc., AltStore, Riley Testut, SideStore or LiveContainer. Apple, iPhone, iPad, iOS and Xcode are trademarks of Apple Inc. Other names belong to their owners and are used only to describe compatibility.</p>
+      </section>
+
+      <section id="risk">
+        <h2><span class="n">02</span>Assumption of risk</h2>
+        <p>Sideloading and developer features have consequences you accept by using the Service, including:</p>
+        <ul>
+          <li>apps stopping working when certificates expire or are revoked;</li>
+          <li>certificates made elsewhere being revoked when your Apple ID is at its limit;</li>
+          <li>Apple limiting or suspending an Apple ID, or rejecting sign-ins;</li>
+          <li>nightly builds of SideStore and LiveContainer being unstable or broken;</li>
+          <li>apps reacting to a simulated location or a debugger;</li>
+          <li>lost app data, or things not working on some iOS versions.</li>
+        </ul>
+        <p>Back up anything important. We recommend a secondary Apple ID for sideloading.</p>
+      </section>
+
+      <section id="you">
+        <h2><span class="n">03</span>Your responsibilities</h2>
+        <h3>Your Apple ID</h3>
+        <p>AltLoad acts on your behalf with your Apple ID. You're responsible for keeping it secure, for what is done with it, and for following Apple's terms that apply to you, including Apple's limits on free accounts (7-day apps, a few active apps, some capabilities only for paid members). Apple can change its services or accounts at any time; that is outside our control.</p>
+        <h3>Acceptable use</h3>
+        <p>You agree not to use the Service to:</p>
+        <ul>
+          <li>install or share apps you don't have the right to use, including pirated or cracked apps;</li>
+          <li>pair with or install software on a device or account you aren't authorised to use;</li>
+          <li>spread malware or break security measures where the law doesn't allow it;</li>
+          <li>sell, redistribute or repackage AltLoad, or present a modified version as the official app;</li>
+          <li>break any law or regulation.</li>
+        </ul>
+        <h3>Developer features</h3>
+        <p><strong>Location simulation</strong> changes the location every app sees. Don't use it to deceive people, commit fraud, cheat where it's forbidden, or get around legal or safety rules, and stop it before relying on your real location. <strong>JIT</strong> briefly attaches a debugger; only use it with apps you may run that way. <strong>Entitlements</strong> are enabled on your own App IDs and Apple decides which your account may use. For JIT and location, AltLoad mounts Apple's Developer Disk Image from a third-party mirror, as Xcode would.</p>
+        <p>You must be able to form a binding agreement where you live and meet Apple's requirements for the Apple ID you use.</p>
+      </section>
+
+      <section id="warranty">
+        <h2><span class="n">04</span>No warranty</h2>
+        <p>The Service is provided "as is" and "as available", without warranty of any kind, express or implied, including merchantability, fitness for a particular purpose, non-infringement, and that it will be uninterrupted, secure or error-free. We don't promise that any third-party source, anisette server or repository will be available. Where the law doesn't allow some exclusions, they apply as far as it does.</p>
+      </section>
+
+      <section id="liability">
+        <h2><span class="n">05</span>Limitation of liability</h2>
+        <p>To the fullest extent the law allows, we aren't liable for indirect, incidental, special, consequential or punitive damages, or for loss of data, device functionality, apps, certificates or access to an Apple ID, arising from your use of or inability to use the Service. Because the Service is free, our total liability is limited to zero, or the lowest amount the law allows. Nothing here limits liability that can't legally be limited.</p>
+      </section>
+
+      <section id="indemnity">
+        <h2><span class="n">06</span>Indemnification</h2>
+        <p>As far as the law allows, you agree to cover us for claims, losses and costs that come from your misuse of the Service or your breach of these Terms or of the law.</p>
+      </section>
+
+      <section id="privacy">
+        <h2><span class="n">07</span>Privacy</h2>
+        <p>We don't collect your data. AltLoad has no analytics or tracking and sends nothing to us.</p>
+        <ul>
+          <li>Your Apple ID password is sent only to Apple. With Remember password on, it's kept in the device's Keychain, readable only while unlocked and never synced.</li>
+          <li>Anisette servers provide the device-identity data Apple requires to sign in. They never see your password. By default AltLoad picks a working public server; you can choose one in Settings.</li>
+          <li>Pairing files, certificates, anisette data, simulated locations and settings stay on your device.</li>
+        </ul>
+        <p>AltLoad also relies on services we don't run, each with its own terms: Apple, the anisette servers, AltStore's, SideStore's and LiveContainer's sources and GitHub releases, LocalDevVPN, GitHub (which hosts this site and the builds) and Apple Maps. We aren't responsible for them or their availability.</p>
+      </section>
+
+      <section id="changes">
+        <h2><span class="n">08</span>Changes and termination</h2>
+        <p>We may update these Terms. We'll change the effective date above and mention significant changes in the release notes; using the Service after that means you accept them. We may change or stop any part of the Service at any time. You can stop by deleting AltLoad; apps it installed keep working until their signature expires. If you break these Terms, your permission to use the Service ends.</p>
+      </section>
+
+      <section id="severability">
+        <h2><span class="n">09</span>Severability</h2>
+        <p>If any part of these Terms can't be enforced, the rest stays in effect. Not enforcing a term doesn't waive it. These Terms and the AltLoad License are the whole agreement about the Service; where they conflict about rights to the code, the license applies. Mandatory consumer-protection laws where you live still apply.</p>
+      </section>
+
+      <section id="contact">
+        <h2><span class="n">10</span>Contact</h2>
+        <p>Questions about these Terms: open an issue at <a href="https://github.com/mirazbakis/AltLoad/issues">github.com/mirazbakis/AltLoad/issues</a>. Security problems: follow the <a href="https://github.com/mirazbakis/AltLoad/blob/main/SECURITY.md">Security Policy</a>, not a public issue.</p>
+      </section>
+    </article>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="AltLoad.png" alt="">AltLoad</a>
+    <nav>
+      <a href="https://github.com/mirazbakis/AltLoad/releases">Releases</a>
+      <a href="https://github.com/mirazbakis/AltLoad/blob/main/LICENSE.md">License</a>
+      <a href="https://github.com/mirazbakis/AltLoad/blob/main/THIRD_PARTY_NOTICES.md">Notices</a>
+      <a href="https://github.com/mirazbakis/AltLoad/blob/main/SECURITY.md">Security</a>
+    </nav>
+    <small>© 2026 mirazbakis. Not affiliated with AltStore, SideStore, LiveContainer or Apple.</small>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // Highlight the section being read in the contents.
+  var links=[].slice.call(document.querySelectorAll('.toc a'));
+  if(!('IntersectionObserver' in window)) return;
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(!en.isIntersecting) return;
+      links.forEach(function(a){ a.classList.toggle('on', a.getAttribute('href')==='#'+en.target.id); });
+    });
+  },{rootMargin:'-20% 0px -70% 0px'});
+  document.querySelectorAll('article section').forEach(function(s){ io.observe(s); });
+})();
+</script>
+</body>
+</html>

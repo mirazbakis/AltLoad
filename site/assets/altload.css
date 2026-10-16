@@ -1,0 +1,84 @@
+/* AltLoad pages (index.html, terms.html). Midnight blue: a deep navy page that
+   lifts to a brighter blue at the top, solid navy cards with a thin blue edge, and
+   blue buttons. No white-tinted glass, which turns grey on a dark page. */
+:root{
+  --night:#061648;
+  --night-top:#0b2368;
+  --card:#050f36;
+  --card-2:#0b1a4f;
+  --edge:rgba(120,165,255,.16);
+  --edge-2:rgba(120,165,255,.30);
+  --accent:#2f6df6;
+  --accent-2:#4c95ff;
+  --valid:#3ddc97;
+  --ink:#f3f6ff;
+  --ink-2:rgba(222,232,255,.74);
+  --ink-3:rgba(222,232,255,.52);
+  --sans:-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  /* terms.html still uses these names */
+  --line:var(--edge);
+  --line-2:var(--edge-2);
+  --glass:var(--card);
+  --glass-2:var(--card-2);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--night);scroll-behavior:smooth;overflow-x:clip}
+body{
+  font-family:var(--sans);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;
+  min-height:100vh;overflow-x:clip;
+  background:
+    radial-gradient(900px 520px at 50% -120px,rgba(76,149,255,.28),rgba(76,149,255,0) 70%),
+    linear-gradient(180deg,var(--night-top) 0,var(--night) 700px);
+  background-color:var(--night);background-repeat:no-repeat;
+}
+a{color:inherit}
+img{display:block;max-width:100%}
+.wrap{width:min(720px,100% - 32px);margin-inline:auto}
+h1,h2,h3{letter-spacing:-.02em;line-height:1.15;font-weight:800}
+.label{font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+
+/* top bar */
+.bar{padding:18px 0}
+.bar .wrap{display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:17px}
+.brand img{width:30px;height:30px;border-radius:8px}
+.bar nav{margin-left:auto;display:flex;gap:4px}
+.bar nav a{padding:8px 13px;border-radius:999px;text-decoration:none;font-size:14.5px;font-weight:600;color:var(--ink-2)}
+.bar nav a:hover{color:var(--ink);background:rgba(76,149,255,.14)}
+@media (max-width:520px){.bar nav a.opt{display:none}}
+
+/* cards */
+.card,.surface{background:var(--card);border:1px solid var(--edge);border-radius:22px;
+  box-shadow:0 1px 0 rgba(160,195,255,.08) inset,0 24px 50px -30px rgba(0,0,0,.8)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:50px;padding:0 22px;border-radius:999px;
+  font:700 15.5px/1 var(--sans);text-decoration:none;cursor:pointer;border:1px solid transparent;
+  transition:filter .15s,transform .15s,background .15s}
+.btn svg{width:18px;height:18px;flex:none}
+.btn-primary{color:#fff;background:linear-gradient(180deg,var(--accent-2),var(--accent));border-color:rgba(160,200,255,.35);
+  box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 12px 28px -12px rgba(47,109,246,.9)}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-quiet{color:var(--ink);background:var(--card-2);border-color:var(--edge-2)}
+.btn-quiet:hover{background:#152b6e}
+.btn:active{transform:scale(.98)}
+.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;filter:saturate(.6)}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:999px;font-size:13.5px;font-weight:600;
+  color:var(--ink-2);text-decoration:none;background:var(--card);border:1px solid var(--edge)}
+.chip b{color:var(--ink)}
+a.chip:hover{border-color:var(--edge-2);color:var(--ink)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--valid);box-shadow:0 0 8px var(--valid)}
+
+/* footer */
+footer{border-top:1px solid var(--edge);margin-top:56px;padding:34px 0 48px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;text-align:center}
+footer nav{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center}
+footer a{color:var(--ink-2);text-decoration:none;font-size:14px}
+footer a:hover{color:var(--ink)}
+footer small{color:var(--ink-3);font-size:13px;flex-basis:100%}
+
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

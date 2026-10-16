@@ -1,0 +1,108 @@
+name: Sign IPA
+
+# Signs any IPA with one of the cert packs under signing/certs/<N>/ and hands back
+# the signed IPA plus a ready manifest.plist as a workflow artifact. Nothing is
+# published: to put a build on the install page, use "Sign IPAs & Deploy OTA".
+#
+# Actions → Sign IPA → Run workflow, then download the "signed-ipa" artifact.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ipa_url:
+        description: "Direct link to the IPA to sign"
+        type: string
+        required: true
+      pack:
+        description: "Cert pack number (folder under signing/certs/)"
+        type: string
+        default: "1"
+      bundle_id:
+        description: "New bundle id (empty keeps the IPA's own)"
+        type: string
+        required: false
+      base_url:
+        description: "Where you'll host the files, for manifest.plist (empty uses this repo's Pages URL)"
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  sign:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check inputs
+        env:
+          PACK: ${{ inputs.pack }}
+          IPA_URL: ${{ inputs.ipa_url }}
+        run: |
+          set -euo pipefail
+          case "$PACK" in ''|*[!0-9]*) echo "::error::pack must be a number"; exit 1 ;; esac
+          [ -d "signing/certs/$PACK" ] || { echo "::error::signing/certs/$PACK doesn't exist"; exit 1; }
+          case "$IPA_URL" in https://*) ;; *) echo "::error::ipa_url must be an https:// link"; exit 1 ;; esac
+
+      - name: Download the IPA
+        env:
+          IPA_URL: ${{ inputs.ipa_url }}
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o "$RUNNER_TEMP/input.ipa" "$IPA_URL"
+          unzip -tq "$RUNNER_TEMP/input.ipa" >/dev/null || { echo "::error::That file isn't a valid IPA"; exit 1; }
+
+      # Same pinned rcodesign as the OTA workflow, for revoked or expired packs.
+      - name: Install rcodesign
+        run: |
+          set -euo pipefail
+          V=0.29.0
+          F="apple-codesign-$V-macos-universal.tar.gz"
+          SHA=d98372d5524226ccf9dc0eda03d4e4f5826182dabb2fc3f2bd303ed9113a748d
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/$F" \
+            "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign/$V/$F"
+          echo "$SHA  $RUNNER_TEMP/$F" | shasum -a 256 -c -
+          mkdir -p "$RUNNER_TEMP/rcodesign"
+          tar -xzf "$RUNNER_TEMP/$F" -C "$RUNNER_TEMP/rcodesign"
+          BIN="$(find "$RUNNER_TEMP/rcodesign" -type f -name rcodesign | head -n1)"
+          chmod +x "$BIN"
+          echo "$(dirname "$BIN")" >> "$GITHUB_PATH"
+
+      - name: Sign and write manifest.plist
+        env:
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          PACK: ${{ inputs.pack }}
+          BUNDLE_ID: ${{ inputs.bundle_id }}
+          BASE_URL: ${{ inputs.base_url }}
+        run: |
+          set -euo pipefail
+          chmod +x signing/scripts/*.sh
+          if [ -z "$BUNDLE_ID" ]; then
+            mkdir -p "$RUNNER_TEMP/peek"
+            unzip -q -o "$RUNNER_TEMP/input.ipa" 'Payload/*.app/Info.plist' -d "$RUNNER_TEMP/peek"
+            BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$(ls "$RUNNER_TEMP"/peek/Payload/*.app/Info.plist | head -n1)")"
+          fi
+          : "${BASE_URL:=https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}}"
+          SLUG="$(printf '%s' "$BUNDLE_ID" | tr -c 'A-Za-z0-9.-' '-')"
+
+          signing/scripts/sign-pack.sh "signing/certs/$PACK" "$RUNNER_TEMP/input.ipa" "$BUNDLE_ID" "$RUNNER_TEMP/signed.ipa" | tee "$RUNNER_TEMP/sign.log"
+          signing/scripts/build-manifest.sh "$RUNNER_TEMP/signed.ipa" "$BASE_URL" "out" "$SLUG"
+
+          STATUS="$(grep '^STATUS=' "$RUNNER_TEMP/sign.log" | tail -n1 | cut -d= -f2)"
+          {
+            echo "### Signed $BUNDLE_ID with pack $PACK (${STATUS:-valid})"
+            echo ""
+            echo "Download the **signed-ipa** artifact below. Upload \`app.ipa\` and \`manifest.plist\` to \`$BASE_URL/installs/$SLUG/\`, then install with:"
+            echo ""
+            echo "\`itms-services://?action=download-manifest&url=$BASE_URL/installs/$SLUG/manifest.plist\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-ipa
+          path: out/installs/
+          retention-days: 7

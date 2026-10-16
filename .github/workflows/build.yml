@@ -60,7 +60,7 @@ jobs:
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: rust
+          workspaces: core
 
       - name: Build Rust FFI xcframework
         run: bash ./scripts/build-rust.sh

@@ -59,14 +59,14 @@ rp_pairing_file*.plist
 
 # ---- Signed installs are published by the signing workflow, not source ----
 # A local copy may be pulled in just to preview the site; never commit it.
-web/installs/
+site/installs/
 
 # ---- OTA ad-hoc signing packs: intentionally committed ----
 # These ad-hoc .p12/.mobileprovision are deliberately tracked (owner's choice,
 # public repo). They only produce installs for UDIDs already in each profile.
-# This re-includes ONLY the packs under ota/certs/ — signing material anywhere
+# This re-includes ONLY the packs under signing/certs/ — signing material anywhere
 # else in the repo stays ignored by the rules above.
-!ota/certs/
-!ota/certs/*/
-!ota/certs/**/*.p12
-!ota/certs/**/*.mobileprovision
+!signing/certs/
+!signing/certs/*/
+!signing/certs/**/*.p12
+!signing/certs/**/*.mobileprovision
