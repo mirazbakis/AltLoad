@@ -3,7 +3,8 @@ name: Sign IPAs & Deploy OTA
 # Downloads the latest NON-beta AltLoad release IPA, re-signs it once per cert
 # pack under signing/certs/<N>/ (rewriting the bundle id to com.mirazbakis.altload<N>),
 # writes a manifest.plist per slot, and publishes the AltLoad OTA install page to
-# GitHub Pages — one "Install" button per signed copy.
+# GitHub Pages — one "Install" button per signed copy — plus source.json, an
+# AltStore / SideStore source of every stable release.
 #
 # Each cert pack folder signing/certs/<N>/ holds:
 #   <N>.p12               the signing certificate + private key
@@ -145,6 +146,15 @@ jobs:
         run: |
           set -euo pipefail
           signing/scripts/build-site.sh "site" "_site"
+
+      # AltStore / SideStore source listing every stable release.
+      - name: Build AltStore source
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          set -euo pipefail
+          python3 signing/scripts/build-source.py "$RUNNER_TEMP/AltLoad.ipa" "_site" "$BASE_URL"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

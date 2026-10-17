@@ -108,6 +108,11 @@
   .box ol li{padding:2px 0}
   .box b{color:var(--ink)}
   .box .btn{width:100%;margin-top:16px}
+  .src-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  @media (max-width:520px){.src-row{grid-template-columns:1fr}}
+  .box .src-row .btn{margin-top:0}
+  .box p.src-url{font-size:13px;color:var(--ink-3);overflow-wrap:anywhere}
+  .src-url code{color:var(--ink-2);user-select:all}
 
   .copies-head{display:flex;align-items:center;gap:10px}
   .copies-head .count{margin-left:auto;font-size:13px;font-weight:700;color:var(--ink-3)}
@@ -241,7 +246,17 @@
         </div>
 
         <div class="box">
-          <h3><i>3</i>Or download the IPA</h3>
+          <h3><i>3</i>Or add the source</h3>
+          <p>Already use AltStore or SideStore? Add the AltLoad source to get it and its updates there.</p>
+          <div class="src-row">
+            <a class="btn btn-line gated" href="altstore://source?url=https://mirazbakis.github.io/AltLoad/source.json" aria-disabled="true">Add to AltStore</a>
+            <a class="btn btn-line gated" href="sidestore://source?url=https://mirazbakis.github.io/AltLoad/source.json" aria-disabled="true">Add to SideStore</a>
+          </div>
+          <p class="src-url">Source URL: <code>https://mirazbakis.github.io/AltLoad/source.json</code></p>
+        </div>
+
+        <div class="box">
+          <h3><i>4</i>Or download the IPA</h3>
           <p>Prefer your own signer? Get the unsigned build from the latest release and sign it yourself.</p>
           <a class="btn btn-line gated" id="dlBtn" href="https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa" aria-disabled="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>Download IPA</a>
