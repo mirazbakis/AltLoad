@@ -3,7 +3,8 @@
 # Write the AltStore / SideStore source (source.json) for the Pages site.
 # Lists every stable (non-prerelease) GitHub release that has an AltLoad.ipa,
 # newest first, pointing at the official release download. App info
-# (bundle id, minimum iOS, privacy strings) is read from the given IPA.
+# (bundle id, privacy strings) is read from the given IPA. The minimum iOS is
+# MIN_IOS, not the IPA's: pairing on the device needs iOS 27.
 #
 # Usage:
 #   build-source.py <ipa> <out_dir> <base_url>
@@ -22,6 +23,7 @@ import zipfile
 IPA, OUT_DIR, BASE_URL = sys.argv[1], sys.argv[2], sys.argv[3].rstrip("/")
 REPO = os.environ.get("GITHUB_REPOSITORY", "mirazbakis/AltLoad")
 ASSET = "AltLoad.ipa"
+MIN_IOS = "27.0"
 
 
 def app_info(ipa):
@@ -42,7 +44,6 @@ def releases():
 
 
 info = app_info(IPA)
-latest = info.get("CFBundleShortVersionString", "")
 
 versions = []
 for rel in releases():
@@ -58,9 +59,8 @@ for rel in releases():
         "localizedDescription": (rel.get("body") or "").strip() or f"AltLoad {version}",
         "downloadURL": asset["browser_download_url"],
         "size": asset["size"],
+        "minOSVersion": MIN_IOS,
     }
-    if version == latest and info.get("MinimumOSVersion"):
-        v["minOSVersion"] = info["MinimumOSVersion"]
     versions.append(v)
 
 if not versions:
