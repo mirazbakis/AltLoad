@@ -1,15 +1,13 @@
-<p align="center">
-  <img src="docs/assets/logo.svg" width="120" height="120" alt="AltLoad">
-</p>
+<div align="center">
 
-<h1 align="center">AltLoad</h1>
+<img src="docs/assets/logo.svg" width="120" height="120" alt="AltLoad">
 
-<p align="center">
-  <b>Sideload AltStore, SideStore and LiveContainer from the iPhone itself.</b><br>
-  No computer, no subscription, your own Apple ID.
-</p>
+# AltLoad
 
-<h3 align="center">
+**Sideload AltStore, SideStore and LiveContainer from the iPhone itself.**<br>
+No computer, no subscription, your own Apple ID.
+
+<h3>
 <a href="https://mirazbakis.github.io/AltLoad/altstore.html"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/altstore-badge-dark.png"><img src="docs/assets/altstore-badge-light.png" width="200" alt="Download on AltStore"></picture></a>
 &nbsp;
 <a href="https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json"><img src="https://altdirect.app/assets/png/AltSource_Blue.png" width="200" alt="Add AltSource"></a>
@@ -17,18 +15,13 @@
 <a href="https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa"><img src="https://altdirect.app/assets/png/Download_Blue.png" width="200" alt="Download .ipa"></a>
 </h3>
 
-<p align="center">
-  <a href="https://mirazbakis.github.io/AltLoad/"><b>Install</b></a> ·
-  <a href="https://github.com/mirazbakis/AltLoad/releases">Releases</a> ·
-  <a href="docs/HOW-IT-WORKS.md">How it works</a> ·
-  <a href="SECURITY.md">Security</a>
-</p>
+[![Install](https://img.shields.io/badge/Install-AltLoad-3be0a0?style=for-the-badge)](https://mirazbakis.github.io/AltLoad/)
+[![Version](https://img.shields.io/github/v/release/mirazbakis/AltLoad?label=version&style=for-the-badge&color=4c8dff)](https://github.com/mirazbakis/AltLoad/releases)
+[![Platform](https://img.shields.io/badge/iOS-18%2B-0a1740?style=for-the-badge&logo=apple)](#install)
+[![How it works](https://img.shields.io/badge/how_it_works-docs-0a1740?style=for-the-badge)](docs/HOW-IT-WORKS.md)
+[![License](https://img.shields.io/badge/license-proprietary-0a1740?style=for-the-badge)](LICENSE.md)
 
-<p align="center">
-  <a href="https://github.com/mirazbakis/AltLoad/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/mirazbakis/AltLoad?label=release&style=flat-square&color=2f6df6"></a>
-  <img alt="iOS 18+" src="https://img.shields.io/badge/iOS-18%2B-0a1740?style=flat-square&logo=apple">
-  <img alt="License" src="https://img.shields.io/badge/license-proprietary-0a1740?style=flat-square">
-</p>
+</div>
 
 ---
 
