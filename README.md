@@ -42,7 +42,7 @@ Normally a store like AltStore needs a computer: to pair with the iPhone, sign t
 Pick whichever fits:
 
 - **Signed install.** Open **[mirazbakis.github.io/AltLoad](https://mirazbakis.github.io/AltLoad/)** in Safari, accept the Terms, add the DNS profile and tap any signed install.
-- **AltStore or SideStore.** Add the source `https://mirazbakis.github.io/AltLoad/source.json` (or tap **Add to AltStore** / **Add to SideStore** on the website). You get updates there too.
+- **AltStore or SideStore.** Add the source `https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json` (or tap **Add to AltStore** / **Add to SideStore** on the website). You get updates there too.
 - **Your own signer.** Download `AltLoad.ipa` from [Releases](https://github.com/mirazbakis/AltLoad/releases) and sign it with a tool you already have.
 
 ### Set it up

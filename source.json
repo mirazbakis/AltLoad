@@ -1,0 +1,59 @@
+{
+  "name": "AltLoad",
+  "identifier": "com.mirazbakis.altload.source",
+  "subtitle": "Official AltLoad builds.",
+  "description": "The official source for AltLoad by mirazbakis. Builds come straight from https://github.com/mirazbakis/AltLoad/releases.",
+  "iconURL": "https://raw.githubusercontent.com/mirazbakis/AltLoad/main/docs/assets/logo.png",
+  "website": "https://github.com/mirazbakis/AltLoad",
+  "tintColor": "#4C8DFF",
+  "featuredApps": [
+    "com.mirazbakis.altload"
+  ],
+  "apps": [
+    {
+      "name": "AltLoad",
+      "bundleIdentifier": "com.mirazbakis.altload",
+      "developerName": "mirazbakis",
+      "subtitle": "Your iPhone is the computer now.",
+      "localizedDescription": "AltLoad pairs your iPhone with itself, signs AltStore, SideStore or LiveContainer with your Apple ID, and installs it. No Mac, no PC, no subscription.",
+      "iconURL": "https://raw.githubusercontent.com/mirazbakis/AltLoad/main/docs/assets/logo.png",
+      "tintColor": "#4C8DFF",
+      "category": "developer",
+      "versions": [
+        {
+          "version": "1.2.0",
+          "date": "2026-10-16T18:03:50Z",
+          "localizedDescription": "## AltLoad 1.2.0\n\n### New\n- **Choose what happens to app extensions.** Before installing a store or an IPA, pick **Keep Extensions**, **Keep, Use Main Profile** (the whole app uses one App ID) or **Remove Extensions**, like SideStore. Handy with a free Apple ID's 10 App IDs a week.\n- **Pairing code in the Dynamic Island.** While you pair, the six-digit code shows in the Dynamic Island and on the Lock Screen, so you can read it while you're in Settings.\n- **Import a pairing file.** Tools › Pair › Import Pairing File adds a pairing file made on a computer and uses it for installs.\n- **Runs on iOS 18 and later.** Below iOS 27 the iPhone can't pair with AltLoad itself, so the Pair screen walks you through importing a pairing file instead.\n- **App IDs in Tools.** See every App ID on your Apple ID, how many of the weekly limit are used, and when each one frees up. Pull down to refresh.\n- **Another anisette server.** Automatic now also tries jkcoxson's macOS server, after the Windows one, whenever it's up.\n\n### Changed\n- **Your apps are on the Install tab** under Your Apps, with a pill to refresh each one. Library is gone.\n- **Every pairing file is on the Pair page.** Long-press one to use it for installs, share it or delete it.\n- **Entitlements moved to Tools.**\n- **Pairing File to Apps lists only sideloaded apps,** like SideStore and StikDebug.\n- **Liquid Glass buttons** and **icons without tiles** throughout the app.\n\n### Good to know\n- The Dynamic Island code comes from a small widget extension inside AltLoad. With a free Apple ID, sideloading AltLoad uses **2 App IDs** instead of 1.",
+          "downloadURL": "https://github.com/mirazbakis/AltLoad/releases/download/v1.2.0/AltLoad.ipa",
+          "size": 11637451,
+          "minOSVersion": "27.0"
+        },
+        {
+          "version": "1.0.1",
+          "date": "2026-10-15T13:17:51Z",
+          "localizedDescription": "## AltLoad 1.0.1\n\n### Fixed\n- **AltStore sign-in through AltLoad.** With Settings › Anisette on Automatic (the default), AltStore couldn't get anisette data from AltLoad's AltServer, so signing in inside AltStore failed. AltServer now uses the same working servers as AltLoad and moves on to the next one if a server doesn't answer.",
+          "downloadURL": "https://github.com/mirazbakis/AltLoad/releases/download/v1.0.1/AltLoad.ipa",
+          "size": 11508461,
+          "minOSVersion": "27.0"
+        },
+        {
+          "version": "1.0.0",
+          "date": "2026-10-15T13:03:28Z",
+          "localizedDescription": "## AltLoad 1.0.0\r\n\r\n### New\r\n- **SideStore** and **SideStore + LiveContainer**, each as a stable or **nightly** build. Pick one from the store menu on the Install tab.\r\n- **When SideStore's repository is down**, AltLoad tries a mirror, GitHub releases, a known-good build and its own saved copy. If none answer, pick an IPA from Files.\r\n- **Sign in from Settings.** Settings › Apple ID › Sign In checks your Apple ID, including two-factor, without installing anything.\r\n- **About** tab with special thanks and legal links. Settings now opens from the gear at the top right of every tab.\r\n\r\n### Fixed\r\n- **Apple ID sign-in.** Since 12 October 2026 Apple refuses sign-in data from many anisette servers. AltLoad now picks a server that's working, moves on to the next one when Apple refuses it, and keeps its anisette data in files instead of the Keychain (which some signing tools break). Use **Reset Anisette Data** in Settings if sign-in keeps failing.\r\n- Installs sign in to Apple first, so a sign-in problem shows up straight away.\r\n\r\n### Changed\r\n- Darker midnight design with a navy spotlight, solid cards and bigger buttons.\r\n- New icon: midnight, dark green and white.",
+          "downloadURL": "https://github.com/mirazbakis/AltLoad/releases/download/v1.0.0/AltLoad.ipa",
+          "size": 11506610,
+          "minOSVersion": "27.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {
+          "NSLocalNetworkUsageDescription": "AltLoad uses your local network to discover devices and complete pairing.",
+          "NSLocationAlwaysAndWhenInUseUsageDescription": "AltLoad can use location to keep running in the background while you complete pairing in Settings.",
+          "NSLocationWhenInUseUsageDescription": "AltLoad can use location to keep running in the background while you complete pairing in Settings."
+        }
+      }
+    }
+  ],
+  "news": []
+}

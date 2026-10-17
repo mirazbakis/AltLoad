@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 #
-# Write the AltStore / SideStore source (source.json) for the Pages site.
+# Write the AltStore / SideStore source (source.json, kept at the repo root and
+# served from raw.githubusercontent.com).
 # Lists every stable (non-prerelease) GitHub release that has an AltLoad.ipa,
 # newest first, pointing at the official release download. App info
 # (bundle id, privacy strings) is read from the given IPA. The minimum iOS is
 # MIN_IOS, not the IPA's: pairing on the device needs iOS 27.
 #
 # Usage:
-#   build-source.py <ipa> <out_dir> <base_url>
+#   build-source.py <ipa> <out_dir>
 #
 # Reads GITHUB_REPOSITORY (default mirazbakis/AltLoad) and, if set,
 # GITHUB_TOKEN for the releases API.
@@ -20,8 +21,9 @@ import sys
 import urllib.request
 import zipfile
 
-IPA, OUT_DIR, BASE_URL = sys.argv[1], sys.argv[2], sys.argv[3].rstrip("/")
+IPA, OUT_DIR = sys.argv[1], sys.argv[2]
 REPO = os.environ.get("GITHUB_REPOSITORY", "mirazbakis/AltLoad")
+RAW = f"https://raw.githubusercontent.com/{REPO}/main"
 ASSET = "AltLoad.ipa"
 MIN_IOS = "27.0"
 
@@ -66,7 +68,7 @@ for rel in releases():
 if not versions:
     sys.exit("No stable release with AltLoad.ipa found")
 
-icon = f"{BASE_URL}/AltLoad.png"
+icon = f"{RAW}/docs/assets/logo.png"
 source = {
     "name": "AltLoad",
     "identifier": "com.mirazbakis.altload.source",
@@ -74,7 +76,7 @@ source = {
     "description": "The official source for AltLoad by mirazbakis. "
                    "Builds come straight from https://github.com/mirazbakis/AltLoad/releases.",
     "iconURL": icon,
-    "website": f"{BASE_URL}/",
+    "website": f"https://github.com/{REPO}",
     "tintColor": "#4C8DFF",
     "featuredApps": [info["CFBundleIdentifier"]],
     "apps": [{
