@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Add AltLoad to AltStore</title>
+<meta name="theme-color" content="#050b1f">
+<link rel="icon" type="image/png" href="AltLoad.png">
+<meta http-equiv="refresh" content="0;url=altstore://source?url=https://mirazbakis.github.io/AltLoad/source.json">
+<style>
+  :root{--bg:#050b1f;--card:#0a1638;--edge:rgba(148,178,255,.13);--ink:#f2f5ff;--ink-2:rgba(220,229,255,.74);--ink-3:rgba(220,229,255,.5);
+    --mint:#3be0a0;--grad:linear-gradient(120deg,#5b9bff 0%,#3be0a0 100%);color-scheme:dark}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;display:grid;place-items:center;padding:24px 16px;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",Roboto,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+  main{width:min(420px,100%);padding:28px 22px;border-radius:24px;background:var(--card);border:1px solid var(--edge);text-align:center}
+  img{width:72px;height:72px;border-radius:18px;margin:0 auto 18px;display:block}
+  h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
+  p{color:var(--ink-2);font-size:15px;margin-top:8px}
+  .btn{display:flex;align-items:center;justify-content:center;min-height:50px;margin-top:20px;border-radius:15px;font-weight:800;font-size:16px;
+    text-decoration:none;color:#04140d;background:var(--grad)}
+  small{display:block;margin-top:16px;color:var(--ink-3);font-size:13px}
+  a{color:var(--mint)}
+  code{color:var(--ink-2);overflow-wrap:anywhere;user-select:all}
+</style>
+</head>
+<body>
+<main>
+  <img src="AltLoad.png" alt="AltLoad icon">
+  <h1>Opening AltStore…</h1>
+  <p>Adding the AltLoad source to AltStore Classic. If nothing happens, tap the button.</p>
+  <a class="btn" id="open" href="altstore://source?url=https://mirazbakis.github.io/AltLoad/source.json">Open in AltStore</a>
+  <small>Need AltStore? Get it at <a href="https://altstore.io">altstore.io</a>, or use another way on the <a href="./#install">install page</a>.<br>
+    Source URL: <code>https://mirazbakis.github.io/AltLoad/source.json</code><br>
+    Using AltLoad means accepting the <a href="terms.html">Terms of Service</a>.</small>
+</main>
+<script>location.replace(document.getElementById('open').href);</script>
+</body>
+</html>

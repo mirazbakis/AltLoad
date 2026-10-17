@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://mirazbakis.github.io/AltLoad/#install">
+  <a href="https://mirazbakis.github.io/AltLoad/altstore.html">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="docs/assets/altstore-badge-dark.png">
       <img src="docs/assets/altstore-badge-light.png" width="250" alt="Download on AltStore">
