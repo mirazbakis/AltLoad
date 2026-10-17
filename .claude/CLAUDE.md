@@ -38,7 +38,7 @@ xcodebuild -project AltLoad.xcodeproj -scheme AltLoad -sdk iphonesimulator \
 - Commits are authored as the owner's own git identity. No co-author or "Generated with" trailers on commits or PRs.
 - The owner pushes through GitHub Desktop; there are no GitHub credentials in the shell.
 - CI (`.github/workflows/build.yml`) runs only when started by hand. See the `release` skill. `sign-ota.yml` re-signs every cert pack and deploys `site/` (on push, release and weekly); `sign-ipa.yml` signs any IPA with one pack into an artifact.
-- License is custom MIT, Non-Commercial, Attribution (LICENSE.md v4). Keep the LGPL carve-out for apple-codesign-quick.
+- License is custom MIT-based: open code, non-commercial, attribution, distribution only via the official repo and site (LICENSE.md v5). Keep the LGPL carve-out for apple-codesign-quick.
 - UI: midnight background with one navy spotlight, solid `cardSurface()` cards, Liquid Glass `AltLoadButtonStyle` buttons at least 44 pt tall (`liquidGlass(tint:in:)` falls back to material before iOS 26). Icons (`IconTile`) are plain symbols with no tile behind them; prefer symbols without a built-in box or circle.
 - Anisette: default is `AnisetteServers.automatic`; anything that needs a server URL must go through `AnisetteServers.signInList(preferred:)`, never use `anisetteURL` directly.
 - Comments explain why, in plain sentences, like the surrounding code.

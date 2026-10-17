@@ -19,7 +19,7 @@ No computer, no subscription, your own Apple ID.
 [![Version](https://img.shields.io/github/v/release/mirazbakis/AltLoad?label=version&style=for-the-badge&color=4c8dff)](https://github.com/mirazbakis/AltLoad/releases)
 [![Platform](https://img.shields.io/badge/iOS-18%2B-0a1740?style=for-the-badge&logo=apple)](#install)
 [![How it works](https://img.shields.io/badge/how_it_works-docs-0a1740?style=for-the-badge)](docs/HOW-IT-WORKS.md)
-[![License](https://img.shields.io/badge/license-MIT_Non--Commercial-0a1740?style=for-the-badge)](LICENSE.md)
+[![License](https://img.shields.io/badge/license-Custom_MIT-0a1740?style=for-the-badge)](LICENSE.md)
 
 </div>
 
@@ -115,7 +115,7 @@ docs/           how it works, release notes, logo
 .github/        Build IPA, Sign IPAs & Deploy OTA, Sign IPA
 ```
 
-AltLoad is under a custom MIT license: free to use, change and share for non-commercial purposes, as long as you credit *"Based on AltLoad by mirazbakis"* with a link, give your version its own name and icon, and never send anyone's Apple ID details anywhere but Apple. See [LICENSE.md](LICENSE.md).
+AltLoad is open source under a custom MIT-based license. You can read it, change it, build it for yourself and send pull requests, and reuse pieces of it in non-commercial projects with the credit *"Based on AltLoad by mirazbakis"*. AltLoad and its builds may only be distributed here and on the [official website](https://mirazbakis.github.io/AltLoad/): no mirrors, re-uploads, other sources or paywalls. See [LICENSE.md](LICENSE.md).
 
 ## Credits
 
@@ -123,4 +123,4 @@ Built on [idevice](https://github.com/jkcoxson/idevice), [LocalDevVPN](https://g
 
 ---
 
-<sub>© 2026 mirazbakis. Licensed under the [AltLoad License (MIT, Non-Commercial, Attribution)](LICENSE.md). Using AltLoad means agreeing to the [Terms of Service](https://mirazbakis.github.io/AltLoad/terms.html). Not affiliated with Apple, AltStore, Riley Testut, SideStore or LiveContainer.</sub>
+<sub>© 2026 mirazbakis. Licensed under the [AltLoad License](LICENSE.md). Distributed only through this repository and its website. Using AltLoad means agreeing to the [Terms of Service](https://mirazbakis.github.io/AltLoad/terms.html). Not affiliated with Apple, AltStore, Riley Testut, SideStore or LiveContainer.</sub>
