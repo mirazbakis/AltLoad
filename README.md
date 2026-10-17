@@ -9,14 +9,13 @@
   No computer, no subscription, your own Apple ID.
 </p>
 
-<p align="center">
-  <a href="https://mirazbakis.github.io/AltLoad/altstore.html">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/altstore-badge-dark.png">
-      <img src="docs/assets/altstore-badge-light.png" width="250" alt="Download on AltStore">
-    </picture>
-  </a>
-</p>
+<h3 align="center">
+<a href="https://mirazbakis.github.io/AltLoad/altstore.html"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/altstore-badge-dark.png"><img src="docs/assets/altstore-badge-light.png" width="200" alt="Download on AltStore"></picture></a>
+&nbsp;
+<a href="https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json"><img src="https://altdirect.app/assets/png/AltSource_Blue.png" width="200" alt="Add AltSource"></a>
+&nbsp;
+<a href="https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa"><img src="https://altdirect.app/assets/png/Download_Blue.png" width="200" alt="Download .ipa"></a>
+</h3>
 
 <p align="center">
   <a href="https://mirazbakis.github.io/AltLoad/"><b>Install</b></a> ·
@@ -29,7 +28,6 @@
   <a href="https://github.com/mirazbakis/AltLoad/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/mirazbakis/AltLoad?label=release&style=flat-square&color=2f6df6"></a>
   <img alt="iOS 18+" src="https://img.shields.io/badge/iOS-18%2B-0a1740?style=flat-square&logo=apple">
   <img alt="License" src="https://img.shields.io/badge/license-proprietary-0a1740?style=flat-square">
-  <a href="https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json"><img alt="Add the source with AltDirect" src="https://img.shields.io/badge/AltDirect-Add%20source-1aa79b?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyIDIyIDEyIDEyIDIyIDIgMTJ6bTAgNi41TDguNSAxMiAxMiAxNS41IDE1LjUgMTJ6Ii8+PC9zdmc+"></a>
 </p>
 
 ---
