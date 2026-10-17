@@ -10,6 +10,15 @@
 </p>
 
 <p align="center">
+  <a href="https://mirazbakis.github.io/AltLoad/#install">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/altstore-badge-dark.png">
+      <img src="docs/assets/altstore-badge-light.png" width="250" alt="Download on AltStore">
+    </picture>
+  </a>
+</p>
+
+<p align="center">
   <a href="https://mirazbakis.github.io/AltLoad/"><b>Install</b></a> ·
   <a href="https://github.com/mirazbakis/AltLoad/releases">Releases</a> ·
   <a href="docs/HOW-IT-WORKS.md">How it works</a> ·
@@ -28,10 +37,19 @@ Normally a store like AltStore needs a computer: to pair with the iPhone, sign t
 
 ## Install
 
-1. Open **[mirazbakis.github.io/AltLoad](https://mirazbakis.github.io/AltLoad/)** in Safari, accept the Terms and follow the two steps. Or sideload `AltLoad.ipa` from [Releases](https://github.com/mirazbakis/AltLoad/releases) with a tool you already have.
-2. Turn on **Developer Mode** and get **[LocalDevVPN](https://apps.apple.com/app/id6755608044)** from the App Store.
-3. In AltLoad, go to **Tools › Pair**. The code shows up in your Dynamic Island. Open **Settings › Developer › Pair with AltLoad** and type it in.
-4. Switch LocalDevVPN on, pick a store on the **Install** tab and sign in.
+### Get AltLoad
+
+Pick whichever fits:
+
+- **Signed install.** Open **[mirazbakis.github.io/AltLoad](https://mirazbakis.github.io/AltLoad/)** in Safari, accept the Terms, add the DNS profile and tap any signed install.
+- **AltStore or SideStore.** Add the source `https://mirazbakis.github.io/AltLoad/source.json` (or tap **Add to AltStore** / **Add to SideStore** on the website). You get updates there too.
+- **Your own signer.** Download `AltLoad.ipa` from [Releases](https://github.com/mirazbakis/AltLoad/releases) and sign it with a tool you already have.
+
+### Set it up
+
+1. Turn on **Developer Mode** and get **[LocalDevVPN](https://apps.apple.com/app/id6755608044)** from the App Store.
+2. In AltLoad, go to **Tools › Pair**. The code shows up in your Dynamic Island. Open **Settings › Developer › Pair with AltLoad** and type it in. On iOS 18 to 26, import a pairing file instead (see the table below).
+3. Switch LocalDevVPN on, pick a store on the **Install** tab and sign in.
 
 AltLoad reminds you the day before anything expires. A free Apple ID works; apps last 7 days.
 
