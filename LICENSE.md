@@ -1,6 +1,6 @@
 # AltLoad Proprietary License
 
-**Version 3.0, October 2026**
+**Version 3.1, October 2026**
 
 Copyright (c) 2026 mirazbakis. **All rights reserved.**
 
@@ -15,6 +15,8 @@ Provided you follow every other part of this license, you may:
 - **c. Fork on GitHub, to contribute only.** Use GitHub's own fork feature, which GitHub's Terms of Service require public repositories to allow, solely to prepare a pull request to the official repository. You may change your fork only for that pull request, and you must not use, build, run or publish anything from it otherwise.
 
 That is the whole grant. It is personal to you, non-exclusive, non-transferable, non-sublicensable and revocable.
+
+**Attribution is required for any permitted use of the code.** Wherever this license or the Owner's written permission lets you use, copy, show or adapt any part of the Software's code (including in a fork under 1c), you must keep every copyright and license notice intact and visibly credit the Owner, in the same place you use it, as: "Based on AltLoad by mirazbakis, https://github.com/mirazbakis/AltLoad". Permission to use code is never permission to drop this credit.
 
 ## 2. Everything else is forbidden
 
