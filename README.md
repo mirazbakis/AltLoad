@@ -29,6 +29,7 @@
   <a href="https://github.com/mirazbakis/AltLoad/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/mirazbakis/AltLoad?label=release&style=flat-square&color=2f6df6"></a>
   <img alt="iOS 18+" src="https://img.shields.io/badge/iOS-18%2B-0a1740?style=flat-square&logo=apple">
   <img alt="License" src="https://img.shields.io/badge/license-proprietary-0a1740?style=flat-square">
+  <a href="https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json"><img alt="Add the source with AltDirect" src="https://img.shields.io/badge/AltDirect-Add%20source-1aa79b?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyIDIyIDEyIDEyIDIyIDIgMTJ6bTAgNi41TDguNSAxMiAxMiAxNS41IDE1LjUgMTJ6Ii8+PC9zdmc+"></a>
 </p>
 
 ---
