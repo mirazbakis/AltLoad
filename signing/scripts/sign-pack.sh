@@ -8,7 +8,7 @@
 #   sign-pack.sh <pack_dir> <input.ipa> <new-bundle-id> <output.ipa>
 #
 # Env:
-#   P12_PASSWORD       .p12 password (default WSF; "WSF!" is also tried)
+#   P12_PASSWORD       .p12 password (default 1; "1!" is also tried)
 #   KEYCHAIN_PASSWORD  password for the throwaway keychain
 #
 # Prints "STATUS=valid|revoked|expired|unverified" as its last line. Revoked and
@@ -22,7 +22,7 @@ SRC_IPA="$2"
 BUNDLE_ID="$3"
 OUT_IPA="$4"
 SCRIPTS="$(cd "$(dirname "$0")" && pwd)"
-: "${P12_PASSWORD:=WSF}"
+: "${P12_PASSWORD:=1}"
 : "${KEYCHAIN_PASSWORD:=ota-signing-temp}"
 TMP="${RUNNER_TEMP:-$(mktemp -d)}"
 
@@ -34,6 +34,23 @@ if [ -z "$P12" ] || [ -z "$PROFILE" ]; then
   exit 1
 fi
 NAME="$(basename "$PACK_DIR")"
+
+# BUNDLE_ID "AUTO": take the app id straight from this pack's own profile, so the
+# IPA is signed and labelled with whatever app id the profile carries. The runner
+# reads it here; no one has to look inside the cert. The team-id prefix is stripped.
+# A wildcard profile (TEAM.*) has no single app id, so fall back to a unique
+# per-pack id that still installs.
+if [ "$BUNDLE_ID" = "AUTO" ]; then
+  security cms -D -i "$PROFILE" > "$TMP/prof-$NAME.plist" 2>/dev/null || true
+  APPID_FULL="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$TMP/prof-$NAME.plist" 2>/dev/null || true)"
+  APPID="${APPID_FULL#*.}"
+  case "$APPID" in
+    ''|*'*') BUNDLE_ID="com.mirazbakis.altload$NAME" ;;
+    *)       BUNDLE_ID="$APPID" ;;
+  esac
+  echo ">> [$NAME] bundle id from profile -> $BUNDLE_ID"
+fi
+
 OPENSSL="$(brew --prefix openssl@3 2>/dev/null)/bin/openssl"
 
 # Import the .p12 into a keychain. Tries the password as given and with a trailing

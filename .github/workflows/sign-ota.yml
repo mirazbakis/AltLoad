@@ -1,8 +1,9 @@
 name: Sign IPAs & Deploy OTA
 
 # Downloads the latest NON-beta AltLoad release IPA, re-signs it once per cert
-# pack under signing/certs/<N>/ (rewriting the bundle id to com.mirazbakis.altload<N>),
-# writes a manifest.plist per slot, and publishes the AltLoad OTA install page to
+# pack under signing/certs/<N>/ (rewriting the bundle id to the app id read from
+# each pack's own provisioning profile), writes a manifest.plist per slot, and
+# publishes the AltLoad OTA install page to
 # GitHub Pages — one "Install" button per signed copy. It also rewrites
 # source.json, the AltStore / SideStore source at the repo root.
 #
@@ -11,7 +12,7 @@ name: Sign IPAs & Deploy OTA
 #   <N>.mobileprovision   the ad-hoc provisioning profile (its registered UDIDs)
 #
 # Ad-hoc signing: a device can only install a slot if its UDID is in that slot's
-# profile. The default .p12 password is "WSF" (override with the P12_PASSWORD secret).
+# profile. The default .p12 password is "1" (override with the P12_PASSWORD secret).
 #
 # Pages source must be set to "GitHub Actions":
 #   Settings -> Pages -> Build and deployment -> Source: GitHub Actions
@@ -105,7 +106,7 @@ jobs:
           SRC_IPA="$RUNNER_TEMP/AltLoad.ipa"
           ICON="site/AltLoad.png"
 
-          echo "| Cert pack | Bundle id | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Cert pack | App id | Result |" >> "$GITHUB_STEP_SUMMARY"
           echo "|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
           SIGNED=0; FAILED=0
           for dir in signing/certs/*/; do
@@ -116,7 +117,7 @@ jobs:
             echo "::group::Signing $slug"
             (
               set -euo pipefail
-              signing/scripts/sign-pack.sh "$dir" "$SRC_IPA" "com.mirazbakis.$slug" "$RUNNER_TEMP/$slug.ipa"
+              signing/scripts/sign-pack.sh "$dir" "$SRC_IPA" "AUTO" "$RUNNER_TEMP/$slug.ipa"
               signing/scripts/build-manifest.sh "$RUNNER_TEMP/$slug.ipa" "$BASE_URL" "_site" "$slug" "$ICON"
             ) 2>&1 | tee "$LOG"
             rc=${PIPESTATUS[0]}
@@ -126,14 +127,16 @@ jobs:
               SIGNED=$((SIGNED+1))
               st="$(grep '^STATUS=' "$LOG" | tail -n1 | cut -d= -f2)"
               echo "STATUS=${st:-valid}" >> "_site/installs/$slug/meta.txt"
-              echo "| $n | com.mirazbakis.$slug | signed (${st:-valid}) |" >> "$GITHUB_STEP_SUMMARY"
+              # The app id the pack was signed with, straight from its meta.txt.
+              bid="$(grep '^BUNDLE_ID=' "_site/installs/$slug/meta.txt" | head -n1 | cut -d= -f2-)"
+              echo "| $n | ${bid:-?} | signed (${st:-valid}) |" >> "$GITHUB_STEP_SUMMARY"
             else
               FAILED=$((FAILED+1))
               rm -rf "_site/installs/$slug"
               # Annotations are readable without signing in, unlike step logs.
               msg="$(grep -v '^>>' "$LOG" | grep -v '^ *$' | tail -n 4 | tr '\n' ' ' | cut -c1-500)"
               echo "::warning title=Cert pack $n skipped::$msg"
-              echo "| $n | com.mirazbakis.$slug | failed: ${msg//|/ } |" >> "$GITHUB_STEP_SUMMARY"
+              echo "| $n | — | failed: ${msg//|/ } |" >> "$GITHUB_STEP_SUMMARY"
             fi
           done
 

@@ -2,12 +2,12 @@
 
 Signs the latest **non-beta** AltLoad release with your own ad-hoc certificates and
 publishes a tap-to-install page to GitHub Pages — one **Install** button per cert
-pack, each the same app under its own bundle id.
+pack, each signed and labelled with the app id taken from its own profile.
 
 ```
 signing/
-  certs/<N>/<N>.p12              signing certificate + private key   (N = 1..11)
-  certs/<N>/<N>.mobileprovision  ad-hoc provisioning profile (its UDIDs)
+  certs/<N>/*.p12                signing certificate + private key   (one folder per cert)
+  certs/<N>/*.mobileprovision    ad-hoc provisioning profile (sets the app id + UDIDs)
   scripts/sign-pack.sh           sign one IPA with one pack (keychain, identity, rcodesign fallback)
   scripts/resign.sh              re-sign + rewrite bundle id
   scripts/build-manifest.sh      per slot: copy IPA + write manifest.plist + meta.txt
@@ -23,11 +23,13 @@ site/
 1. Downloads `https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa`.
    `releases/latest` is the latest **non-prerelease** release, so beta/rc and the
    `nightly` tag are excluded automatically.
-2. For each `signing/certs/<N>/`, imports the cert into a throwaway keychain, re-signs the
-   IPA with it, rewrites the bundle id to `com.mirazbakis.altload<N>` (and the widget
-   to `…altload<N>.widgets`), and writes `_site/installs/altload<N>/{app.ipa,manifest.plist}`.
+2. For each `signing/certs/<N>/`, imports the cert into a throwaway keychain, reads the
+   **app id from that pack's `.mobileprovision`**, and re-signs the IPA under it (the
+   widget becomes `<app id>.<suffix>`). A wildcard profile (`TEAM.*`) has no single app
+   id, so it falls back to `com.mirazbakis.altload<N>`. Writes
+   `_site/installs/altload<N>/{app.ipa,manifest.plist}`.
 3. Builds `_site/installs/index.json`; `site/index.html` fetches it and renders a button
-   per slot pointing at `itms-services://…/manifest.plist`.
+   per slot — **labelled with the app id** — pointing at `itms-services://…/manifest.plist`.
 4. Deploys `_site` to GitHub Pages at `https://mirazbakis.github.io/AltLoad/`.
 
 Triggers: **Actions → "Sign IPAs & Deploy OTA" → Run workflow**, any push under
@@ -46,7 +48,7 @@ optional new bundle id. It signs the IPA with that pack and uploads `app.ipa` an
 1. **Pages source must be GitHub Actions.**
    Settings → Pages → Build and deployment → **Source: GitHub Actions**. (If it is
    currently "Deploy from a branch", switch it, or the deploy step fails.)
-2. **Password.** The `.p12` password defaults to `WSF`. To change it, set a repo
+2. **Password.** The `.p12` password defaults to `1`. To change it, set a repo
    secret `P12_PASSWORD` (Settings → Secrets and variables → Actions). All packs use
    the same password.
 3. Push, then run the workflow.

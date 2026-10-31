@@ -360,7 +360,7 @@
     countEl.textContent = slots.length + ' available';
     list.innerHTML = slots.map(function(s, i){
       return '<li class="copy"><div class="head"><img src="' + esc(s.iconUrl || 'AltLoad.png') + '" alt="">'
-        + '<div class="t"><div class="n">Signed Install ' + (i + 1) + '</div>'
+        + '<div class="t"><div class="n">' + esc(s.bundleId || ('Signed Install ' + (i + 1))) + '</div>'
         + '<div class="v">AltLoad' + (s.version ? ' · v' + esc(s.version) : '') + '</div></div></div>'
         + '<a class="get" href="' + esc(s.installUrl) + '">'
         + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>Install</a></li>';
