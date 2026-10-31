@@ -5,7 +5,7 @@
 	<key>ConsentText</key>
 	<dict>
 		<key>default</key>
-		<string>This is AltLoad's official configuration profile. Feel free to uninstall this as soon as you install AltStore.</string>
+		<string>This is AltLoad's official configuration profile. Feel free to uninstall this as soon as you install AltStore. Uses SideInstaller DNS.</string>
 	</dict>
 	<key>PayloadContent</key>
 	<array>
@@ -15,7 +15,7 @@
 				<key>DNSProtocol</key>
 				<string>HTTPS</string>
 				<key>ServerURL</key>
-				<string>https://da9c98.dns.nextdns.io/da9c98</string>
+				<string>https://apple.dns.nextdns.io/73f83a/SideInstaller</string>
 			</dict>
 			<key>PayloadDescription</key>
 			<string>AltLoad</string>
@@ -32,7 +32,7 @@
 		</dict>
 	</array>
 	<key>PayloadDescription</key>
-	<string>This is AltLoad's official configuration profile. Feel free to uninstall this as soon as you install AltStore.</string>
+	<string>This is AltLoad's official configuration profile. Feel free to uninstall this as soon as you install AltStore. Uses SideInstaller DNS.</string>
 	<key>PayloadDisplayName</key>
 	<string>AltLoad</string>
 	<key>PayloadIdentifier</key>
