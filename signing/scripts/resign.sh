@@ -68,13 +68,14 @@ security cms -D -i "$PROFILE" > "$WORK/profile.plist"
 pb -x -c "Print :Entitlements" "$WORK/profile.plist" > "$ENTITLEMENTS"
 
 # --- Revoked/expired identity: codesign won't use it, so sign with rcodesign -
-# RCODESIGN_P12 / RCODESIGN_PASSWORD are set by the workflow for those packs.
+# REVOKED_P12 / REVOKED_P12_PASSWORD are set by sign-pack.sh for those packs. They must
+# not start with RCODESIGN_: rcodesign reads those variables as its own config and stops.
 # rcodesign signs nested bundles itself; unscoped entitlements apply to the app.
-if [ -n "${RCODESIGN_P12:-}" ]; then
+if [ -n "${REVOKED_P12:-}" ]; then
   echo ">> Signing with rcodesign (identity isn't valid for codesign)"
-  printf '%s' "${RCODESIGN_PASSWORD:-}" > "$WORK/p12pw"
+  printf '%s' "${REVOKED_P12_PASSWORD:-}" > "$WORK/p12pw"
   rcodesign sign \
-    --p12-file "$RCODESIGN_P12" \
+    --p12-file "$REVOKED_P12" \
     --p12-password-file "$WORK/p12pw" \
     --entitlements-xml-file "$ENTITLEMENTS" \
     "$APP_PATH"

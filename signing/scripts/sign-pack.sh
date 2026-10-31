@@ -95,7 +95,7 @@ fi
 if [ "$STATUS" = "valid" ]; then
   "$SCRIPTS/resign.sh" "$SRC_IPA" "$PROFILE" "$HASH" "$BUNDLE_ID" "$OUT_IPA"
 else
-  RCODESIGN_P12="$SIGN_P12" RCODESIGN_PASSWORD="$SIGN_PW" \
+  REVOKED_P12="$SIGN_P12" REVOKED_P12_PASSWORD="$SIGN_PW" \
     "$SCRIPTS/resign.sh" "$SRC_IPA" "$PROFILE" "$HASH" "$BUNDLE_ID" "$OUT_IPA"
 fi
 
