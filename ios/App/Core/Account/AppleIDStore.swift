@@ -54,6 +54,14 @@ enum AppleIDStore {
         ]
         SecItemDelete(query as CFDictionary)
         UserDefaults.standard.removeObject(forKey: emailKey)
+        forgetSession()
+    }
+
+    /// Removes the developer session the Rust core saves after a sign-in, so the
+    /// next install or account request has to sign in again.
+    static func forgetSession() {
+        guard let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return }
+        try? FileManager.default.removeItem(at: support.appendingPathComponent("AltLoad/session", isDirectory: true))
     }
 }
 

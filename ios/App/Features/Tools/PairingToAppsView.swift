@@ -25,19 +25,12 @@ struct PairingToAppsView: View {
 
     var body: some View {
         AuroraScreen {
-            GlassCard(padding: 20) {
-                HStack(spacing: 14) {
-                    GlassBadge(systemImage: "doc.badge.gearshape", tint: Aurora.accent, size: 56)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Pairing file to apps")
-                            .font(.headline)
-                        Text(pairings.selfPairing.map { "Uses \($0.displayName)'s pairing file. Only sideloaded apps, like SideStore and StikDebug, are listed." }
-                             ?? "Create this iPhone's pairing file in Tools › Pair first.")
-                            .font(.footnote)
-                            .foregroundStyle(Aurora.secondaryText)
-                    }
-                }
-            }
+            Text(pairings.selfPairing.map { "Uses \($0.displayName)'s pairing file. Only sideloaded apps are listed." }
+                 ?? "Create this iPhone's pairing file in Tools › Pair first.")
+                .font(.footnote)
+                .foregroundStyle(Aurora.secondaryText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 4)
 
             if loading {
                 GlassCard {
@@ -102,15 +95,11 @@ struct PairingToAppsView: View {
             titleVisibility: .visible,
             presenting: chosen
         ) { app in
-            let suggested = PairingDestination.path(for: app.bundleID)
-            Button("\(fileName(suggested)) (suggested)") { place(app, as: suggested) }
-            ForEach([PairingDestination.sideStoreName, PairingDestination.idevice].filter { $0 != suggested }, id: \.self) { path in
-                Button(fileName(path)) { place(app, as: path) }
-            }
+            Button("Place Pairing File") { place(app, as: nil) }
             Button("Other File Name…") { customTarget = app }
             Button("Cancel", role: .cancel) {}
         } message: { app in
-            Text("\(app.bundleID)\nSideStore reads PairingFile_RemoteRP.plist. StikDebug and other idevice apps read rp_pairing_file.plist.")
+            Text(app.bundleID)
         }
         .alert("File name inside the app", isPresented: Binding(get: { customTarget != nil }, set: { if !$0 { customTarget = nil } })) {
             TextField("Documents/pairingFile.plist", text: $customName)
@@ -145,7 +134,7 @@ struct PairingToAppsView: View {
     private func appRow(_ app: DeviceOps.DeviceApp) -> some View {
         AppBannerRow(
             name: app.name,
-            detail: detail(app),
+            detail: app.bundleID,
             symbol: "hammer.fill"
         ) {
             if working == app.bundleID {
@@ -160,13 +149,6 @@ struct PairingToAppsView: View {
         }
     }
 
-    private func detail(_ app: DeviceOps.DeviceApp) -> String {
-        "\(app.bundleID) · Sideloaded"
-    }
-
-    private func fileName(_ path: String) -> String {
-        (path as NSString).lastPathComponent
-    }
 
     private func load() async {
         loading = true
@@ -181,16 +163,21 @@ struct PairingToAppsView: View {
         }
     }
 
-    private func place(_ app: DeviceOps.DeviceApp, as path: String) {
+    /// `path` is a custom file name; nil puts the file wherever the app reads it.
+    private func place(_ app: DeviceOps.DeviceApp, as path: String?) {
         guard let pairing = pairings.selfPairing, app.debuggable else { return }
-        let trimmed = path.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        let trimmed = path?.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed?.isEmpty != true else { return }
         working = app.bundleID
         Task {
             defer { working = nil }
             do {
-                try await DeviceOps.placeFile(pairing.fileURL, in: app.bundleID, as: trimmed)
-                result = Result(success: true, message: "\(app.name) now has \(trimmed). Reopen the app so it picks the file up.")
+                if let trimmed {
+                    try await DeviceOps.placeFile(pairing.fileURL, in: app.bundleID, as: trimmed)
+                } else {
+                    try await PairingDestination.place(pairing.fileURL, in: app.bundleID)
+                }
+                result = Result(success: true, message: "\(app.name) now has the pairing file. Reopen the app so it picks the file up.")
             } catch {
                 result = Result(success: false, message: error.localizedDescription)
             }

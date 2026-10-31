@@ -2,6 +2,13 @@
 
 use super::*;
 
+use std::sync::Arc;
+
+use isideload::anisette::AnisetteDataGenerator;
+use isideload::auth::apple_account::AppToken;
+use isideload::auth::grandslam::GrandSlam;
+use tokio::sync::RwLock;
+
 /// Signs in to the Apple ID (GSA + anisette, 2FA through the prompt callback)
 /// and opens a developer-services session. Shared by installs and the
 /// certificate manager.
@@ -23,6 +30,10 @@ pub(super) async fn sign_in(
         .filter(|u| !u.is_empty())
         .collect();
     let urls = if urls.is_empty() { vec!["https://ani.jkcoxson.com"] } else { urls };
+
+    if let Some(session) = restore_session(apple_id, &urls).await {
+        return Ok(session);
+    }
 
     let mut failures: Vec<String> = Vec::new();
     for (i, url) in urls.iter().enumerate() {
@@ -59,14 +70,8 @@ pub(super) async fn sign_in_with(
     cbs: Callbacks,
     replies: Replies,
 ) -> Result<DeveloperSession, (String, String)> {
-    // Each server provisions its own anisette identity, so each gets its own folder.
-    let anisette = RemoteV3AnisetteProvider::default()
-        .map_err(|e| (err("Anisette setup failed", &e), format!("anisette {e:?}")))?
-        .set_url(anisette_url)
-        .set_storage(Box::new(FileStorage::new(
-            &format!("anisette/{}", host_of(anisette_url)),
-            Some("AltLoad.anisette"),
-        )));
+    let anisette = anisette_provider(anisette_url)
+        .map_err(|e| (err("Anisette setup failed", &e), format!("anisette {e:?}")))?;
 
     let two_factor = move |params: TwoFactorCallbackParams| {
         let replies = replies.clone();
@@ -89,9 +94,117 @@ pub(super) async fn sign_in_with(
         .await
         .map_err(|e| (err("Apple ID sign-in failed", &e), format!("{e} {e:?}")))?;
 
-    DeveloperSession::from_account(&mut account)
+    let token = account
+        .get_app_token("xcode.auth")
         .await
-        .map_err(|e| (err("Couldn't open a developer session", &e), format!("{e} {e:?}")))
+        .map_err(|e| (err("Couldn't open a developer session", &e), format!("{e} {e:?}")))?;
+    let adsid = account
+        .spd
+        .as_ref()
+        .and_then(|spd| spd.get("adsid"))
+        .and_then(|v| v.as_string())
+        .map(str::to_string)
+        .ok_or_else(|| ("Couldn't open a developer session: Apple sent no account ID.".to_string(), String::new()))?;
+
+    save_session(apple_id, &token, &adsid, anisette_url);
+    Ok(DeveloperSession::new(
+        token,
+        adsid,
+        account.grandslam_client.clone(),
+        account.anisette_generator.clone(),
+    ))
+}
+
+/// Each server provisions its own anisette identity, so each gets its own folder.
+fn anisette_provider(anisette_url: &str) -> Result<RemoteV3AnisetteProvider, rootcause::Report> {
+    Ok(RemoteV3AnisetteProvider::default()?
+        .set_url(anisette_url)
+        .set_storage(Box::new(FileStorage::new(
+            &format!("anisette/{}", host_of(anisette_url)),
+            Some("AltLoad.anisette"),
+        ))))
+}
+
+// MARK: - Saved session
+//
+// Signing in is the step anisette servers break most often, and repeating it risks
+// 2FA prompts and rate limits. Apple's developer token outlasts the sign-in, so it's
+// kept and reused until Apple stops accepting it.
+
+const SESSION_KEY: &str = "xcode";
+/// Treat a token this close to expiring as already gone, so it can't run out mid-install.
+const SESSION_MARGIN_SECS: u64 = 60 * 60;
+
+fn session_storage() -> FileStorage {
+    FileStorage::new("session", None)
+}
+
+fn save_session(apple_id: &str, token: &AppToken, adsid: &str, anisette_url: &str) {
+    let saved = serde_json::json!({
+        "appleID": apple_id.to_lowercase(),
+        "token": token.token,
+        "duration": token.duration,
+        "expiry": token.expiry,
+        "adsid": adsid,
+        "anisette": anisette_url,
+    });
+    // Not fatal: the next run just signs in again.
+    let _ = session_storage().store(SESSION_KEY, &saved.to_string());
+}
+
+/// The saved developer session for this Apple ID, if Apple still accepts it.
+async fn restore_session(apple_id: &str, urls: &[&str]) -> Option<DeveloperSession> {
+    let storage = session_storage();
+    let saved: serde_json::Value = serde_json::from_str(&storage.retrieve(SESSION_KEY).ok()??).ok()?;
+    if saved["appleID"].as_str()? != apple_id.to_lowercase() {
+        return None;
+    }
+
+    let expiry = saved["expiry"].as_u64()?;
+    // Apple sends milliseconds.
+    let expires_at = if expiry > 100_000_000_000 { expiry / 1000 } else { expiry };
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).ok()?.as_secs();
+    if expires_at <= now + SESSION_MARGIN_SECS {
+        let _ = storage.delete(SESSION_KEY);
+        return None;
+    }
+
+    let token = AppToken {
+        token: saved["token"].as_str()?.to_string(),
+        duration: saved["duration"].as_u64()?,
+        expiry,
+    };
+    let adsid = saved["adsid"].as_str()?;
+
+    // The server the token came from first, then the others: a dead server shouldn't
+    // cost a sign-in while the token is still good.
+    let first = saved["anisette"].as_str()?;
+    let others = urls.iter().copied().filter(|u| *u != first);
+    for url in std::iter::once(first).chain(others) {
+        match session_with(token.clone(), adsid, url).await {
+            Ok(session) => return Some(session),
+            Err(detail) if is_anisette_failure(&detail) => continue,
+            Err(_) => {
+                // Apple turned the token down, so it's no use to anyone.
+                let _ = storage.delete(SESSION_KEY);
+                return None;
+            }
+        }
+    }
+    None
+}
+
+async fn session_with(token: AppToken, adsid: &str, anisette_url: &str) -> Result<DeveloperSession, String> {
+    let describe = |e: rootcause::Report| format!("anisette {e} {e:?}");
+    let provider = anisette_provider(anisette_url).map_err(describe)?;
+    let generator = AnisetteDataGenerator::new(Arc::new(RwLock::new(provider)));
+    let client_info = generator.get_client_info().await.map_err(describe)?;
+    let client = GrandSlam::new(client_info, false, None).await.map_err(describe)?;
+
+    let mut session = DeveloperSession::new(token, adsid.to_string(), Arc::new(client), generator);
+    // The cheapest request that proves the token still works.
+    session.list_teams().await.map_err(|e| format!("{e} {e:?}"))?;
+    Ok(session)
 }
 
 /// Errors that come from the anisette server or Apple refusing its data, where

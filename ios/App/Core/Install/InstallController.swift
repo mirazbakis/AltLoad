@@ -549,11 +549,10 @@ final class InstallController: ObservableObject {
         case .installed(var app):
             if case .ipa(let url) = target { app.ipaFile = url.lastPathComponent }
             if case .store(let store) = target { app.channel = store.rawValue }
-            // SideStore-family apps need this iPhone's pairing file in their Documents.
+            // SideStore-family apps, LiveContainer's built-in SideStore included, need
+            // this iPhone's pairing file in their Documents.
             if PairingDestination.isSideStoreFamily(app.bundleID) {
                 await placePairingFile(in: app.bundleID, pairing: pairing.fileURL)
-            } else if app.store == .sidestoreLC {
-                pairingNote = "In LiveContainer, open SideStore and import the pairing file from Files › On My iPhone › AltLoad."
             }
             apps.removeAll { $0.bundleID == app.bundleID }
             apps.insert(app, at: 0)
@@ -684,8 +683,9 @@ final class InstallController: ObservableObject {
         enter(.pairing)
         phase = .working("Placing pairing file…", nil)
         do {
-            try await DeviceOps.placeFile(pairing, in: bundleID, as: PairingDestination.path(for: bundleID))
-            pairingNote = "This iPhone's pairing file is already inside the app."
+            try await PairingDestination.place(pairing, in: bundleID)
+            // iOS caches an app's settings once it has run, until the next restart.
+            pairingNote = "This iPhone's pairing file is already inside the app. If SideStore still asks for it, restart your iPhone."
         } catch {
             pairingNote = "Couldn't place the pairing file (\(error.localizedDescription)). Add it from Tools › Pairing File to Apps."
         }

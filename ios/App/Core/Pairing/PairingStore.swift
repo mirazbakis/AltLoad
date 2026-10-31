@@ -56,7 +56,8 @@ final class PairingStore: ObservableObject {
         }
     }
 
-    /// The chosen pairing for this device, else the newest iPhone/iPad one.
+    /// The chosen pairing for this device, else the newest iPhone/iPad one. Apple TV
+    /// files saved by older versions are skipped, since they can't install on this device.
     var selfPairing: SavedPairing? {
         if let id = selfPairingID, let match = items.first(where: { $0.id == id }) {
             return match

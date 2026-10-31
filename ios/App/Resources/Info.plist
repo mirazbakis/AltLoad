@@ -26,7 +26,10 @@
     <key>NSSupportsLiveActivities</key>
     <true/>
     <key>UILaunchScreen</key>
-    <dict/>
+    <dict>
+        <key>UIColorName</key>
+        <string>LaunchBackground</string>
+    </dict>
     <!-- Saved pairing files show up in the Files app under "On My iPhone › AltLoad". -->
     <key>UIFileSharingEnabled</key>
     <true/>
@@ -73,7 +76,6 @@
     <key>NSBonjourServices</key>
     <array>
         <string>_remotepairing-pairable-host._tcp</string>
-        <string>_remotepairing-manual-pairing._tcp</string>
         <!-- AltLoad's on-device AltServer, found by AltStore over Wi-Fi. -->
         <string>_altserver._tcp</string>
         <!-- Throwaway type used only to trigger the Local Network prompt. -->

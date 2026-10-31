@@ -2,12 +2,10 @@ import CoreLocation
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Creates a pairing file on-device (StikPair's mechanism) for this iPhone,
-/// another iPhone/iPad, or an Apple TV.
+/// Creates a pairing file on-device (StikPair's mechanism) for this iPhone or iPad.
 struct PairView: View {
     @StateObject private var controller = PairingController.shared
     @StateObject private var store = PairingStore.shared
-    @State private var appleTVPin = ""
     @State private var showImporter = false
 
     var body: some View {
@@ -35,7 +33,7 @@ struct PairView: View {
             switch newPhase {
             case .success: return .success
             case .failed: return .error
-            case .showPin, .enteringAppleTVPin: return .impact(weight: .medium)
+            case .showPin: return .impact(weight: .medium)
             default: return nil
             }
         }
@@ -47,9 +45,9 @@ struct PairView: View {
         VStack(spacing: 14) {
             Group {
                 if case .idle = controller.phase {
-                    AltLoadMark(size: 100)
+                    AltLoadMark(size: 72)
                 } else {
-                    GlassBadge(systemImage: headerSymbol, tint: headerTint, size: 100)
+                    GlassBadge(systemImage: headerSymbol, tint: headerTint, size: 72)
                         .contentTransition(.symbolEffect(.replace))
                         .symbolEffect(.pulse, isActive: isWorking)
                 }
@@ -85,9 +83,6 @@ struct PairView: View {
                         showImporter = true
                     }
                 }
-                GlassActionButton(title: "Pair Apple TV", systemImage: "appletv") {
-                    controller.browseForAppleTVs()
-                }
 
                 if !store.items.isEmpty {
                     VStack(spacing: 10) {
@@ -106,7 +101,7 @@ struct PairView: View {
                                     }
                                 }
                         }
-                        Text("The file marked **This iPhone** is used for installs. Long-press a file to change it or delete it. Files also appear in **Files › On My iPhone › AltLoad**.")
+                        Text("Long-press a file to change which one is used, or to delete it.")
                             .font(.caption)
                             .foregroundStyle(Aurora.secondaryText)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -145,71 +140,6 @@ struct PairView: View {
                 ProgressView()
             }
 
-        case .browsingAppleTV:
-            VStack(spacing: 14) {
-                GlassCard {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("On your Apple TV:")
-                            .font(.subheadline.weight(.semibold))
-                        GuideStep(number: 1, text: "Open **Settings › Remotes and Devices**")
-                        GuideStep(number: 2, text: "Choose **Remote App and Devices**")
-                    }
-                }
-
-                if controller.appleTVs.isEmpty {
-                    ProgressView("Looking for Apple TVs…")
-                        .padding(.vertical, 8)
-                } else {
-                    ForEach(controller.appleTVs) { device in
-                        GlassActionButton(title: LocalizedStringKey(device.name), systemImage: "appletv", prominent: true) {
-                            appleTVPin = ""
-                            controller.pairAppleTV(device)
-                        }
-                    }
-                }
-
-                GlassActionButton(title: "Cancel") { controller.cancelAppleTVPairing() }
-            }
-
-        case .enteringAppleTVPin(let device):
-            VStack(spacing: 16) {
-                Text("Pair with \(device.name)")
-                    .font(.headline)
-                Text("Enter the six-digit code shown on your Apple TV.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                TextField("000000", text: $appleTVPin)
-                    .keyboardType(.numberPad)
-                    .textContentType(.oneTimeCode)
-                    .multilineTextAlignment(.center)
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .tracking(6)
-                    .onChange(of: appleTVPin) { _, value in
-                        appleTVPin = String(value.filter(\.isNumber).prefix(6))
-                    }
-                    .padding(.vertical, 14)
-                    .cardSurface()
-                GlassActionButton(title: "Pair", systemImage: "link", prominent: true) {
-                    controller.submitAppleTVPin(appleTVPin)
-                }
-                .disabled(appleTVPin.count != 6)
-                GlassActionButton(title: "Cancel") { controller.cancelAppleTVPairing() }
-            }
-
-        case .pairingAppleTV(let name):
-            VStack(spacing: 16) {
-                GlassCard {
-                    HStack(spacing: 12) {
-                        ProgressView()
-                        Text("Pairing with \(name)…")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                GlassActionButton(title: "Cancel") { controller.cancelAppleTVPairing() }
-            }
-
         case .success(let saved):
             VStack(spacing: 14) {
                 GlassCard(tint: Aurora.success) {
@@ -232,9 +162,7 @@ struct PairView: View {
                 }
                 .buttonStyle(AltLoadButtonStyle(minHeight: 56))
 
-                footnote(saved.isAppleTV
-                         ? "Also saved in **Files › On My iPhone › AltLoad › Pairings**."
-                         : "AltLoad will use this file for installs. It's also in **Files › On My iPhone › AltLoad › Pairings**.")
+                footnote("AltLoad will use this file for installs. It's also in **Files › On My iPhone › AltLoad › Pairings**.")
 
                 GlassActionButton(title: "Done") { controller.reset() }
             }
@@ -319,7 +247,7 @@ struct PairView: View {
     private func lastPairingCard(_ item: SavedPairing) -> some View {
         GlassCard {
             HStack(spacing: 14) {
-                Image(systemName: item.isAppleTV ? "appletv" : "iphone.gen3")
+                Image(systemName: "iphone.gen3")
                     .font(.title2)
                     .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(Aurora.mist)
@@ -381,9 +309,6 @@ struct PairView: View {
         case .idle: "idle"
         case .waiting: "waiting"
         case .showPin: "pin"
-        case .browsingAppleTV: "browse"
-        case .enteringAppleTVPin: "tvpin"
-        case .pairingAppleTV: "tvpairing"
         case .success: "success"
         case .failed: "failed"
         }
@@ -391,7 +316,7 @@ struct PairView: View {
 
     private var isWorking: Bool {
         switch controller.phase {
-        case .waiting, .browsingAppleTV, .pairingAppleTV: true
+        case .waiting: true
         default: false
         }
     }
@@ -400,8 +325,7 @@ struct PairView: View {
         switch controller.phase {
         case .idle: "antenna.radiowaves.left.and.right"
         case .waiting: "wifi"
-        case .showPin, .enteringAppleTVPin: "lock.open"
-        case .browsingAppleTV, .pairingAppleTV: "appletv"
+        case .showPin: "lock.open"
         case .success: "checkmark"
         case .failed: "xmark"
         }
@@ -418,12 +342,10 @@ struct PairView: View {
     private var subtitle: String {
         switch controller.phase {
         case .idle: PairingController.canPairOnDevice
-            ? "Create a pairing file right on this device. AltLoad uses it to install apps, just like a computer would."
-            : "AltLoad needs this device's pairing file to install apps, just like a computer would."
+            ? "Create a pairing file on this device. AltLoad uses it to install apps."
+            : "AltLoad needs this device's pairing file to install apps."
         case .waiting: "Listening on your local network."
-        case .showPin, .enteringAppleTVPin: "Almost there."
-        case .browsingAppleTV: "Searching nearby."
-        case .pairingAppleTV: "Hang tight."
+        case .showPin: "Almost there."
         case .success: "Your pairing file is ready."
         case .failed: "Something went wrong."
         }

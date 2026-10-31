@@ -188,8 +188,7 @@ struct InstallFlowView: View {
 
         case .success(let app):
             VStack(spacing: 18) {
-                GlassBadge(systemImage: "checkmark", tint: Aurora.success, size: 88)
-                GlassCard(tint: Aurora.success) {
+                GlassCard {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("\(app.name) \(app.version) is on your Home Screen")
                             .font(.headline)
@@ -222,7 +221,6 @@ struct InstallFlowView: View {
 
         case .failed(let message):
             VStack(spacing: 18) {
-                GlassBadge(systemImage: "xmark", tint: Aurora.danger, size: 88)
                 GlassCard(tint: Aurora.danger) {
                     VStack(alignment: .leading, spacing: 8) {
                         Label("Stopped at: \(controller.step.title(for: target))", systemImage: controller.step.symbol)

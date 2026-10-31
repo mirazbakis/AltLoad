@@ -22,6 +22,7 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use idevice::afc::opcode::AfcFopenMode;
+use idevice::afc::AfcClient;
 use idevice::cryptexd::{install_ddi, installed_ddi, Cryptex1Assets};
 use idevice::debug_proxy::{DebugProxyClient, DebugserverCommand};
 use idevice::dvt::location_simulation::LocationSimulationClient;
@@ -267,6 +268,13 @@ async fn run(
             place_file(&mut adapter, &mut handshake, &bundle_id, Path::new(&source), &name).await?;
             Ok(serde_json::json!({ "ok": true }))
         }
+        "merge_plist" => {
+            let bundle_id = string_field(&request, "bundleId")?;
+            let name = string_field(&request, "name")?;
+            let values = request.get("values").and_then(|v| v.as_object()).ok_or("missing values")?;
+            merge_plist(&mut adapter, &mut handshake, &bundle_id, &name, values).await?;
+            Ok(serde_json::json!({ "ok": true }))
+        }
         other => Err(format!("Unknown device op \"{other}\".")),
     }
 }
@@ -510,8 +518,47 @@ async fn place_file(
     name: &str,
 ) -> Result<(), String> {
     let data = std::fs::read(source).map_err(|e| err("Couldn't read the file", e))?;
-    let name = name.trim_start_matches('/');
+    let mut afc = open_container(adapter, handshake, bundle_id).await?;
+    write_to_container(&mut afc, name, &data).await
+}
 
+/// Sets keys in a plist inside an app's container, keeping everything else in it,
+/// so a refresh doesn't wipe the app's settings.
+async fn merge_plist(
+    adapter: &mut AdapterHandle,
+    handshake: &mut RsdHandshake,
+    bundle_id: &str,
+    name: &str,
+    values: &serde_json::Map<String, serde_json::Value>,
+) -> Result<(), String> {
+    let mut afc = open_container(adapter, handshake, bundle_id).await?;
+    let path = format!("/{}", name.trim_start_matches('/'));
+
+    let mut dict = plist::Dictionary::new();
+    if let Ok(mut file) = afc.open(path.clone(), AfcFopenMode::RdOnly).await {
+        let existing = file.read_entire().await.map_err(|e| err("Couldn't read the app's settings", e));
+        let _ = file.close().await;
+        dict = plist::from_bytes(&existing?).map_err(|e| err("Couldn't read the app's settings", e))?;
+    }
+    for (key, value) in values {
+        let value = match value {
+            serde_json::Value::Bool(b) => plist::Value::Boolean(*b),
+            serde_json::Value::String(s) => plist::Value::String(s.clone()),
+            other => return Err(format!("Unsupported setting {key}: {other}")),
+        };
+        dict.insert(key.clone(), value);
+    }
+
+    let mut data = Vec::new();
+    plist::to_writer_binary(&mut data, &dict).map_err(|e| err("Couldn't write the app's settings", e))?;
+    write_to_container(&mut afc, name, &data).await
+}
+
+async fn open_container(
+    adapter: &mut AdapterHandle,
+    handshake: &mut RsdHandshake,
+    bundle_id: &str,
+) -> Result<AfcClient, String> {
     // The whole container works for apps signed with a development profile
     // (everything AltLoad, AltStore or Catalyst installs). Documents-only access
     // is the fallback for apps with file sharing turned on.
@@ -519,8 +566,8 @@ async fn place_file(
         Ok(client) => client.vend_container(bundle_id).await,
         Err(e) => Err(e),
     };
-    let mut afc = match container {
-        Ok(afc) => afc,
+    match container {
+        Ok(afc) => Ok(afc),
         Err(container_error) => {
             let documents = match HouseArrestClient::connect_rsd(adapter, handshake).await {
                 Ok(client) => client.vend_documents(bundle_id).await,
@@ -531,21 +578,29 @@ async fn place_file(
                     "iOS won't let AltLoad into this app ({container_error}; {e}). Only apps signed \
                      with a development certificate, or with file sharing on, can receive files."
                 )
-            })?
+            })
         }
-    };
-    let path = format!("/{name}");
+    }
+}
 
-    if let Some(parent) = Path::new(&path).parent().and_then(|p| p.to_str()) {
-        if parent != "/" && !parent.is_empty() {
-            let _ = afc.mk_dir(parent).await;
+async fn write_to_container(afc: &mut AfcClient, name: &str, data: &[u8]) -> Result<(), String> {
+    let path = format!("/{}", name.trim_start_matches('/'));
+
+    // Outermost folder first: LiveContainer's SideStore folder doesn't exist until
+    // it first opens.
+    let parents: Vec<&Path> = Path::new(&path).ancestors().skip(1).collect();
+    for parent in parents.into_iter().rev() {
+        if let Some(parent) = parent.to_str() {
+            if parent != "/" && !parent.is_empty() {
+                let _ = afc.mk_dir(parent).await;
+            }
         }
     }
     let mut file = afc
         .open(path.clone(), AfcFopenMode::WrOnly)
         .await
         .map_err(|e| err("Couldn't create the file in the app", e))?;
-    file.write_entire(&data)
+    file.write_entire(data)
         .await
         .map_err(|e| err("Couldn't write the file", e))?;
     file.close().await.map_err(|e| err("Couldn't finish writing", e))?;

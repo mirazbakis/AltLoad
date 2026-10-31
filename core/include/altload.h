@@ -18,9 +18,6 @@ typedef void (*AltLoadReadyCb)(void *ctx,
                                 size_t txt_count);
 
 typedef void (*AltLoadPinCb)(const char *pin, void *ctx);
-typedef void (*AltLoadAppleTvPinCb)(void *ctx);
-
-typedef struct AltLoadAppleTvSession AltLoadAppleTvSession;
 
 typedef struct {
     char *error;
@@ -40,23 +37,6 @@ int32_t altload_run_host(const char *bind_addr,
                           AltLoadPinCb pin_cb,
                           void *ctx,
                           AltLoadResult *out);
-
-AltLoadAppleTvSession *altload_apple_tv_session_new(void);
-
-int32_t altload_apple_tv_session_run(AltLoadAppleTvSession *session,
-                                      const char *host,
-                                      uint16_t port,
-                                      const char *name,
-                                      const char *out_path,
-                                      AltLoadAppleTvPinCb pin_cb,
-                                      void *ctx,
-                                      AltLoadResult *out);
-
-int32_t altload_apple_tv_session_submit_pin(AltLoadAppleTvSession *session,
-                                             const char *pin);
-
-void altload_apple_tv_session_cancel(AltLoadAppleTvSession *session);
-void altload_apple_tv_session_free(AltLoadAppleTvSession *session);
 
 void altload_result_free(AltLoadResult *r);
 

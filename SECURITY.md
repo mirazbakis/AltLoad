@@ -52,6 +52,7 @@ We won't pursue or support legal action against anyone who researches and report
 ## How AltLoad protects your data
 
 - **Apple ID password:** sent only to Apple's sign-in servers (GrandSlam, using the SRP protocol, so the password itself isn't transmitted). It's saved only if you turn on *Remember password*, and then only in the iOS Keychain with `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`: readable only while unlocked, and never synced or backed up to other devices.
+- **Apple developer token:** saved after a sign-in in AltLoad's private app storage, whether or not the password is saved, so later installs don't have to sign in again. It's never sent anywhere but Apple. Signing out deletes it.
 - **Anisette server:** receives device-identity data needed for Apple sign-in, **never** your password. You can choose the server or run your own.
 - **Development certificate and key:** stored in the Keychain.
 - **Pairing files:** stored in the app's Documents folder. Anyone with a pairing file can connect to your device, so share them only with apps you trust.

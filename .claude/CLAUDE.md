@@ -9,7 +9,7 @@ App (iOS 18+, on-device pairing on iOS 27+) that signs and installs AltStore, Si
   - `Install/`: `InstallController` (install flow, Rust bridge, `ExtensionsMode`), `StoreCatalog` (stores, sources, fallbacks, IPA cache), `Entitlements` (capability settings).
   - `Account/`: Apple ID storage, anisette server list and health checks, certificate manager bridge.
   - `Device/`: device ops over the tunnel, Developer Disk Image, LocalDevVPN, location simulation.
-  - `Pairing/`: pairing host, saved pairing files, Apple TV discovery, background keep-alive, the pairing-code Live Activity.
+  - `Pairing/`: pairing host, saved pairing files, background keep-alive, the pairing-code Live Activity.
   - `AltServer/`: the on-device AltServer AltStore talks to.
 - `ios/App/Features/<Tab>/`: SwiftUI screens only. Install shows the installed apps ("Your Apps"); Tools › Pair lists every saved pairing file; Tools › Entitlements; Tools › App IDs (list + refresh, shares the Certificates session); Tools › Pairing File to Apps only offers sideloaded (development-signed) apps.
 - `ios/Shared/`: code compiled into both the app and the widget extension (`PairingActivityAttributes`).
@@ -39,6 +39,6 @@ xcodebuild -project AltLoad.xcodeproj -scheme AltLoad -sdk iphonesimulator \
 - The owner pushes through GitHub Desktop; there are no GitHub credentials in the shell.
 - CI (`.github/workflows/build.yml`) runs only when started by hand. See the `release` skill. `sign-ota.yml` re-signs every cert pack and deploys `site/` (on push, release and weekly); `sign-ipa.yml` signs any IPA with one pack into an artifact.
 - License is custom MIT-based: open code, non-commercial, attribution, distribution only via the official repo and site (LICENSE.md v5). Keep the LGPL carve-out for apple-codesign-quick.
-- UI: midnight background with one navy spotlight, solid `cardSurface()` cards, Liquid Glass `AltLoadButtonStyle` buttons at least 44 pt tall (`liquidGlass(tint:in:)` falls back to material before iOS 26). Icons (`IconTile`) are plain symbols with no tile behind them; prefer symbols without a built-in box or circle.
+- UI: pure black background with a small, dim navy glow, solid `cardSurface()` cards, Liquid Glass `AltLoadButtonStyle` buttons at least 44 pt tall (`liquidGlass(tint:in:)` falls back to material before iOS 26). Icons (`IconTile`) are plain symbols with no tile behind them; prefer symbols without a built-in box or circle.
 - Anisette: default is `AnisetteServers.automatic`; anything that needs a server URL must go through `AnisetteServers.signInList(preferred:)`, never use `anisetteURL` directly.
 - Comments explain why, in plain sentences, like the surrounding code.

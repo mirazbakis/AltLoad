@@ -120,25 +120,75 @@ enum DeviceOps {
                           progress: @escaping @MainActor (String, Double?) -> Void = { _, _ in }) async throws {
         try await run(["op": "place_file", "bundleId": bundleID, "source": source.path, "name": name], progress: progress)
     }
+
+    /// Sets keys in a plist inside an app's container and keeps the rest of it.
+    static func mergePreferences(_ values: [String: Any], in bundleID: String, at path: String) async throws {
+        try await run(["op": "merge_plist", "bundleId": bundleID, "name": path, "values": values])
+    }
 }
 
 /// Where each kind of app looks for its pairing file.
 enum PairingDestination {
-    /// SideStore-family apps read Documents/PairingFile_RemoteRP.plist.
-    static let sideStoreName = "Documents/PairingFile_RemoteRP.plist"
     /// StikDebug and other idevice-based apps use rp_pairing_file.plist.
     static let idevice = "Documents/\(PairingPaths.fileName)"
 
-    static func path(for bundleID: String) -> String {
+    /// SideStore's home inside the app's container: the root, or the folder
+    /// LiveContainer gives its built-in SideStore. Nil for any other app.
+    private static func sideStoreHome(for bundleID: String) -> String? {
         let id = bundleID.lowercased()
-        if id.hasPrefix("com.mirazbakis.catalyst") || id.hasPrefix("com.sidestore.sidestore") {
-            return sideStoreName
-        }
-        return idevice
+        if id.hasPrefix("com.kdt.livecontainer") { return "Documents/SideStore/" }
+        if id.hasPrefix("com.mirazbakis.catalyst") || id.hasPrefix("com.sidestore.sidestore") { return "" }
+        return nil
     }
 
     static func isSideStoreFamily(_ bundleID: String) -> Bool {
-        path(for: bundleID) == sideStoreName
+        sideStoreHome(for: bundleID) != nil
+    }
+
+    /// Gives an app the pairing file so it doesn't ask for it on launch.
+    static func place(_ pairing: URL, in bundleID: String) async throws {
+        guard let home = sideStoreHome(for: bundleID) else {
+            try await DeviceOps.placeFile(pairing, in: bundleID, as: idevice)
+            return
+        }
+
+        // Release builds read this one file, whatever it holds.
+        try await DeviceOps.placeFile(pairing, in: bundleID, as: home + "Documents/ALTPairingFile.mobiledevicepairing")
+
+        // Newer builds keep one file per protocol and refuse a file with both.
+        let records = try sideStoreRecords(in: Data(contentsOf: pairing))
+        let folder = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        for (name, record) in [("PairingFile_Lockdown.plist", records.lockdown), ("PairingFile_RemoteRP.plist", records.remote)] {
+            guard let record else { continue }
+            let file = folder.appendingPathComponent(name)
+            try record.write(to: file)
+            try await DeviceOps.placeFile(file, in: bundleID, as: home + "Documents/" + name)
+        }
+
+        // They also ignore those files until these two settings are saved, which
+        // SideStore normally does itself when you import a file. Its settings file
+        // is named after the signed bundle ID, except inside LiveContainer.
+        let preferences = home.isEmpty ? "\(bundleID).plist" : "com.SideStore.SideStore.plist"
+        try await DeviceOps.mergePreferences(
+            ["isPairingReset": false, "activePairingProtocol": records.lockdown != nil ? "lockdown" : "rppairing"],
+            in: bundleID, at: home + "Library/Preferences/" + preferences)
+    }
+
+    private static func sideStoreRecords(in data: Data) throws -> (lockdown: Data?, remote: Data?) {
+        guard let file = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any] else {
+            throw CocoaError(.propertyListReadCorrupt)
+        }
+        let remoteKeys: Set<String> = ["private_key", "public_key", "identifier", "alt_irk"]
+        let remote = file.filter { remoteKeys.contains($0.key) }
+        let lockdown = file.filter { !remoteKeys.contains($0.key) }
+        func xml(_ record: [String: Any]) throws -> Data {
+            try PropertyListSerialization.data(fromPropertyList: record, format: .xml, options: 0)
+        }
+        return (lockdown["HostPrivateKey"] != nil ? try xml(lockdown) : nil,
+                remote["private_key"] != nil ? try xml(remote) : nil)
     }
 }
 

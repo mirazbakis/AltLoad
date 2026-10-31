@@ -1,13 +1,12 @@
 import SwiftUI
 
-/// AltLoad's palette: Freight Manager's navy tone, taken darker. A midnight base,
-/// one dark navy spotlight, solid navy surfaces and a deep blue accent. The dark
+/// AltLoad's palette: a pure black base with a dim navy glow, solid navy surfaces and a deep blue accent. The dark
 /// green and white come from the app icon. The enum keeps its old name so every
 /// screen picks it up.
 enum Aurora {
     // Base, from darkest to lightest.
-    static let night = Color(red: 0.012, green: 0.020, blue: 0.043)      // #03050B
-    static let spotlight = Color(red: 0.055, green: 0.125, blue: 0.290)  // #0E204A
+    static let night = Color.black
+    static let glow = Color(red: 0.055, green: 0.125, blue: 0.290)       // #0E204A
     static let card = Color(red: 0.039, green: 0.063, blue: 0.118)       // #0A101E
     static let raised = Color(red: 0.063, green: 0.098, blue: 0.173)     // #10192C
     static let navy = Color(red: 0.075, green: 0.161, blue: 0.333)       // #132955

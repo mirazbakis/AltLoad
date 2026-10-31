@@ -12,7 +12,7 @@ This document describes each stage of the install, with the protocol, the librar
 | FFI | A C header plus a Rust static library packaged as `AltLoadFFI.xcframework` | `core/include/altload.h`, `core/src/*.rs` |
 | Device protocols | [`idevice`](https://github.com/jkcoxson/idevice) (git `d32c818`): `remote_pairing`, `rsd`, `tunnel_tcp_stack`, `afc`, `installation_proxy`, `misagent`, `house_arrest`, `cryptexd`, `dvt`, `debug_proxy` | `core/src/lib.rs`, `core/src/install/` |
 | Apple ID + signing | [`isideload`](https://github.com/nab138/isideload) 0.4.6 (uses idevice, a fork of apple-codesign, rcgen, keyring) | `core/src/install/sign_in.rs`, `core/src/install/bundle.rs` |
-| Discovery | `NetServiceBrowser` / `NetService` (mDNSResponder), used for pairing and Apple TV, so no multicast entitlement is needed | `ios/App/Core/Pairing/PairingController.swift`, `ios/App/Core/Pairing/AppleTVDiscovery.swift` |
+| Discovery | `NetServiceBrowser` / `NetService` (mDNSResponder), used for pairing, so no multicast entitlement is needed | `ios/App/Core/Pairing/PairingController.swift` |
 | Loopback | [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN): detection via `getifaddrs`, and control via `localdevvpn://` and `altload://` URLs | `ios/App/Core/Device/LocalDevVPN.swift` |
 | Catalog | AltStore-format sources (`https://apps.altstore.io` for AltStore and Beta, `https://apps.sidestore.io` for SideStore), GitHub releases for LiveContainer and both nightlies, with fallbacks for when SideStore's repository is down; `URLSession` download with progress, IPA cache in Application Support | `ios/App/Core/Install/StoreCatalog.swift` |
 | Secrets | Keychain (`kSecClassGenericPassword`, `WhenUnlockedThisDeviceOnly`) for the Apple ID password. files in `Application Support/AltLoad` (`FileStorage` in `core/src/install/storage.rs`) for the certificate key and anisette state, one folder per anisette server; values left in the Keychain by older builds are moved over | `ios/App/Core/Account/AppleIDStore.swift`, `core/src/install/storage.rs` |
@@ -31,8 +31,6 @@ iOS 27 lets a device pair wirelessly with a host that advertises `_remotepairing
 **Dynamic Island.** iOS only lets an app start a Live Activity while it's in the foreground, so `PairingLiveActivity` starts one when the user taps Pair, in a "waiting" state. When `pinCallback` fires, by then from the background, the activity is updated with the code, so it shows in the Dynamic Island (or on the Lock Screen on iPhones without one) while Settings is open. It ends a few seconds after pairing succeeds or fails. The views live in the `AltLoadWidgets` extension (`ios/Widgets/`), and `PairingActivityAttributes` (`ios/Shared/`) is compiled into both targets.
 
 **Below iOS 27** there is no RPPairing host mode, so the iPhone can't pair with AltLoad. AltLoad still runs from iOS 18: the Pair screen offers **Import Pairing File** instead, `PairingStore.importForThisDevice` copies a pairing file made on a computer into `Documents/Pairings` and marks it as this device's, and everything from step 2 on works the same.
-
-Apple TV uses the reverse direction: AltLoad is the client for the TV's `_remotepairing-manual-pairing._tcp` service, via `RemotePairingClient::connect`.
 
 ## 2. Tunnel to this iPhone (Install, step 1)
 
@@ -57,6 +55,7 @@ This comes from isideload's `AppleAccount`.
 
 - **Anisette:** Apple's servers require `X-Apple-I-MD`, `X-Apple-I-MD-M` and related machine-identity headers. `RemoteV3AnisetteProvider` provisions a virtual machine identity through an anisette v3 server over a websocket, then caches the state. The default is **Automatic**: before signing in, AltLoad checks which servers answer `/v3/client_info` (Windows-ADI servers first, since Apple refuses most others since 12 October 2026) and passes up to four to Rust, which moves on to the next when Apple or a server rejects the anisette data. Wrong passwords, 2FA problems and cancellations are not retried. Settings also offers a picker built from `https://servers.sidestore.io/servers.json` (HTTPS entries only, merged with a built-in list), a custom URL, and **Reset Anisette Data**. AltServer's `AnisetteDataRequest` uses the same list.
 - **GrandSlam (GSA):** the SRP-6a login to `gsa.apple.com`, which never sends the password in plaintext.
+- **Saved session:** after a sign-in, the `xcode.auth` developer token is kept in `Application Support/AltLoad/session`. Installs, refreshes and the account screens reuse it until it nears expiry or Apple refuses it, and only then sign in again. If its anisette server is down, the others are tried with the same token first. Signing out deletes it.
 - **2FA:** trusted-device push or SMS. Rust calls `AltLoadPromptCb(kind: 1, json)`. Swift shows `TwoFactorSheet` and answers with `altload_install_session_respond("code:123456" | "sms:<id>" | "devices" | "resend" | "abort")`.
 
 ## 4. Developer services (Install, step 3)
@@ -101,8 +100,6 @@ A free-account profile lasts 7 days. AltStore's built-in refresh expects to find
 ```c
 // pairing (core/src/lib.rs)
 int32_t altload_run_host(...);                         // host mode, device pairs to us
-AltLoadAppleTvSession *altload_apple_tv_session_new(void);
-int32_t altload_apple_tv_session_run(...);             // client mode, Apple TV
 // install (core/src/install/)
 AltLoadInstallSession *altload_install_session_new(void);
 int32_t altload_install_session_run(session, config, progress_cb, prompt_cb, ctx, out); // blocking

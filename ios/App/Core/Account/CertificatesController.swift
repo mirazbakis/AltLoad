@@ -118,6 +118,7 @@ final class CertificatesController: ObservableObject {
     }
 
     func signOut() {
+        AppleIDStore.forgetSession()
         credentials = nil
         overview = nil
         lastUpdated = nil

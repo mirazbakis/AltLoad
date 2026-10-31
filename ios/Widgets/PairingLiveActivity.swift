@@ -172,7 +172,7 @@ private extension PairingActivityAttributes.ContentState.Status {
 
 /// AltLoad's colors, repeated here because the extension doesn't link the app's theme.
 private enum Palette {
-    static let night = Color(red: 0.012, green: 0.020, blue: 0.043)
+    static let night = Color.black
     static let accent = Color(red: 0.235, green: 0.478, blue: 0.890)
     static let sky = Color(red: 0.490, green: 0.690, blue: 0.980)
     static let success = Color(red: 0.250, green: 0.760, blue: 0.500)
