@@ -14,12 +14,12 @@
 <link rel="apple-touch-icon" href="AltLoad.png">
 <style>
   :root{
-    --bg:#050b1f;
-    --bg-2:#081232;
-    --card:#0a1638;
-    --card-hi:#0e1c46;
-    --edge:rgba(148,178,255,.13);
-    --edge-hi:rgba(148,178,255,.28);
+    --bg:#000000;
+    --bg-2:#070707;
+    --card:#0c0c0c;
+    --card-hi:#121212;
+    --edge:rgba(255,255,255,.10);
+    --edge-hi:rgba(255,255,255,.24);
     --ink:#f2f5ff;
     --ink-2:rgba(220,229,255,.74);
     --ink-3:rgba(220,229,255,.5);
@@ -27,6 +27,8 @@
     --mint:#3be0a0;
     --warn:#ffb547;
     --grad:linear-gradient(120deg,#5b9bff 0%,#3be0a0 100%);
+    --grad-btn:linear-gradient(120deg,#16255b 0%,#2a4894 100%);
+    --btn-ink:#eaf0ff;
     --sans:-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",Roboto,sans-serif;
     color-scheme:dark;
   }
@@ -40,15 +42,15 @@
 
   /* ---- nav ---- */
   .nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
-    background:rgba(5,11,31,.72);border-bottom:1px solid var(--edge)}
+    background:rgba(0,0,0,.72);border-bottom:1px solid var(--edge)}
   .nav .wrap{display:flex;align-items:center;gap:10px;height:60px}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;text-decoration:none}
   .brand img{width:30px;height:30px;border-radius:8px}
   .nav nav{margin-left:auto;display:flex;align-items:center;gap:4px}
   .nav nav a{padding:8px 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:none}
   .nav nav a:hover{color:var(--ink);background:var(--card)}
-  .nav .go{color:#04140d;background:var(--grad)}
-  .nav .go:hover{color:#04140d;background:var(--grad);filter:brightness(1.06)}
+  .nav .go{color:var(--btn-ink);background:var(--grad-btn)}
+  .nav .go:hover{color:var(--btn-ink);background:var(--grad-btn);filter:brightness(1.12)}
   @media (max-width:560px){.nav nav a.opt{display:none}}
 
   /* ---- hero ---- */
@@ -66,7 +68,7 @@
     font:700 16px var(--sans);text-decoration:none;cursor:pointer;border:1px solid transparent;transition:filter .15s,transform .15s,border-color .15s}
   .btn svg{width:19px;height:19px}
   .btn:active{transform:scale(.98)}
-  .btn-main{color:#04140d;background:var(--grad);box-shadow:0 14px 34px -14px rgba(59,224,160,.7)}
+  .btn-main{color:var(--btn-ink);background:var(--grad-btn);box-shadow:0 14px 34px -14px rgba(42,72,148,.6)}
   .btn-main:hover{filter:brightness(1.06)}
   .btn-line{color:var(--ink);background:var(--card);border-color:var(--edge)}
   .btn-line:hover{border-color:var(--edge-hi)}
@@ -122,13 +124,15 @@
   .copies{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
   .copy{display:flex;flex-direction:column;gap:16px;padding:18px;border-radius:22px;background:var(--card-hi);border:1px solid var(--edge);transition:border-color .15s}
   .copy:hover{border-color:var(--edge-hi)}
-  .copy .head{display:flex;align-items:center;gap:14px}
+  .copy .head{display:flex;align-items:flex-start;gap:14px}
   .copy img{width:56px;height:56px;border-radius:14px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
   .copy .t{min-width:0}
-  .copy .n{font-weight:780;font-size:18px;letter-spacing:-.01em;white-space:nowrap}
+  /* App id is the label; it varies in length, so let it wrap on the dots and
+     keep the type size steady so no card stands out. */
+  .copy .n{font-weight:780;font-size:16px;letter-spacing:-.01em;line-height:1.25;overflow-wrap:anywhere;word-break:break-word}
   .copy .v{font-size:14px;color:var(--ink-3);margin-top:2px}
-  .get{display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:15px;font-size:16px;font-weight:800;
-    text-decoration:none;color:#04140d;background:var(--grad);box-shadow:0 12px 26px -14px rgba(59,224,160,.75);transition:filter .15s,transform .15s}
+  .get{display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;margin-top:auto;border-radius:15px;font-size:16px;font-weight:800;
+    text-decoration:none;color:var(--btn-ink);background:var(--grad-btn);box-shadow:0 12px 26px -14px rgba(42,72,148,.7);transition:filter .15s,transform .15s}
   .get svg{width:18px;height:18px}
   .get:hover{filter:brightness(1.07)}
   .get:active{transform:scale(.98)}
