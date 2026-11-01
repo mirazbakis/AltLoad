@@ -21,6 +21,14 @@
       "category": "developer",
       "versions": [
         {
+          "version": "1.4.0",
+          "date": "2026-11-01T09:56:00Z",
+          "localizedDescription": "## AltLoad 1.4.0\n\n### New\n- **Husk.** Install Husk from the store list, with this iPhone's pairing file already inside it for its built-in JIT.\n- **French, German, Italian, Chinese and Russian.** AltLoad follows your iPhone's language.\n- **Update notices.** AltLoad tells you when a newer version is out.\n\n### Fixed\n- **Pairing files for SideStore and SideStore + LiveContainer.** They now include this iPhone's UDID and go everywhere SideStore looks, along with the settings newer builds need.\n- Fixed potential issues with Apple IDs",
+          "downloadURL": "https://github.com/mirazbakis/AltLoad/releases/download/v1.4.0/AltLoad.ipa",
+          "size": 11792459,
+          "minOSVersion": "27.0"
+        },
+        {
           "version": "1.3.0",
           "date": "2026-10-31T08:29:17Z",
           "localizedDescription": "## AltLoad 1.3.0\n\n### Fixed\n- **SideStore no longer asks you to import a pairing file.** AltLoad now hands the pairing file over the way SideStore reads it, on stable and Nightly. If SideStore has already been opened and still asks, restart your iPhone.\n- **SideStore + LiveContainer gets the pairing file too.** It's placed for you at install, so there's nothing to import by hand.\n\n### Changed\n- **Far fewer Apple ID sign-ins.** AltLoad keeps Apple's developer token after you sign in and reuses it for installs, refreshes and the account screens, so unstable anisette servers and 2FA prompts get in the way less often. Signing out deletes it.\n- **Pure black background** with a small navy glow.\n- **Cleaner screens.** Pair, Pairing File to Apps and the install results are simpler, and placing a pairing file is now one button.\n\n### Removed\n- **Apple TV pairing.** Pairing files you already saved for an Apple TV stay in the list, but they're never used for installs.",
