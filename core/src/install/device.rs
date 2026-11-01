@@ -268,13 +268,6 @@ async fn run(
             place_file(&mut adapter, &mut handshake, &bundle_id, Path::new(&source), &name).await?;
             Ok(serde_json::json!({ "ok": true }))
         }
-        "merge_plist" => {
-            let bundle_id = string_field(&request, "bundleId")?;
-            let name = string_field(&request, "name")?;
-            let values = request.get("values").and_then(|v| v.as_object()).ok_or("missing values")?;
-            merge_plist(&mut adapter, &mut handshake, &bundle_id, &name, values).await?;
-            Ok(serde_json::json!({ "ok": true }))
-        }
         other => Err(format!("Unknown device op \"{other}\".")),
     }
 }
@@ -518,39 +511,19 @@ async fn place_file(
     name: &str,
 ) -> Result<(), String> {
     let data = std::fs::read(source).map_err(|e| err("Couldn't read the file", e))?;
-    let mut afc = open_container(adapter, handshake, bundle_id).await?;
-    write_to_container(&mut afc, name, &data).await
-}
-
-/// Sets keys in a plist inside an app's container, keeping everything else in it,
-/// so a refresh doesn't wipe the app's settings.
-async fn merge_plist(
-    adapter: &mut AdapterHandle,
-    handshake: &mut RsdHandshake,
-    bundle_id: &str,
-    name: &str,
-    values: &serde_json::Map<String, serde_json::Value>,
-) -> Result<(), String> {
-    let mut afc = open_container(adapter, handshake, bundle_id).await?;
-    let path = format!("/{}", name.trim_start_matches('/'));
-
-    let mut dict = plist::Dictionary::new();
-    if let Ok(mut file) = afc.open(path.clone(), AfcFopenMode::RdOnly).await {
-        let existing = file.read_entire().await.map_err(|e| err("Couldn't read the app's settings", e));
-        let _ = file.close().await;
-        dict = plist::from_bytes(&existing?).map_err(|e| err("Couldn't read the app's settings", e))?;
-    }
-    for (key, value) in values {
-        let value = match value {
-            serde_json::Value::Bool(b) => plist::Value::Boolean(*b),
-            serde_json::Value::String(s) => plist::Value::String(s.clone()),
-            other => return Err(format!("Unsupported setting {key}: {other}")),
-        };
-        dict.insert(key.clone(), value);
-    }
-
-    let mut data = Vec::new();
-    plist::to_writer_binary(&mut data, &dict).map_err(|e| err("Couldn't write the app's settings", e))?;
+    // Documents access first, as iloader does; the whole container is the fallback.
+    let documents = if name.trim_start_matches('/').starts_with("Documents/") {
+        match HouseArrestClient::connect_rsd(adapter, handshake).await {
+            Ok(client) => client.vend_documents(bundle_id).await.ok(),
+            Err(_) => None,
+        }
+    } else {
+        None
+    };
+    let mut afc = match documents {
+        Some(afc) => afc,
+        None => open_container(adapter, handshake, bundle_id).await?,
+    };
     write_to_container(&mut afc, name, &data).await
 }
 

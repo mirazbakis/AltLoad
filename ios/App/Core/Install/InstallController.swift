@@ -362,7 +362,7 @@ final class InstallController: ObservableObject {
         if opens(store.queryScheme) {
             presence[store] = store == .sidestore && opens(StoreApp.sidestoreLC.queryScheme)
                 ? .unknown : .installed(version: nil)
-        } else if store.isSideStore || !opens("altstore") {
+        } else if store != .altstore && store != .altstoreBeta || !opens("altstore") {
             presence[store] = .missing
         } else {
             presence[store] = .unknown
@@ -549,9 +549,9 @@ final class InstallController: ObservableObject {
         case .installed(var app):
             if case .ipa(let url) = target { app.ipaFile = url.lastPathComponent }
             if case .store(let store) = target { app.channel = store.rawValue }
-            // SideStore-family apps, LiveContainer's built-in SideStore included, need
-            // this iPhone's pairing file in their Documents.
-            if PairingDestination.isSideStoreFamily(app.bundleID) {
+            // SideStore-family apps, LiveContainer's built-in SideStore included, and
+            // Husk need this iPhone's pairing file in their Documents.
+            if PairingDestination.placesAutomatically(app.bundleID) {
                 await placePairingFile(in: app.bundleID, pairing: pairing.fileURL)
             }
             apps.removeAll { $0.bundleID == app.bundleID }
@@ -561,6 +561,7 @@ final class InstallController: ObservableObject {
             if let store = app.store { presence[store] = .installed(version: app.version) }
             phase = .success(app)
         case .failed(let message):
+            AppleIDStore.forgetPasswordIfRejected(message: message, email: credentials.email)
             if message == "Cancelled." {
                 phase = .idle
             } else if message.localizedCaseInsensitiveContains("anisette") || message.contains("-80045") || message.contains("-45061") {
@@ -677,7 +678,7 @@ final class InstallController: ObservableObject {
 
     // MARK: - Callbacks from Rust (hopped to main)
 
-    /// Copies the pairing file into a freshly installed SideStore-family app. Not fatal:
+    /// Copies the pairing file into a freshly installed app that needs one. Not fatal:
     /// the app still works once the file is added from Tools › Pairing File to Apps.
     private func placePairingFile(in bundleID: String, pairing: URL) async {
         enter(.pairing)
@@ -685,7 +686,7 @@ final class InstallController: ObservableObject {
         do {
             try await PairingDestination.place(pairing, in: bundleID)
             // iOS caches an app's settings once it has run, until the next restart.
-            pairingNote = "This iPhone's pairing file is already inside the app. If SideStore still asks for it, restart your iPhone."
+            pairingNote = "This iPhone's pairing file is already inside the app. If the app still asks for it, restart your iPhone."
         } catch {
             pairingNote = "Couldn't place the pairing file (\(error.localizedDescription)). Add it from Tools › Pairing File to Apps."
         }

@@ -61,11 +61,6 @@ struct CertificatesView: View {
             Text("Apps signed with this certificate will stop opening until they're signed again. This can't be undone.")
         }
         .animation(.spring(duration: 0.5, bounce: 0.2), value: controller.phase)
-        .task {
-            if case .signedOut = controller.phase, let saved = controller.savedCredentials {
-                controller.load(with: saved)
-            }
-        }
     }
 
     // MARK: - Header

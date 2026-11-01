@@ -70,6 +70,7 @@
         <!-- SideStore, and LiveContainer with SideStore built in. -->
         <string>sidestore</string>
         <string>livecontainer</string>
+        <string>husk</string>
     </array>
     <key>NSLocalNetworkUsageDescription</key>
     <string>AltLoad uses your local network to discover devices and complete pairing.</string>

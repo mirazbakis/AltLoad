@@ -75,7 +75,7 @@ struct AboutView: View {
                     .cardSurface()
                 }
 
-                Text("AltLoad isn't affiliated with AltStore, SideStore, LiveContainer, Riley Testut or Apple. Apple, iPhone and iOS are trademarks of Apple Inc.")
+                Text("AltLoad isn't affiliated with AltStore, SideStore, LiveContainer, Husk, Riley Testut or Apple. Apple, iPhone and iOS are trademarks of Apple Inc.")
                     .font(.caption)
                     .foregroundStyle(Aurora.secondaryText)
                     .multilineTextAlignment(.center)
@@ -98,7 +98,7 @@ struct AboutView: View {
                     .font(.subheadline)
                     .foregroundStyle(Aurora.secondaryText)
             }
-            Text("AltStore, SideStore and LiveContainer, signed and installed on this iPhone. No computer.")
+            Text("AltStore, SideStore, LiveContainer and Husk, signed and installed on this iPhone. No computer.")
                 .font(.subheadline)
                 .foregroundStyle(Aurora.mist)
                 .multilineTextAlignment(.center)

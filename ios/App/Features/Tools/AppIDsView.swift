@@ -55,11 +55,6 @@ struct AppIDsView: View {
                 .auroraTheme()
         }
         .animation(.spring(duration: 0.5, bounce: 0.2), value: controller.phase)
-        .task {
-            if case .signedOut = controller.phase, let saved = controller.savedCredentials {
-                controller.load(with: saved)
-            }
-        }
     }
 
     /// Refreshes with the current session, or signs in again with the saved password.

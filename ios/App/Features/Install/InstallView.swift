@@ -133,6 +133,9 @@ struct InstallView: View {
                 menuItem(.sidestoreLC, title: "SideStore + LC")
                 menuItem(.sidestoreLCNightly, title: "SideStore + LC Nightly")
             }
+            Section("Husk") {
+                menuItem(.husk, title: "Husk")
+            }
         } label: {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 1) {

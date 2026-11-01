@@ -8,8 +8,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "1.3.0"
-    CURRENT_PROJECT_VERSION: "6"
+    MARKETING_VERSION: "1.4.0"
+    CURRENT_PROJECT_VERSION: "7"
     # Shown after the version in About ("1.2.0 beta 1"). Empty for a final release.
     ALTLOAD_PRERELEASE: ""
     TARGETED_DEVICE_FAMILY: "1,2"

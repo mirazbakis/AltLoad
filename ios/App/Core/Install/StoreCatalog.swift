@@ -15,6 +15,7 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
     case sidestoreNightly
     case sidestoreLC
     case sidestoreLCNightly
+    case husk
 
     var id: String { rawValue }
 
@@ -34,6 +35,7 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .sidestoreNightly: "SideStore Nightly"
         case .sidestoreLC: "SideStore + LC"
         case .sidestoreLCNightly: "SideStore + LC Nightly"
+        case .husk: "Husk"
         }
     }
 
@@ -46,6 +48,7 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .sidestoreLC: "LiveContainer"
         case .sidestoreNightly: "Nightly"
         case .sidestoreLCNightly: "LC Nightly"
+        case .husk: "Android"
         }
     }
 
@@ -57,6 +60,7 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .sidestoreLC: "SideStore inside LiveContainer: run apps without installing them"
         case .sidestoreNightly: "Newest SideStore build from main. Untested"
         case .sidestoreLCNightly: "Newest LiveContainer + SideStore build. Untested"
+        case .husk: "Android apps and games on your iPhone"
         }
     }
 
@@ -66,10 +70,11 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .altstoreBeta: "com.rileytestut.AltStore.Beta"
         case .sidestore, .sidestoreNightly: "com.SideStore.SideStore"
         case .sidestoreLC, .sidestoreLCNightly: "com.kdt.livecontainer"
+        case .husk: "com.husk.app"
         }
     }
 
-    var isSideStore: Bool { self != .altstore && self != .altstoreBeta }
+    var isSideStore: Bool { self != .altstore && self != .altstoreBeta && self != .husk }
 
     /// Nightlies install over the regular build (same bundle ID), so they share
     /// its record and on-device check.
@@ -94,6 +99,7 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         // Both projects publish nightlies as a GitHub release tagged "nightly".
         case .sidestoreNightly: URL(string: "https://api.github.com/repos/SideStore/SideStore/releases/tags/nightly")!
         case .sidestoreLCNightly: URL(string: "https://api.github.com/repos/LiveContainer/LiveContainer/releases/tags/nightly")!
+        case .husk: URL(string: "https://raw.githubusercontent.com/Leviidev/Husk/main/altsource.json")!
         }
     }
 
@@ -118,6 +124,11 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
             [.pinned(version: "Nightly", url: URL(string: "https://github.com/SideStore/SideStore/releases/download/nightly/SideStore.ipa")!)]
         case .sidestoreLCNightly:
             [.pinned(version: "Nightly", url: URL(string: "https://github.com/LiveContainer/LiveContainer/releases/download/nightly/LiveContainer%2BSideStore.ipa")!)]
+        case .husk:
+            [
+                .github(repo: "Leviidev/Husk", asset: "Husk.ipa"),
+                .pinned(version: "3.3", url: URL(string: "https://github.com/Leviidev/Husk/releases/download/3.3/Husk.ipa")!)
+            ]
         }
     }
 
@@ -129,6 +140,7 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .sidestore: "arrow.triangle.2.circlepath"
         case .sidestoreLC: "shippingbox.fill"
         case .sidestoreNightly, .sidestoreLCNightly: "moon.stars.fill"
+        case .husk: "gamecontroller.fill"
         }
     }
 
@@ -136,6 +148,7 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
     var defaultIconURL: URL? {
         switch self {
         case .altstore, .altstoreBeta: nil
+        case .husk: URL(string: "https://raw.githubusercontent.com/Leviidev/Husk/main/src/app/Husk/Assets.xcassets/AppIcon.appiconset/Icon-Default.png")
         default: URL(string: "https://apps.sidestore.io/apps/sidestore/v0.1.1/icon.png")
         }
     }
@@ -146,6 +159,7 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .altstore, .altstoreBeta: "altstore-\(bundleIdentifier)"
         case .sidestore, .sidestoreNightly: "sidestore"
         case .sidestoreLC, .sidestoreLCNightly: "livecontainer"
+        case .husk: "husk"
         }
     }
 

@@ -55,6 +55,17 @@ enum AppleIDStore {
         SecItemDelete(query as CFDictionary)
         UserDefaults.standard.removeObject(forKey: emailKey)
         forgetSession()
+        if let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            try? FileManager.default.removeItem(at: support.appendingPathComponent("AltLoad/signin", isDirectory: true))
+        }
+    }
+
+    /// Deletes the saved password once Apple has turned it down or locked the account,
+    /// so it can't be sent again. The wording comes from sign_in.rs in the Rust core.
+    static func forgetPasswordIfRejected(message: String, email: String) {
+        if message.contains("Apple ID or password is incorrect") || message.contains("Apple ID is locked") {
+            deletePassword(for: email)
+        }
     }
 
     /// Removes the developer session the Rust core saves after a sign-in, so the

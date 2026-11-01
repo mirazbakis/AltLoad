@@ -14,7 +14,7 @@ This document describes each stage of the install, with the protocol, the librar
 | Apple ID + signing | [`isideload`](https://github.com/nab138/isideload) 0.4.6 (uses idevice, a fork of apple-codesign, rcgen, keyring) | `core/src/install/sign_in.rs`, `core/src/install/bundle.rs` |
 | Discovery | `NetServiceBrowser` / `NetService` (mDNSResponder), used for pairing, so no multicast entitlement is needed | `ios/App/Core/Pairing/PairingController.swift` |
 | Loopback | [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN): detection via `getifaddrs`, and control via `localdevvpn://` and `altload://` URLs | `ios/App/Core/Device/LocalDevVPN.swift` |
-| Catalog | AltStore-format sources (`https://apps.altstore.io` for AltStore and Beta, `https://apps.sidestore.io` for SideStore), GitHub releases for LiveContainer and both nightlies, with fallbacks for when SideStore's repository is down; `URLSession` download with progress, IPA cache in Application Support | `ios/App/Core/Install/StoreCatalog.swift` |
+| Catalog | AltStore-format sources (`https://apps.altstore.io` for AltStore and Beta, `https://apps.sidestore.io` for SideStore), GitHub releases for LiveContainer and both nightlies, Husk's `altsource.json` for Husk, with fallbacks for when SideStore's repository is down; `URLSession` download with progress, IPA cache in Application Support | `ios/App/Core/Install/StoreCatalog.swift` |
 | Secrets | Keychain (`kSecClassGenericPassword`, `WhenUnlockedThisDeviceOnly`) for the Apple ID password. files in `Application Support/AltLoad` (`FileStorage` in `core/src/install/storage.rs`) for the certificate key and anisette state, one folder per anisette server; values left in the Keychain by older builds are moved over | `ios/App/Core/Account/AppleIDStore.swift`, `core/src/install/storage.rs` |
 
 ## 1. Pairing (the Pair tab)
@@ -53,9 +53,9 @@ This is the same path StikDebug uses (`tunnel_create_rppairing` to `10.7.0.1:491
 
 This comes from isideload's `AppleAccount`.
 
-- **Anisette:** Apple's servers require `X-Apple-I-MD`, `X-Apple-I-MD-M` and related machine-identity headers. `RemoteV3AnisetteProvider` provisions a virtual machine identity through an anisette v3 server over a websocket, then caches the state. The default is **Automatic**: before signing in, AltLoad checks which servers answer `/v3/client_info` (Windows-ADI servers first, since Apple refuses most others since 12 October 2026) and passes up to four to Rust, which moves on to the next when Apple or a server rejects the anisette data. Wrong passwords, 2FA problems and cancellations are not retried. Settings also offers a picker built from `https://servers.sidestore.io/servers.json` (HTTPS entries only, merged with a built-in list), a custom URL, and **Reset Anisette Data**. AltServer's `AnisetteDataRequest` uses the same list.
+- **Anisette:** Apple's servers require `X-Apple-I-MD`, `X-Apple-I-MD-M` and related machine-identity headers. `RemoteV3AnisetteProvider` provisions a virtual machine identity through an anisette v3 server over a websocket, then caches the state. The default is **Automatic**: before signing in, AltLoad checks which servers answer `/v3/client_info` (Windows-ADI servers first, since Apple refuses most others since 12 October 2026) and passes up to four to Rust, which tries at most two per sign-in, moving on when Apple or a server rejects the anisette data. Wrong passwords, 2FA problems and cancellations are not retried. Settings also offers a picker built from `https://servers.sidestore.io/servers.json` (HTTPS entries only, merged with a built-in list), a custom URL, and **Reset Anisette Data**. AltServer's `AnisetteDataRequest` uses the same list.
 - **GrandSlam (GSA):** the SRP-6a login to `gsa.apple.com`, which never sends the password in plaintext.
-- **Saved session:** after a sign-in, the `xcode.auth` developer token is kept in `Application Support/AltLoad/session`. Installs, refreshes and the account screens reuse it until it nears expiry or Apple refuses it, and only then sign in again. If its anisette server is down, the others are tried with the same token first. Signing out deletes it.
+- **Failed sign-ins:** the account screens only sign in when you tap. Apple's error code decides what happens next. A rejected password is removed from the Keychain, and a second rejection in a row pauses sign-ins for that Apple ID for 15 minutes. A locked account also removes the saved password and pauses sign-ins straight away, and Apple's "too many requests" error pauses them without removing it. The pause is kept in `Application Support/AltLoad/signin`, so it survives relaunching. Developer tokens aren't saved between runs.
 - **2FA:** trusted-device push or SMS. Rust calls `AltLoadPromptCb(kind: 1, json)`. Swift shows `TwoFactorSheet` and answers with `altload_install_session_respond("code:123456" | "sms:<id>" | "devices" | "resend" | "abort")`.
 
 ## 4. Developer services (Install, step 3)
@@ -115,7 +115,6 @@ void    altload_install_session_cancel(session);
 - The widget extension takes a second App ID when AltLoad itself is sideloaded with a free Apple ID.
 - Free Apple IDs are limited to 3 sideloaded apps, 10 App IDs per 7 days, and 7-day signatures.
 - The anisette server is a third party. Self-host one if you'd rather not depend on it.
-- The install pipeline hasn't been compiled or tested on a device yet. The first build may need small API fixes against the pinned idevice and isideload versions.
 
 ## On-device AltServer
 
@@ -129,7 +128,16 @@ void    altload_install_session_cancel(session);
 
 ## Pairing file into apps
 
-`place_file` uses house_arrest (`VendContainer`, falling back to `VendDocuments`) to write this iPhone's RPPairing file into another app: `Documents/PairingFile_RemoteRP.plist` for SideStore-family apps, `Documents/rp_pairing_file.plist` for StikDebug and other idevice apps. After installing a SideStore-family app, AltLoad does this automatically.
+`place_file` uses house_arrest (`VendDocuments`, falling back to `VendContainer`) to write this iPhone's RPPairing file into another app. The same bytes go to every path:
+
+| App | Paths |
+|---|---|
+| SideStore | `Documents/ALTPairingFile.mobiledevicepairing`, `Documents/PairingFile_RemoteRP.plist`, `Documents/PairingFile_Lockdown.plist` |
+| SideStore + LiveContainer | `Documents/SideStore/Documents/ALTPairingFile.mobiledevicepairing` |
+| Husk | `Documents/StikJIT/pairingFile.plist` |
+| StikDebug and other idevice apps | `Documents/rp_pairing_file.plist` |
+
+After installing SideStore, SideStore + LiveContainer or Husk, AltLoad does this automatically.
 
 
 ## JIT and location

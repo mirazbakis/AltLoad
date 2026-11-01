@@ -202,6 +202,7 @@ final class CertificatesController: ObservableObject {
                     phase = overview == nil ? .signedOut : .loaded
                 } else {
                     phase = .failed(message)
+                    AppleIDStore.forgetPasswordIfRejected(message: message, email: credentials.email)
                     if message.localizedCaseInsensitiveContains("sign-in failed") { self.credentials = nil }
                 }
             }

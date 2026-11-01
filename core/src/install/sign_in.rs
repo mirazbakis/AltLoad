@@ -2,20 +2,13 @@
 
 use super::*;
 
-use std::sync::Arc;
-
-use isideload::anisette::AnisetteDataGenerator;
-use isideload::auth::apple_account::AppToken;
-use isideload::auth::grandslam::GrandSlam;
-use tokio::sync::RwLock;
-
 /// Signs in to the Apple ID (GSA + anisette, 2FA through the prompt callback)
 /// and opens a developer-services session. Shared by installs and the
 /// certificate manager.
 ///
 /// `anisette_urls` is one server or several separated by newlines, best first.
 /// When Apple or a server rejects the anisette data (a dead server, -45061,
-/// -80045 and the like) the next one is tried. Wrong passwords, 2FA problems and
+/// -80045 and the like) one more is tried. Wrong passwords, 2FA problems and
 /// cancellations stop right away so the account isn't hammered.
 pub(super) async fn sign_in(
     apple_id: &str,
@@ -31,9 +24,11 @@ pub(super) async fn sign_in(
         .collect();
     let urls = if urls.is_empty() { vec!["https://ani.jkcoxson.com"] } else { urls };
 
-    if let Some(session) = restore_session(apple_id, &urls).await {
-        return Ok(session);
-    }
+    // v1.3.0 saved the developer token here; it's no longer used, so don't keep it.
+    let _ = FileStorage::new("session", None).delete("xcode");
+
+    let urls = &urls[..urls.len().min(MAX_SERVERS_PER_TRY)];
+    check_pause(apple_id)?;
 
     let mut failures: Vec<String> = Vec::new();
     for (i, url) in urls.iter().enumerate() {
@@ -41,14 +36,31 @@ pub(super) async fn sign_in(
             cbs.progress(&format!("Signing in to Apple (trying {})…", host_of(url)), -1.0);
         }
         match sign_in_with(apple_id, password, url, cbs, replies.clone()).await {
-            Ok(session) => return Ok(session),
-            Err((e, detail)) => {
-                let retry = is_anisette_failure(&detail) && i + 1 < urls.len();
-                failures.push(format!("{}: {e}", host_of(url)));
-                if !retry {
+            Ok(session) => {
+                clear_pause();
+                return Ok(session);
+            }
+            Err((e, detail)) => match classify_failure(&detail) {
+                SignInFailure::WrongPassword => {
+                    record_rejection(apple_id, false);
+                    return Err(WRONG_PASSWORD.to_string());
+                }
+                SignInFailure::Locked => {
+                    record_rejection(apple_id, true);
+                    return Err(LOCKED.to_string());
+                }
+                SignInFailure::RateLimited => {
+                    record_rejection(apple_id, true);
+                    return Err(RATE_LIMITED.to_string());
+                }
+                SignInFailure::Anisette if i + 1 < urls.len() => {
+                    failures.push(format!("{}: {e}", host_of(url)));
+                }
+                _ => {
+                    failures.push(format!("{}: {e}", host_of(url)));
                     break;
                 }
-            }
+            },
         }
     }
 
@@ -70,8 +82,14 @@ pub(super) async fn sign_in_with(
     cbs: Callbacks,
     replies: Replies,
 ) -> Result<DeveloperSession, (String, String)> {
-    let anisette = anisette_provider(anisette_url)
-        .map_err(|e| (err("Anisette setup failed", &e), format!("anisette {e:?}")))?;
+    // Each server provisions its own anisette identity, so each gets its own folder.
+    let anisette = RemoteV3AnisetteProvider::default()
+        .map_err(|e| (err("Anisette setup failed", &e), format!("anisette {e:?}")))?
+        .set_url(anisette_url)
+        .set_storage(Box::new(FileStorage::new(
+            &format!("anisette/{}", host_of(anisette_url)),
+            Some("AltLoad.anisette"),
+        )));
 
     let two_factor = move |params: TwoFactorCallbackParams| {
         let replies = replies.clone();
@@ -94,135 +112,110 @@ pub(super) async fn sign_in_with(
         .await
         .map_err(|e| (err("Apple ID sign-in failed", &e), format!("{e} {e:?}")))?;
 
-    let token = account
-        .get_app_token("xcode.auth")
+    DeveloperSession::from_account(&mut account)
         .await
-        .map_err(|e| (err("Couldn't open a developer session", &e), format!("{e} {e:?}")))?;
-    let adsid = account
-        .spd
-        .as_ref()
-        .and_then(|spd| spd.get("adsid"))
-        .and_then(|v| v.as_string())
-        .map(str::to_string)
-        .ok_or_else(|| ("Couldn't open a developer session: Apple sent no account ID.".to_string(), String::new()))?;
-
-    save_session(apple_id, &token, &adsid, anisette_url);
-    Ok(DeveloperSession::new(
-        token,
-        adsid,
-        account.grandslam_client.clone(),
-        account.anisette_generator.clone(),
-    ))
+        .map_err(|e| (err("Couldn't open a developer session", &e), format!("{e} {e:?}")))
 }
 
-/// Each server provisions its own anisette identity, so each gets its own folder.
-fn anisette_provider(anisette_url: &str) -> Result<RemoteV3AnisetteProvider, rootcause::Report> {
-    Ok(RemoteV3AnisetteProvider::default()?
-        .set_url(anisette_url)
-        .set_storage(Box::new(FileStorage::new(
-            &format!("anisette/{}", host_of(anisette_url)),
-            Some("AltLoad.anisette"),
-        ))))
-}
-
-// MARK: - Saved session
+// MARK: - Limits
 //
-// Signing in is the step anisette servers break most often, and repeating it risks
-// 2FA prompts and rate limits. Apple's developer token outlasts the sign-in, so it's
-// kept and reused until Apple stops accepting it.
+// Apple can lock an account after repeated failed sign-ins, so AltLoad remembers them
+// across launches and stops sending the password for a while.
 
-const SESSION_KEY: &str = "xcode";
-/// Treat a token this close to expiring as already gone, so it can't run out mid-install.
-const SESSION_MARGIN_SECS: u64 = 60 * 60;
+/// Each server is a different device to Apple, so one try only uses a couple.
+const MAX_SERVERS_PER_TRY: usize = 2;
+/// A typo gets one more try before sign-ins pause.
+const REJECTIONS_BEFORE_PAUSE: u64 = 2;
+const PAUSE_SECS: u64 = 15 * 60;
+const PAUSE_KEY: &str = "pause";
 
-fn session_storage() -> FileStorage {
-    FileStorage::new("session", None)
+// AppleIDStore.forgetPasswordIfRejected looks for this wording.
+const WRONG_PASSWORD: &str = "Apple ID sign-in failed: your Apple ID or password is incorrect. Check them before trying again, because too many failed tries can lock your account.";
+const LOCKED: &str = "Apple ID sign-in failed: Apple says this Apple ID is locked. Unlock it at iforgot.apple.com, then sign in again.";
+const RATE_LIMITED: &str = "Apple ID sign-in failed: Apple is receiving too many requests from this account. Try again later.";
+
+fn pause_storage() -> FileStorage {
+    FileStorage::new("signin", None)
 }
 
-fn save_session(apple_id: &str, token: &AppToken, adsid: &str, anisette_url: &str) {
+fn now_secs() -> u64 {
+    SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |d| d.as_secs())
+}
+
+fn saved_pause(apple_id: &str) -> Option<serde_json::Value> {
+    let saved: serde_json::Value = serde_json::from_str(&pause_storage().retrieve(PAUSE_KEY).ok()??).ok()?;
+    (saved["appleID"].as_str()? == apple_id.to_lowercase()).then_some(saved)
+}
+
+fn check_pause(apple_id: &str) -> Result<(), String> {
+    let until = saved_pause(apple_id).and_then(|saved| saved["until"].as_u64()).unwrap_or(0);
+    let now = now_secs();
+    if until > now {
+        let minutes = (until - now).div_ceil(60);
+        return Err(format!(
+            "Apple ID sign-in failed: AltLoad paused sign-ins for this Apple ID to help keep it from being locked. Try again in {minutes} min."
+        ));
+    }
+    Ok(())
+}
+
+fn record_rejection(apple_id: &str, pause_now: bool) {
+    let rejections = saved_pause(apple_id).and_then(|saved| saved["rejections"].as_u64()).unwrap_or(0) + 1;
+    let until = if pause_now || rejections >= REJECTIONS_BEFORE_PAUSE { now_secs() + PAUSE_SECS } else { 0 };
     let saved = serde_json::json!({
         "appleID": apple_id.to_lowercase(),
-        "token": token.token,
-        "duration": token.duration,
-        "expiry": token.expiry,
-        "adsid": adsid,
-        "anisette": anisette_url,
+        "rejections": rejections,
+        "until": until,
     });
-    // Not fatal: the next run just signs in again.
-    let _ = session_storage().store(SESSION_KEY, &saved.to_string());
+    let _ = pause_storage().store(PAUSE_KEY, &saved.to_string());
 }
 
-/// The saved developer session for this Apple ID, if Apple still accepts it.
-async fn restore_session(apple_id: &str, urls: &[&str]) -> Option<DeveloperSession> {
-    let storage = session_storage();
-    let saved: serde_json::Value = serde_json::from_str(&storage.retrieve(SESSION_KEY).ok()??).ok()?;
-    if saved["appleID"].as_str()? != apple_id.to_lowercase() {
-        return None;
-    }
-
-    let expiry = saved["expiry"].as_u64()?;
-    // Apple sends milliseconds.
-    let expires_at = if expiry > 100_000_000_000 { expiry / 1000 } else { expiry };
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).ok()?.as_secs();
-    if expires_at <= now + SESSION_MARGIN_SECS {
-        let _ = storage.delete(SESSION_KEY);
-        return None;
-    }
-
-    let token = AppToken {
-        token: saved["token"].as_str()?.to_string(),
-        duration: saved["duration"].as_u64()?,
-        expiry,
-    };
-    let adsid = saved["adsid"].as_str()?;
-
-    // The server the token came from first, then the others: a dead server shouldn't
-    // cost a sign-in while the token is still good.
-    let first = saved["anisette"].as_str()?;
-    let others = urls.iter().copied().filter(|u| *u != first);
-    for url in std::iter::once(first).chain(others) {
-        match session_with(token.clone(), adsid, url).await {
-            Ok(session) => return Some(session),
-            Err(detail) if is_anisette_failure(&detail) => continue,
-            Err(_) => {
-                // Apple turned the token down, so it's no use to anyone.
-                let _ = storage.delete(SESSION_KEY);
-                return None;
-            }
-        }
-    }
-    None
+fn clear_pause() {
+    let _ = pause_storage().delete(PAUSE_KEY);
 }
 
-async fn session_with(token: AppToken, adsid: &str, anisette_url: &str) -> Result<DeveloperSession, String> {
-    let describe = |e: rootcause::Report| format!("anisette {e} {e:?}");
-    let provider = anisette_provider(anisette_url).map_err(describe)?;
-    let generator = AnisetteDataGenerator::new(Arc::new(RwLock::new(provider)));
-    let client_info = generator.get_client_info().await.map_err(describe)?;
-    let client = GrandSlam::new(client_info, false, None).await.map_err(describe)?;
-
-    let mut session = DeveloperSession::new(token, adsid.to_string(), Arc::new(client), generator);
-    // The cheapest request that proves the token still works.
-    session.list_teams().await.map_err(|e| format!("{e} {e:?}"))?;
-    Ok(session)
+#[derive(Debug, PartialEq)]
+enum SignInFailure {
+    WrongPassword,
+    Locked,
+    RateLimited,
+    /// The anisette server or Apple refusing its data, where another server may well work.
+    Anisette,
+    Other,
 }
 
-/// Errors that come from the anisette server or Apple refusing its data, where
-/// another server may well work. Anything about the password, 2FA or the user
+/// Apple's error code decides when there is one, since the rest of the report can
+/// mention anything. Without a code, anything about the password, 2FA or the user
 /// cancelling is not retried.
-pub(super) fn is_anisette_failure(message: &str) -> bool {
+fn classify_failure(message: &str) -> SignInFailure {
     let m = message.to_lowercase();
-    let user_side = ["-22406", "incorrect", "password", "2fa", "two-factor", "verification code", "cancel", "abort", "locked", "disabled"];
-    if user_side.iter().any(|s| m.contains(s)) && !m.contains("anisette") {
-        return false;
+    if m.contains("too many requests") {
+        return SignInFailure::RateLimited;
     }
-    [
-        "anisette", "provision", "client info", "client_info", "-45061", "-45054", "-80045",
-        "-22410", "-22411", "websocket", "error sending request", "timed out", "connection",
-        "dns", "certificate verify", "status code 5", "502", "503", "504",
-    ]
-    .iter()
-    .any(|s| m.contains(s))
+    if let Some(code) = auth_error_code(&m) {
+        return match code {
+            -22406 | -20101 => SignInFailure::WrongPassword,
+            -20209 => SignInFailure::Locked,
+            -45061 | -45054 | -80045 | -22410 | -22411 => SignInFailure::Anisette,
+            _ if m.contains("locked") || m.contains("disabled") => SignInFailure::Locked,
+            _ if m.contains("incorrect") => SignInFailure::WrongPassword,
+            _ => SignInFailure::Other,
+        };
+    }
+    let user_side = ["incorrect", "password", "2fa", "two-factor", "verification code", "cancel", "abort", "locked", "disabled"];
+    if user_side.iter().any(|s| m.contains(s)) {
+        return SignInFailure::Other;
+    }
+    let anisette = [
+        "anisette", "provision", "client info", "client_info", "websocket", "error sending request",
+        "timed out", "connection", "dns", "certificate verify", "status code 5", "502", "503", "504",
+    ];
+    if anisette.iter().any(|s| m.contains(s)) { SignInFailure::Anisette } else { SignInFailure::Other }
+}
+
+fn auth_error_code(lowercased: &str) -> Option<i64> {
+    let rest = lowercased.split("auth error ").nth(1)?;
+    rest.split(':').next()?.trim().parse().ok()
 }
 
 pub(super) fn host_of(url: &str) -> String {
@@ -233,4 +226,26 @@ pub(super) fn host_of(url: &str) -> String {
         .next()
         .unwrap_or("anisette")
         .replace(':', "_")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn apple_codes_decide_over_the_rest_of_the_report() {
+        let wrong = "Auth error -22406: Your Apple ID or password was incorrect. src/anisette/remote_v3.rs connection";
+        assert_eq!(classify_failure(wrong), SignInFailure::WrongPassword);
+        assert_eq!(classify_failure("Auth error -20209: This Apple ID has been locked"), SignInFailure::Locked);
+        assert_eq!(classify_failure("Auth error -80045: password anisette"), SignInFailure::Anisette);
+        assert_eq!(classify_failure("Auth error -99999: Something else"), SignInFailure::Other);
+    }
+
+    #[test]
+    fn without_a_code_only_server_problems_move_on() {
+        assert_eq!(classify_failure("Failed to get anisette data for login"), SignInFailure::Anisette);
+        assert_eq!(classify_failure("Failed to get anisette data for 2FA"), SignInFailure::Other);
+        assert_eq!(classify_failure("No 2FA code provided, aborting"), SignInFailure::Other);
+        assert_eq!(classify_failure("Received 429 Too Many Requests, no retries left"), SignInFailure::RateLimited);
+    }
 }
