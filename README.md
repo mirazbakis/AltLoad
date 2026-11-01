@@ -17,26 +17,28 @@
 
 </div>
 
----
-
 > [!CAUTION]
-> # Only install AltLoad from the official sources
+> **Only install AltLoad from the [official website](https://mirazbakis.github.io/AltLoad/) or [this repository](https://github.com/mirazbakis/AltLoad).**
 >
-> ## [Website](https://mirazbakis.github.io/AltLoad/) &nbsp;|&nbsp; [GitHub](https://github.com/mirazbakis/AltLoad)
+> AltLoad handles your Apple ID password and your iPhone's pairing data, and a modified copy could send both to someone else. Any other website, source, file host, Telegram channel or Discord server is unofficial, however real it looks. AltLoad is free, and forks may not publish builds.
 >
-> ### AltLoad handles your Apple ID password and your iPhone's pairing data. A modified copy can look exactly like the real app and send both to someone else.
->
-> Do not install AltLoad from any other website, source, file host, Telegram channel or Discord server, however official it looks. AltLoad is free, so anything that charges for it, or hides it behind ads or a link shortener, is not official. Forks may not publish builds.
->
-> **Already used an unofficial copy?** Delete it, change your Apple ID password at [account.apple.com](https://account.apple.com), remove any devices you don't recognize, and delete any pairing files it could reach. Please [report the copy](https://github.com/mirazbakis/AltLoad/issues) too.
+> Already used an unofficial copy? Delete it, change your Apple ID password at [account.apple.com](https://account.apple.com), remove any devices you don't recognize, and delete any pairing files it could reach.
 
----
-
-## Overview
+## Why AltLoad
 
 Stores like AltStore normally depend on a computer to pair with your iPhone, sign the app, install it and refresh it every week. AltLoad does that work on the iPhone itself.
 
 It pairs your iPhone with itself, signs the store with your own Apple ID and installs it. It can then run AltServer on the same device, so AltStore can refresh without a computer on the network. It works with a free Apple ID, and it's fully local.
+
+## Compatibility
+
+| iOS | Installing and signing | Pairing |
+| :-- | :-- | :-- |
+| **27 and later** | Supported | On the iPhone, with no computer |
+| **18 to 26** | Supported | Import a remote pairing file made once on a computer with [iloader](https://github.com/nab138/iloader) or [idevice_pair](https://github.com/jkcoxson/idevice_pair) |
+| **17 and earlier** | Not supported | Not supported |
+
+You also need [Developer Mode](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device), [LocalDevVPN](https://apps.apple.com/app/id6755608044) from the App Store and an Apple ID. With a free Apple ID, apps last 7 days.
 
 ## Features
 
@@ -53,16 +55,9 @@ It pairs your iPhone with itself, signs the store with your own Apple ID and ins
 | **Stays current** | Reminders before a signature expires, update notices, and fallbacks when a store's source is down |
 | **Languages** | English, French, German, Italian, Chinese and Russian |
 
-## Requirements
+## Install
 
-- An iPhone or iPad on iOS 27, or iOS 18 to 26 with a pairing file made on a computer
-- [Developer Mode](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device) turned on
-- [LocalDevVPN](https://apps.apple.com/app/id6755608044), free on the App Store
-- An Apple ID. With a free one, apps last 7 days
-
-## Getting started
-
-**1. Install AltLoad** using one of these:
+**1. Get AltLoad** using one of these:
 
 - **Signed install:** open the [official website](https://mirazbakis.github.io/AltLoad/) in Safari, accept the Terms, add the DNS profile and tap a signed install.
 - **AltStore or SideStore:** [add the source with AltDirect](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) to get updates there.
@@ -71,14 +66,6 @@ It pairs your iPhone with itself, signs the store with your own Apple ID and ins
 **2. Pair your iPhone.** In AltLoad, open **Tools › Pair**, then go to **Settings › Privacy & Security › Developer Mode › Pair with AltLoad** and enter the code.
 
 **3. Install a store.** Turn on LocalDevVPN, choose a store on the **Install** tab and sign in.
-
-## Compatibility
-
-| iOS | Support |
-| :-- | :-- |
-| **27 and later** | Supported, including pairing on the device |
-| **18 to 26** | Supported with a pairing file made once on a computer using [iloader](https://github.com/nab138/iloader) or [idevice_pair](https://github.com/jkcoxson/idevice_pair). Import it from **Tools › Pair** |
-| **17 and earlier** | Not supported |
 
 ## Troubleshooting
 
@@ -117,7 +104,7 @@ Free Apple IDs get only a few development certificates. AltLoad asks which one t
 If a store's sources are all down, get its IPA another way and use **Install IPA from Files** in the Install tab's **…** menu.
 </details>
 
-## Project layout
+## How it's built
 
 | Path | Contents |
 | :-- | :-- |
@@ -128,20 +115,10 @@ If a store's sources are all down, get its IPA another way and use **Install IPA
 | `scripts/` | Build scripts |
 | `docs/` | [How it works](docs/HOW-IT-WORKS.md) and release notes |
 
-## Contributing
-
-Issues and pull requests are welcome. For bugs, please include your iOS version, your AltLoad version and the step that failed. Report security issues as described in [SECURITY.md](SECURITY.md).
-
 ## License
 
 AltLoad is open source under a custom MIT-based license. You can read it, change it, build it for yourself and reuse parts in non-commercial projects with the credit *"Based on AltLoad by mirazbakis"*. Builds may only be distributed through this repository and the official website. See [LICENSE.md](LICENSE.md).
 
-Using AltLoad means agreeing to the [Terms of Service](https://mirazbakis.github.io/AltLoad/terms.html). AltLoad isn't affiliated with Apple or with any app it installs.
+Report security issues as described in [SECURITY.md](SECURITY.md). Using AltLoad means agreeing to the [Terms of Service](https://mirazbakis.github.io/AltLoad/terms.html). AltLoad isn't affiliated with Apple or with any app it installs.
 
 See [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md) for the projects AltLoad relies on, and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for licenses.
-
-<div align="center">
-
-**AltLoad by [mirazbakis](https://github.com/mirazbakis)**
-
-</div>
