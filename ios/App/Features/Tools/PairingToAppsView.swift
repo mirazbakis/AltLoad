@@ -26,7 +26,7 @@ struct PairingToAppsView: View {
     var body: some View {
         AuroraScreen {
             Text(pairings.selfPairing.map { "Uses \($0.displayName)'s pairing file. Only sideloaded apps are listed." }
-                 ?? "Create this iPhone's pairing file in Tools › Pair first.")
+                 ?? String(localized: "Create this iPhone's pairing file in Tools › Pair first."))
                 .font(.footnote)
                 .foregroundStyle(Aurora.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -36,13 +36,13 @@ struct PairingToAppsView: View {
                 GlassCard {
                     HStack(spacing: 14) {
                         ProgressRing(value: nil, lineWidth: 4, size: 28, showsPercent: false)
-                        Text(stage ?? "Reading installed apps…").font(.subheadline)
+                        Text(stage ?? String(localized: "Reading installed apps…")).font(.subheadline)
                     }
                 }
             } else if let loadError {
                 GlassCard(tint: Aurora.danger) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Label("Couldn't read the apps", systemImage: "exclamationmark.triangle.fill")
+                        Label(String(localized: "Couldn't read the apps"), systemImage: "exclamationmark.triangle.fill")
                             .font(.headline)
                         Text(loadError)
                             .font(.footnote)
@@ -73,15 +73,15 @@ struct PairingToAppsView: View {
                 }
             }
         }
-        .navigationTitle("Pairing File to Apps")
+        .navigationTitle(String(localized: "Pairing File to Apps"))
         .toolbarTitleDisplayMode(.inline)
-        .searchable(text: $search, prompt: "Search apps")
+        .searchable(text: $search, prompt: String(localized: "Search apps"))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     Task { await load() }
                 } label: {
-                    Label("Reload", systemImage: "arrow.clockwise")
+                    Label(String(localized: "Reload"), systemImage: "arrow.clockwise")
                 }
                 .disabled(loading || working != nil || pairings.selfPairing == nil)
             }
@@ -90,26 +90,26 @@ struct PairingToAppsView: View {
             if apps.isEmpty, pairings.selfPairing != nil, LocalDevVPN.isActive { await load() }
         }
         .confirmationDialog(
-            "Put the pairing file in \(chosen?.name ?? "this app")?",
+            placeTitle,
             isPresented: Binding(get: { chosen != nil }, set: { if !$0 { chosen = nil } }),
             titleVisibility: .visible,
             presenting: chosen
         ) { app in
-            Button("Place Pairing File") { place(app, as: nil) }
-            Button("Other File Name…") { customTarget = app }
-            Button("Cancel", role: .cancel) {}
+            Button(String(localized: "Place Pairing File")) { place(app, as: nil) }
+            Button(String(localized: "Other File Name…")) { customTarget = app }
+            Button(String(localized: "Cancel"), role: .cancel) {}
         } message: { app in
             Text(app.bundleID)
         }
-        .alert("File name inside the app", isPresented: Binding(get: { customTarget != nil }, set: { if !$0 { customTarget = nil } })) {
+        .alert(String(localized: "File name inside the app"), isPresented: Binding(get: { customTarget != nil }, set: { if !$0 { customTarget = nil } })) {
             TextField("Documents/pairingFile.plist", text: $customName)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-            Button("Place") {
+            Button(String(localized: "Place")) {
                 if let app = customTarget { place(app, as: customName) }
                 customTarget = nil
             }
-            Button("Cancel", role: .cancel) { customTarget = nil }
+            Button(String(localized: "Cancel"), role: .cancel) { customTarget = nil }
         } message: {
             Text("A path inside the app's container, for example Documents/pairingFile.plist.")
         }
@@ -141,7 +141,7 @@ struct PairingToAppsView: View {
                 ProgressRing(value: nil, lineWidth: 3, size: 28, showsPercent: false)
                     .frame(minWidth: 72)
             } else {
-                PillButton(title: "Place", tint: Aurora.accent) {
+                PillButton(title: String(localized: "Place"), tint: Aurora.accent) {
                     chosen = app
                 }
                 .disabled(working != nil)
@@ -163,6 +163,11 @@ struct PairingToAppsView: View {
         }
     }
 
+    private var placeTitle: String {
+        if let chosen { return String(localized: "Put the pairing file in \(chosen.name)?") }
+        return String(localized: "Put the pairing file in this app?")
+    }
+
     /// `path` is a custom file name; nil puts the file wherever the app reads it.
     private func place(_ app: DeviceOps.DeviceApp, as path: String?) {
         guard let pairing = pairings.selfPairing, app.debuggable else { return }
@@ -177,7 +182,7 @@ struct PairingToAppsView: View {
                 } else {
                     try await PairingDestination.place(pairing.fileURL, in: app.bundleID)
                 }
-                result = Result(success: true, message: "\(app.name) now has the pairing file. Reopen the app so it picks the file up.")
+                result = Result(success: true, message: String(localized: "\(app.name) now has the pairing file. Reopen the app so it picks the file up."))
             } catch {
                 result = Result(success: false, message: error.localizedDescription)
             }

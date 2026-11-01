@@ -98,7 +98,7 @@ private struct CodeText: View {
                     .monospacedDigit()
                     .foregroundStyle(.white)
                     .contentTransition(.numericText())
-                    .accessibilityLabel("Pairing code \(code)")
+                    .accessibilityLabel(String(localized: "Pairing code \(code)"))
             } else {
                 Text(state.status.headline)
                     .font(.system(size: size * 0.6, weight: .bold, design: .rounded))
@@ -129,7 +129,7 @@ private extension PairingActivityAttributes.ContentState.Status {
         switch self {
         case .waiting: "antenna.radiowaves.left.and.right"
         case .code: "lock.open.fill"
-        case .paired: "checkmark"
+        case .paired: String(localized: "checkmark")
         case .failed: "xmark"
         }
     }
@@ -144,28 +144,28 @@ private extension PairingActivityAttributes.ContentState.Status {
 
     var title: String {
         switch self {
-        case .waiting: "Waiting"
-        case .code: "Pairing code"
-        case .paired: "Paired"
-        case .failed: "Failed"
+        case .waiting: String(localized: "Waiting")
+        case .code: String(localized: "Pairing code")
+        case .paired: String(localized: "Paired")
+        case .failed: String(localized: "Failed")
         }
     }
 
     var headline: String {
         switch self {
-        case .waiting: "Waiting…"
-        case .code: "Pairing code"
-        case .paired: "Paired"
-        case .failed: "Pairing failed"
+        case .waiting: String(localized: "Waiting…")
+        case .code: String(localized: "Pairing code")
+        case .paired: String(localized: "Paired")
+        case .failed: String(localized: "Pairing failed")
         }
     }
 
     func instruction(hostName: String) -> String {
         switch self {
-        case .waiting: "Settings › Privacy & Security › Developer Mode › Pair with \(hostName)"
-        case .code: "Enter this code in Settings to pair with \(hostName)."
-        case .paired: "Return to \(hostName) to finish."
-        case .failed: "Open \(hostName) to try again."
+        case .waiting: String(localized: "Settings › Privacy & Security › Developer Mode › Pair with \(hostName)")
+        case .code: String(localized: "Enter this code in Settings to pair with \(hostName).")
+        case .paired: String(localized: "Return to \(hostName) to finish.")
+        case .failed: String(localized: "Open \(hostName) to try again.")
         }
     }
 }

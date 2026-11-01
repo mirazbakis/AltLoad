@@ -47,7 +47,7 @@ final class LocationSpoofer: ObservableObject {
             return
         }
         stopRequested = false
-        state = .starting("Opening device link…")
+        state = .starting(String(localized: "Opening device link…"))
         Task {
             do {
                 let dir = try await DeveloperDiskImage.ensureDownloaded { stage, _ in
@@ -59,7 +59,7 @@ final class LocationSpoofer: ObservableObject {
                     on: DeviceOps.longRunningQueue
                 ) { stage, _ in
                     guard self.isRunning else { return }
-                    if stage == "Simulating location" {
+                    if stage == String(localized: "Simulating location") {
                         if self.stopRequested { altload_location_stop(); return }
                         if case .starting = self.state { self.state = .active(coordinate) }
                     } else {

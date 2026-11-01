@@ -14,8 +14,8 @@ enum DeviceOps {
 
         var errorDescription: String? {
             switch self {
-            case .noPairing: "There's no pairing file for this iPhone yet. Create one in Tools › Pair."
-            case .vpnOff: "LocalDevVPN is off. Turn it on so AltLoad can reach this iPhone."
+            case .noPairing: String(localized: "There's no pairing file for this iPhone yet. Create one in Tools › Pair.")
+            case .vpnOff: String(localized: "LocalDevVPN is off. Turn it on so AltLoad can reach this iPhone.")
             case .failed(let message): message
             }
         }
@@ -75,7 +75,7 @@ enum DeviceOps {
         withExtendedLifetime(box) {}
 
         guard code == 0 else {
-            throw OpError.failed(output.isEmpty ? "The device operation failed (code \(code))." : output)
+            throw OpError.failed(output.isEmpty ? String(localized: "The device operation failed (code \(code)).") : output)
         }
         return (try? JSONSerialization.jsonObject(with: Data(output.utf8), options: [.fragmentsAllowed])) ?? [:]
     }
@@ -122,37 +122,106 @@ enum DeviceOps {
     }
 }
 
+extension DeviceOps {
+    /// Sets keys in a plist inside an app's container and keeps the rest of it.
+    static func mergePreferences(_ values: [String: Any], in bundleID: String, at path: String) async throws {
+        try await run(["op": "merge_plist", "bundleId": bundleID, "name": path, "values": values])
+    }
+
+    /// This iPhone's UDID, as it reports it over the tunnel.
+    static func deviceUDID() async throws -> String {
+        let result = try await run(["op": "device_udid"])
+        guard let udid = (result as? [String: Any])?["udid"] as? String, !udid.isEmpty else {
+            throw CocoaError(.propertyListReadCorrupt)
+        }
+        return udid
+    }
+}
+
 /// Where each kind of app looks for its pairing file.
 enum PairingDestination {
     /// StikDebug and other idevice-based apps use rp_pairing_file.plist.
     static let idevice = "Documents/\(PairingPaths.fileName)"
 
-    /// Where an app installed by AltLoad reads the file, the same places iloader uses.
-    /// Nil for any other app.
-    private static func knownPaths(for bundleID: String) -> [String]? {
+    /// SideStore's home inside the app's container: the root, or the folder
+    /// LiveContainer gives its built-in SideStore. Nil for any other app.
+    private static func sideStoreHome(for bundleID: String) -> String? {
         let id = bundleID.lowercased()
-        if id.hasPrefix("com.kdt.livecontainer") {
-            return ["Documents/SideStore/Documents/ALTPairingFile.mobiledevicepairing"]
-        }
-        if id.hasPrefix("com.mirazbakis.catalyst") || id.hasPrefix("com.sidestore.sidestore") {
-            return ["ALTPairingFile.mobiledevicepairing", "PairingFile_RemoteRP.plist", "PairingFile_Lockdown.plist"]
-                .map { "Documents/" + $0 }
-        }
-        if id == "com.husk.app" || id.hasPrefix("com.husk.app.") {
-            return ["Documents/StikJIT/pairingFile.plist"]
-        }
+        if id.hasPrefix("com.kdt.livecontainer") { return "Documents/SideStore/" }
+        if id.hasPrefix("com.mirazbakis.catalyst") || id.hasPrefix("com.sidestore.sidestore") { return "" }
         return nil
     }
 
-    static func placesAutomatically(_ bundleID: String) -> Bool {
-        knownPaths(for: bundleID) != nil
+    private static func isHusk(_ bundleID: String) -> Bool {
+        let id = bundleID.lowercased()
+        return id == "com.husk.app" || id.hasPrefix("com.husk.app.")
     }
 
-    /// Gives an app the pairing file so it doesn't ask for it on launch.
+    static func placesAutomatically(_ bundleID: String) -> Bool {
+        sideStoreHome(for: bundleID) != nil || isHusk(bundleID)
+    }
+
+    /// Gives an app the pairing file, with the UDID in it, so it doesn't ask on launch.
     static func place(_ pairing: URL, in bundleID: String) async throws {
-        for path in knownPaths(for: bundleID) ?? [idevice] {
-            try await DeviceOps.placeFile(pairing, in: bundleID, as: path)
+        let folder = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+
+        var record = try record(in: Data(contentsOf: pairing))
+        if (record["UDID"] as? String)?.isEmpty != false, let udid = try? await DeviceOps.deviceUDID() {
+            record["UDID"] = udid
         }
+        func put(_ record: [String: Any], as path: String) async throws {
+            let file = folder.appendingPathComponent(UUID().uuidString)
+            try xml(record).write(to: file)
+            try await DeviceOps.placeFile(file, in: bundleID, as: path)
+        }
+
+        guard let home = sideStoreHome(for: bundleID) else {
+            try await put(record, as: isHusk(bundleID) ? "Documents/StikJIT/pairingFile.plist" : idevice)
+            return
+        }
+
+        // Stable builds read this one file, whatever it holds.
+        try await put(record, as: home + "Documents/ALTPairingFile.mobiledevicepairing")
+
+        // Newer builds keep one file per protocol and refuse a file with both. They
+        // ignore those files until the two settings are saved, as their own import does.
+        // Older builds don't need any of this, so it can't fail the placement.
+        let lockdown = record.filter { !remoteKeys.contains($0.key) }
+        var remote = record.filter { remoteKeys.contains($0.key) }
+        remote["UDID"] = record["UDID"]
+        let hasLockdown = requiredLockdownKeys.allSatisfy { lockdown[$0] != nil }
+        let hasRemote = ["private_key", "public_key", "identifier"].allSatisfy { remote[$0] != nil }
+        guard hasLockdown || hasRemote else { return }
+        do {
+            if hasLockdown { try await put(lockdown, as: home + "Documents/PairingFile_Lockdown.plist") }
+            if hasRemote { try await put(remote, as: home + "Documents/PairingFile_RemoteRP.plist") }
+            // SideStore's settings file is named after the signed bundle ID, except inside LiveContainer.
+            let preferences = home.isEmpty ? "\(bundleID).plist" : "com.SideStore.SideStore.plist"
+            try await DeviceOps.mergePreferences(
+                ["isPairingReset": false, "activePairingProtocol": hasLockdown ? "lockdown" : "rppairing"],
+                in: bundleID, at: home + "Library/Preferences/" + preferences)
+        } catch {}
+    }
+
+    private static let remoteKeys: Set<String> = ["private_key", "public_key", "identifier", "alt_irk"]
+    private static let requiredLockdownKeys = [
+        "WiFiMACAddress", "SystemBUID", "RootPrivateKey", "HostPrivateKey", "HostID",
+        "RootCertificate", "UDID", "EscrowBag", "HostCertificate", "DeviceCertificate"
+    ]
+
+    private static func record(in data: Data) throws -> [String: Any] {
+        guard let file = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any] else {
+            throw CocoaError(.propertyListReadCorrupt)
+        }
+        return file
+    }
+
+    /// XML, because SideStore reads the file as a string.
+    private static func xml(_ record: [String: Any]) throws -> Data {
+        try PropertyListSerialization.data(fromPropertyList: record, format: .xml, options: 0)
     }
 }
 

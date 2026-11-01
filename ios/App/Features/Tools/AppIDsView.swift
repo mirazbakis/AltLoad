@@ -27,9 +27,9 @@ struct AppIDsView: View {
                 failure(message)
             }
         }
-        .navigationTitle("App IDs")
+        .navigationTitle(String(localized: "App IDs"))
         .toolbarTitleDisplayMode(.inlineLarge)
-        .searchable(text: $search, prompt: "Search App IDs")
+        .searchable(text: $search, prompt: String(localized: "Search App IDs"))
         .refreshable { reload() }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -39,7 +39,7 @@ struct AppIDsView: View {
                     Button {
                         reload()
                     } label: {
-                        Label("Refresh", systemImage: "arrow.clockwise")
+                        Label(String(localized: "Refresh"), systemImage: "arrow.clockwise")
                     }
                 }
             }
@@ -103,7 +103,7 @@ struct AppIDsView: View {
         VStack(spacing: 14) {
             GlassCard(tint: Aurora.danger) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("Couldn't load", systemImage: "xmark.octagon.fill")
+                    Label(String(localized: "Couldn't load"), systemImage: "xmark.octagon.fill")
                         .font(.title3.bold())
                         .foregroundStyle(Aurora.danger)
                     Text(message)
@@ -148,7 +148,7 @@ struct AppIDsView: View {
                 if shown.isEmpty {
                     GlassCard {
                         Text(items.isEmpty ? "No App IDs yet. One is made the first time you install an app."
-                                           : "Nothing matches \"\(query)\".")
+                                           : String(localized: "Nothing matches \"\(query)\"."))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -204,7 +204,7 @@ struct AppIDsView: View {
                     GlassProgressBar(value: min(1, Double(used) / Double(max)))
                 }
                 if let available = appIds.available {
-                    Label(available > 0 ? "\(available) available now" : "None available right now",
+                    Label(available > 0 ? String(localized: "\(available) available now") : String(localized: "None available right now"),
                           systemImage: available > 0 ? "checkmark.circle.fill" : "clock.fill")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(available > 0 ? Aurora.success : Aurora.ember)
@@ -248,7 +248,7 @@ struct AppIDsView: View {
             }
         }
         .contextMenu {
-            Button("Copy Identifier", systemImage: "doc.on.doc") {
+            Button(String(localized: "Copy Identifier"), systemImage: "doc.on.doc") {
                 UIPasteboard.general.string = appID.identifier
             }
         }

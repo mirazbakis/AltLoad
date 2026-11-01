@@ -10,7 +10,7 @@ struct SavedPairing: Codable, Identifiable, Hashable {
     let date: Date
 
     var id: String { folder }
-    var displayName: String { name.isEmpty ? "Unknown device" : name }
+    var displayName: String { name.isEmpty ? String(localized: "Unknown device") : name }
     var fileURL: URL { PairingPaths.fileURL(inFolder: folder) }
     var isAppleTV: Bool { model.localizedCaseInsensitiveContains("appletv") }
 }
@@ -78,7 +78,7 @@ final class PairingStore: ObservableObject {
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         let base = url.deletingPathExtension().lastPathComponent
-        let name = base == "rp_pairing_file" ? "Imported" : base
+        let name = base == "rp_pairing_file" ? String(localized: "Imported") : base
         return try store(fileAt: url, move: false, name: name, model: "", udid: "")
     }
 
@@ -142,6 +142,6 @@ final class PairingStore: ObservableObject {
             }
         }
         let trimmed = out.trimmingCharacters(in: CharacterSet(charactersIn: "-"))
-        return trimmed.isEmpty ? "Device" : String(trimmed.prefix(40))
+        return trimmed.isEmpty ? String(localized: "Device") : String(trimmed.prefix(40))
     }
 }

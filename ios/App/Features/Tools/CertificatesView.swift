@@ -25,14 +25,14 @@ struct CertificatesView: View {
                 failure(message)
             }
         }
-        .navigationTitle("Certificates")
+        .navigationTitle(String(localized: "Certificates"))
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     controller.refresh()
                 } label: {
-                    Label("Refresh", systemImage: "arrow.clockwise")
+                    Label(String(localized: "Refresh"), systemImage: "arrow.clockwise")
                 }
                 .disabled(controller.isBusy || controller.overview == nil)
             }
@@ -48,15 +48,15 @@ struct CertificatesView: View {
                 .auroraTheme()
         }
         .confirmationDialog(
-            "Revoke this certificate?",
+            String(localized: "Revoke this certificate?"),
             isPresented: Binding(get: { pendingRevoke != nil }, set: { if !$0 { pendingRevoke = nil } }),
             presenting: pendingRevoke
         ) { cert in
-            Button("Revoke \(cert.displayName)", role: .destructive) {
+            Button(String(localized: "Revoke \(cert.displayName)"), role: .destructive) {
                 controller.revoke([cert])
                 pendingRevoke = nil
             }
-            Button("Cancel", role: .cancel) { pendingRevoke = nil }
+            Button(String(localized: "Cancel"), role: .cancel) { pendingRevoke = nil }
         } message: { _ in
             Text("Apps signed with this certificate will stop opening until they're signed again. This can't be undone.")
         }
@@ -117,7 +117,7 @@ struct CertificatesView: View {
         VStack(spacing: 14) {
             GlassCard(tint: Aurora.danger) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("Couldn't load", systemImage: "xmark.octagon.fill")
+                    Label(String(localized: "Couldn't load"), systemImage: "xmark.octagon.fill")
                         .font(.title3.bold())
                         .foregroundStyle(Aurora.danger)
                     Text(message)
@@ -243,23 +243,23 @@ struct CertificatesView: View {
                     }
                     Spacer(minLength: 0)
                     if cert.isAltLoad {
-                        GlassChip(text: "This app", tint: Aurora.accent)
+                        GlassChip(text: String(localized: "This app"), tint: Aurora.accent)
                     }
                 }
 
                 VStack(alignment: .leading, spacing: 6) {
                     if let expiration = cert.expiration {
-                        detail("Expires", expiration.formatted(date: .abbreviated, time: .omitted)
-                               + (cert.isExpired ? " · expired" : ""))
+                        detail(String(localized: "Expires"), expiration.formatted(date: .abbreviated, time: .omitted)
+                               + (cert.isExpired ? String(localized: " · expired") : ""))
                     }
-                    if !cert.serial.isEmpty { detail("Serial", cert.serial, mono: true) }
-                    if !cert.machineName.isEmpty { detail("Machine", cert.machineName) }
+                    if !cert.serial.isEmpty { detail(String(localized: "Serial"), cert.serial, mono: true) }
+                    if !cert.machineName.isEmpty { detail(String(localized: "Machine"), cert.machineName) }
                 }
 
                 Button(role: .destructive) {
                     pendingRevoke = cert
                 } label: {
-                    Label("Revoke", systemImage: "trash")
+                    Label(String(localized: "Revoke"), systemImage: "trash")
                         .font(.subheadline.weight(.semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 4)
@@ -278,7 +278,7 @@ struct CertificatesView: View {
                     let expired = overview.certificates.filter(\.isExpired)
                     toolRow(
                         title: "Revoke all expired",
-                        detail: expired.isEmpty ? "None to revoke" : "\(expired.count) expired certificate\(expired.count == 1 ? "" : "s")",
+                        detail: expired.isEmpty ? String(localized: "None to revoke") : expired.count == 1 ? String(localized: "1 expired certificate") : String(localized: "\(expired.count) expired certificates"),
                         systemImage: "trash.slash",
                         tint: Aurora.danger,
                         disabled: expired.isEmpty || controller.isBusy
@@ -288,7 +288,7 @@ struct CertificatesView: View {
                     Divider().overlay(Aurora.frost.opacity(0.1))
                     toolRow(
                         title: "Free up a slot",
-                        detail: "Revoke the oldest certificate",
+                        detail: String(localized: "Revoke the oldest certificate"),
                         systemImage: "clock.arrow.circlepath",
                         tint: Aurora.accent,
                         disabled: overview.certificates.isEmpty || controller.isBusy
@@ -377,19 +377,19 @@ struct CertificatesView: View {
     private func usageText(_ overview: AccountOverview) -> String {
         var parts: [String] = []
         if let limit = overview.certificateLimit {
-            parts.append("\(overview.certificates.count) of \(limit) certificates")
+            parts.append(String(localized: "\(overview.certificates.count) of \(limit) certificates"))
         } else {
-            parts.append("\(overview.certificates.count) certificates")
+            parts.append(String(localized: "\(overview.certificates.count) certificates"))
         }
         if let available = overview.appIds.available, let max = overview.appIds.max {
-            parts.append("\(max - available)/\(max) App IDs")
+            parts.append(String(localized: "\(max - available)/\(max) App IDs"))
         }
         return parts.joined(separator: " · ")
     }
 
     private func appIdTrailing(_ appIds: AccountOverview.AppIDs) -> String {
         guard let items = appIds.items else { return "" }
-        if let max = appIds.max { return "\(items.count)/\(max)" }
-        return "\(items.count)"
+        if let max = appIds.max { return String(localized: "\(items.count)/\(max)") }
+        return String(localized: "\(items.count)")
     }
 }

@@ -16,12 +16,12 @@ struct SignInSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Apple ID email", text: $email)
+                    TextField(String(localized: "Apple ID email"), text: $email)
                         .textContentType(.username)
                         .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    SecureField("Password", text: $password)
+                    SecureField(String(localized: "Password"), text: $password)
                         .textContentType(.password)
                 } footer: {
                     Text("Your password goes only to Apple. Apple also requires device-identity headers (\"anisette\"), which AltLoad gets from \(host). You can use a secondary Apple ID if you prefer.")
@@ -29,21 +29,21 @@ struct SignInSheet: View {
                 .auroraRow()
 
                 Section {
-                    Toggle("Remember password", isOn: $remember)
+                    Toggle(String(localized: "Remember password"), isOn: $remember)
                 } footer: {
                     Text("Kept in this iPhone's Keychain so refreshing is one tap. It never syncs to iCloud.")
                 }
                 .auroraRow()
             }
             .auroraListBackground()
-            .navigationTitle("Apple ID")
+            .navigationTitle(String(localized: "Apple ID"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     CloseButton { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Continue") {
+                    Button(String(localized: "Continue")) {
                         onContinue(AppleIDCredentials(email: email.trimmingCharacters(in: .whitespaces), password: password), remember)
                         dismiss()
                     }
@@ -59,7 +59,7 @@ struct SignInSheet: View {
     }
 
     private var host: String {
-        if anisetteURL == AnisetteServers.automatic { return "a public server that's working right now" }
+        if anisetteURL == AnisetteServers.automatic { return String(localized: "a public server that's working right now") }
         return URL(string: anisetteURL)?.host() ?? anisetteURL
     }
 }
@@ -93,23 +93,23 @@ struct TwoFactorSheet: View {
                 }
                 .auroraRow()
 
-                Section("Other options") {
-                    Button("Send code to my Apple devices") { respond("devices") }
+                Section(String(localized: "Other options")) {
+                    Button(String(localized: "Send code to my Apple devices")) { respond("devices") }
                     ForEach(prompt.numbers.filter { $0.id != prompt.selectedNumberID || !prompt.sms }) { number in
                         Button("Text \(number.number)") { respond("sms:\(number.id)") }
                     }
                     if !prompt.unknown {
-                        Button("Resend code") { respond("resend") }
+                        Button(String(localized: "Resend code")) { respond("resend") }
                     }
                 }
                 .auroraRow()
             }
             .auroraListBackground()
-            .navigationTitle("Verification")
+            .navigationTitle(String(localized: "Verification"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", role: .cancel) { respond("abort") }
+                    Button(String(localized: "Cancel"), role: .cancel) { respond("abort") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Verify") { respond("code:\(code)") }
@@ -120,13 +120,13 @@ struct TwoFactorSheet: View {
     }
 
     private var headline: String {
-        if prompt.unknown { return "Choose where to get your code" }
+        if prompt.unknown { return String(localized: "Choose where to get your code") }
         if prompt.sms,
            let id = prompt.selectedNumberID,
            let number = prompt.numbers.first(where: { $0.id == id }) {
-            return "Enter the code sent to \(number.number)"
+            return String(localized: "Enter the code sent to \(number.number)")
         }
-        return "Enter the code shown on your other Apple devices"
+        return String(localized: "Enter the code shown on your other Apple devices")
     }
 }
 
@@ -170,14 +170,14 @@ struct RevokeSheet: View {
                 .auroraRow()
             }
             .auroraListBackground()
-            .navigationTitle("Certificate Limit")
+            .navigationTitle(String(localized: "Certificate Limit"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", role: .cancel) { respond("abort") }
+                    Button(String(localized: "Cancel"), role: .cancel) { respond("abort") }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Revoke", role: .destructive) {
+                    Button(String(localized: "Revoke"), role: .destructive) {
                         let data = (try? JSONEncoder().encode(Array(selected))) ?? Data("[]".utf8)
                         respond(String(data: data, encoding: .utf8) ?? "[]")
                     }

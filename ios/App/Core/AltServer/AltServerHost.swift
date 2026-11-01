@@ -60,7 +60,7 @@ final class AltServerHost: ObservableObject {
     }
 
     @Published private(set) var isRunning = false
-    @Published private(set) var wifiState = "Off"
+    @Published private(set) var wifiState = String(localized: "Off")
     @Published private(set) var events: [Event] = []
     @Published private(set) var activity: Activity?
     /// Last time AltStore looked for a server.
@@ -99,7 +99,7 @@ final class AltServerHost: ObservableObject {
             CFNotificationCenterGetDarwinNotifyCenter(), Unmanaged.passUnretained(self).toOpaque())
         listener?.cancel()
         listener = nil
-        wifiState = "Off"
+        wifiState = String(localized: "Off")
         log("AltServer stopped", detail: nil, kind: .info)
     }
 
@@ -149,7 +149,7 @@ final class AltServerHost: ObservableObject {
                 host: "127.0.0.1",
                 port: NWEndpoint.Port(rawValue: Self.wiredPort)!,
                 using: .tcp)
-            serve(connection, via: "on-device link")
+            serve(connection, via: String(localized: "on-device link"))
         default:
             break
         }
@@ -169,11 +169,11 @@ final class AltServerHost: ObservableObject {
             listener.stateUpdateHandler = { state in
                 let text: String
                 switch state {
-                case .ready: text = "Advertising"
-                case .waiting(let error): text = "Waiting: \(error.localizedDescription)"
-                case .failed(let error): text = "Failed: \(error.localizedDescription)"
-                case .cancelled: text = "Off"
-                default: text = "Starting"
+                case .ready: text = String(localized: "Advertising")
+                case .waiting(let error): text = String(localized: "Waiting: \(error.localizedDescription)")
+                case .failed(let error): text = String(localized: "Failed: \(error.localizedDescription)")
+                case .cancelled: text = String(localized: "Off")
+                default: text = String(localized: "Starting")
                 }
                 DispatchQueue.main.async {
                     MainActor.assumeIsolated {
@@ -191,7 +191,7 @@ final class AltServerHost: ObservableObject {
             listener.start(queue: queue)
             self.listener = listener
         } catch {
-            wifiState = "Failed: \(error.localizedDescription)"
+            wifiState = String(localized: "Failed: \(error.localizedDescription)")
         }
     }
 
@@ -230,28 +230,28 @@ final class AltServerHost: ObservableObject {
                 defer { paths.forEach { try? FileManager.default.removeItem(atPath: $0) } }
                 var op: [String: Any] = ["op": "install_profiles", "paths": paths]
                 if let active = request["activeProfiles"] as? [String] { op["activeProfiles"] = active }
-                try await runDeviceOp(op, title: "Refreshing app profiles")
+                try await runDeviceOp(op, title: String(localized: "Refreshing app profiles"))
                 try await session.send(["version": 1, "identifier": "InstallProvisioningProfilesResponse"])
                 log("Installed \(profiles.count) provisioning profile\(profiles.count == 1 ? "" : "s")",
-                    detail: "AltStore refreshed apps (\(route)).", kind: .success)
+                    detail: String(localized: "AltStore refreshed apps (\(route))."), kind: .success)
 
             case "RemoveProvisioningProfilesRequest":
                 let ids = request["bundleIdentifiers"] as? [String] ?? []
-                try await runDeviceOp(["op": "remove_profiles", "bundleIds": ids], title: "Deactivating apps")
+                try await runDeviceOp(["op": "remove_profiles", "bundleIds": ids], title: String(localized: "Deactivating apps"))
                 try await session.send(["version": 1, "identifier": "RemoveProvisioningProfilesResponse"])
                 log("Removed profiles", detail: ids.joined(separator: ", "), kind: .success)
 
             case "RemoveAppRequest":
                 let bundleID = request["bundleIdentifier"] as? String ?? ""
-                try await runDeviceOp(["op": "remove_app", "bundleId": bundleID], title: "Removing an app")
+                try await runDeviceOp(["op": "remove_app", "bundleId": bundleID], title: String(localized: "Removing an app"))
                 try await session.send(["version": 1, "identifier": "RemoveAppResponse"])
                 log("Removed \(bundleID)", detail: nil, kind: .success)
 
             case "EnableUnsignedCodeExecutionRequest":
-                throw HostError.message("AltLoad can't enable JIT. Use StikDebug for that.")
+                throw HostError.message(String(localized: "AltLoad can't enable JIT. Use StikDebug for that."))
 
             default:
-                throw HostError.message("AltLoad doesn't support \"\(identifier)\" yet.")
+                throw HostError.message(String(localized: "AltLoad doesn't support \"\(identifier)\" yet."))
             }
         } catch {
             try? await session.send(Self.errorResponse(error))
@@ -263,9 +263,9 @@ final class AltServerHost: ObservableObject {
 
     private func installApp(_ request: [String: Any], session: AltServerSession, route: String) async throws {
         let size = (request["contentSize"] as? NSNumber)?.intValue ?? 0
-        guard size > 0 else { throw HostError.message("AltStore sent an empty app.") }
+        guard size > 0 else { throw HostError.message(String(localized: "AltStore sent an empty app.")) }
 
-        activity = Activity(title: "AltStore is installing an app", stage: "Receiving the app…", fraction: 0)
+        activity = Activity(title: String(localized: "AltStore is installing an app"), stage: String(localized: "Receiving the app…"), fraction: 0)
         let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".ipa")
         defer { try? FileManager.default.removeItem(at: file) }
         try await session.receive(size, into: file) { fraction in
@@ -274,7 +274,7 @@ final class AltServerHost: ObservableObject {
 
         let begin = try await session.receiveMessage()
         guard begin["identifier"] as? String == "BeginInstallationRequest" else {
-            throw HostError.message("AltStore didn't start the installation.")
+            throw HostError.message(String(localized: "AltStore didn't start the installation."))
         }
         let bundleID = begin["bundleIdentifier"] as? String
 
@@ -294,7 +294,7 @@ final class AltServerHost: ObservableObject {
     }
 
     private func runDeviceOp(_ op: [String: Any], title: String) async throws {
-        activity = Activity(title: title, stage: "Opening device link…", fraction: nil)
+        activity = Activity(title: title, stage: String(localized: "Opening device link…"), fraction: nil)
         try await DeviceOps.run(op) { stage, fraction in
             AltServerHost.shared.activity?.stage = stage
             AltServerHost.shared.activity?.fraction = fraction
@@ -370,8 +370,8 @@ final class AltServerSession: @unchecked Sendable {
         case closed, badMessage
         var errorDescription: String? {
             switch self {
-            case .closed: "AltStore closed the connection."
-            case .badMessage: "AltStore sent something AltLoad couldn't read."
+            case .closed: String(localized: "AltStore closed the connection.")
+            case .badMessage: String(localized: "AltStore sent something AltLoad couldn't read.")
             }
         }
     }
@@ -494,7 +494,7 @@ enum AnisetteV1 {
         case unsupported(String)
         var errorDescription: String? {
             if case .unsupported(let host) = self {
-                return "\(host) didn't return anisette data AltStore can use. Pick another anisette server in AltLoad's Settings."
+                return String(localized: "\(host) didn't return anisette data AltStore can use. Pick another anisette server in AltLoad's Settings.")
             }
             return nil
         }
@@ -502,7 +502,7 @@ enum AnisetteV1 {
 
     /// Tries each server in turn and returns the first usable anisette data.
     static func fetchFirst(_ servers: [String]) async throws -> [String: String] {
-        var lastError: Error = AnisetteError.unsupported("No anisette server")
+        var lastError: Error = AnisetteError.unsupported(String(localized: "No anisette server"))
         for server in servers {
             do { return try await fetch(from: server) } catch { lastError = error }
         }

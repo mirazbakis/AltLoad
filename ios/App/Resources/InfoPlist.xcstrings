@@ -1,0 +1,111 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSLocalNetworkUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad verwendet dein lokales Netzwerk, um Geräte zu finden und die Kopplung abzuschließen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad utilise votre réseau local pour détecter les appareils et terminer le jumelage."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad usa la rete locale per trovare i dispositivi e completare l'abbinamento."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad использует локальную сеть, чтобы находить устройства и завершать сопряжение."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad 使用本地网络发现设备并完成配对。"
+          }
+        }
+      }
+    },
+    "NSLocationAlwaysAndWhenInUseUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad kann den Standort nutzen, um im Hintergrund weiterzulaufen, während du die Kopplung in den Einstellungen abschließt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad peut utiliser la position pour continuer en arrière-plan pendant que vous terminez le jumelage dans Réglages."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad può usare la posizione per restare attiva in background mentre completi l'abbinamento in Impostazioni."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad может использовать геопозицию, чтобы работать в фоне, пока вы завершаете сопряжение в Настройках."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad 可使用位置在后台持续运行，以便你在“设置”中完成配对。"
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad kann den Standort nutzen, um im Hintergrund weiterzulaufen, während du die Kopplung in den Einstellungen abschließt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad peut utiliser la position pour continuer en arrière-plan pendant que vous terminez le jumelage dans Réglages."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad può usare la posizione per restare attiva in background mentre completi l'abbinamento in Impostazioni."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad может использовать геопозицию, чтобы работать в фоне, пока вы завершаете сопряжение в Настройках."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad 可使用位置在后台持续运行，以便你在“设置”中完成配对。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

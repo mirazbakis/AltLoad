@@ -18,7 +18,7 @@ struct PairView: View {
                     .transition(.blurReplace.combined(with: .scale(0.96)))
             }
         }
-        .navigationTitle("Pair")
+        .navigationTitle(String(localized: "Pair"))
         .toolbarTitleDisplayMode(.inlineLarge)
         .animation(.spring(duration: 0.55, bounce: 0.25), value: controller.phase)
         .fileImporter(isPresented: $showImporter, allowedContentTypes: [.propertyList, .xml, .data]) { result in
@@ -26,7 +26,7 @@ struct PairView: View {
             do {
                 controller.phase = .success(try store.importForThisDevice(at: url))
             } catch {
-                controller.phase = .failed("The pairing file couldn't be imported: \(error.localizedDescription)")
+                controller.phase = .failed(String(localized: "The pairing file couldn't be imported: \(error.localizedDescription)"))
             }
         }
         .sensoryFeedback(trigger: controller.phase) { _, newPhase in
@@ -91,12 +91,12 @@ struct PairView: View {
                             lastPairingCard(item)
                                 .contextMenu {
                                     if !item.isAppleTV {
-                                        Button("Use for Installs on This iPhone", systemImage: "iphone.gen3") {
+                                        Button(String(localized: "Use for Installs on This iPhone"), systemImage: "iphone.gen3") {
                                             store.selfPairingID = item.id
                                         }
                                     }
                                     ShareLink(item: item.fileURL)
-                                    Button("Delete", systemImage: "trash", role: .destructive) {
+                                    Button(String(localized: "Delete"), systemImage: "trash", role: .destructive) {
                                         store.delete(item)
                                     }
                                 }
@@ -144,17 +144,17 @@ struct PairView: View {
             VStack(spacing: 14) {
                 GlassCard(tint: Aurora.success) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Label("Paired", systemImage: "checkmark.seal.fill")
+                        Label(String(localized: "Paired"), systemImage: "checkmark.seal.fill")
                             .font(.title3.bold())
                             .foregroundStyle(Aurora.success)
-                        detailRow("Device", saved.displayName)
-                        if !saved.model.isEmpty { detailRow("Model", saved.model) }
-                        if !saved.udid.isEmpty { detailRow("Pairing ID", saved.udid, monospaced: true) }
+                        detailRow(String(localized: "Device"), saved.displayName)
+                        if !saved.model.isEmpty { detailRow(String(localized: "Model"), saved.model) }
+                        if !saved.udid.isEmpty { detailRow(String(localized: "Pairing ID"), saved.udid, monospaced: true) }
                     }
                 }
 
                 ShareLink(item: saved.fileURL) {
-                    Label("Export Pairing File", systemImage: "square.and.arrow.up")
+                    Label(String(localized: "Export Pairing File"), systemImage: "square.and.arrow.up")
                         .font(.headline)
                         .foregroundStyle(Aurora.frost)
                         .frame(maxWidth: .infinity)
@@ -171,7 +171,7 @@ struct PairView: View {
             VStack(spacing: 14) {
                 GlassCard(tint: Aurora.danger) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("Pairing failed", systemImage: "xmark.octagon.fill")
+                        Label(String(localized: "Pairing failed"), systemImage: "xmark.octagon.fill")
                             .font(.title3.bold())
                             .foregroundStyle(Aurora.danger)
                         Text(message)
@@ -209,7 +209,7 @@ struct PairView: View {
                     Text("For the most reliable pairing, allow location **Always**.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
-                    Button("Allow Always") { controller.requestLocationAuthorization() }
+                    Button(String(localized: "Allow Always")) { controller.requestLocationAuthorization() }
                         .buttonStyle(AltLoadButtonStyle(prominent: false, radius: 14, minHeight: 44))
                 }
             }
@@ -229,7 +229,7 @@ struct PairView: View {
     private var importGuidance: some View {
         GlassCard(tint: Aurora.accent) {
             VStack(alignment: .leading, spacing: 12) {
-                Label("Import a pairing file", systemImage: "doc.badge.gearshape")
+                Label(String(localized: "Import a pairing file"), systemImage: "doc.badge.gearshape")
                     .font(.headline)
                     .foregroundStyle(Aurora.frost)
                 Text("Pairing on this device needs iOS 27. On iOS \(UIDevice.current.systemVersion), make a pairing file on a computer once, then bring it here.")
@@ -278,7 +278,7 @@ struct PairView: View {
                         .overlay { Circle().strokeBorder(Aurora.hairline, lineWidth: 1) }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Export \(item.displayName) pairing file")
+                .accessibilityLabel(String(localized: "Export \(item.displayName) pairing file"))
             }
         }
     }
@@ -326,7 +326,7 @@ struct PairView: View {
         case .idle: "antenna.radiowaves.left.and.right"
         case .waiting: "wifi"
         case .showPin: "lock.open"
-        case .success: "checkmark"
+        case .success: String(localized: "checkmark")
         case .failed: "xmark"
         }
     }
@@ -342,12 +342,12 @@ struct PairView: View {
     private var subtitle: String {
         switch controller.phase {
         case .idle: PairingController.canPairOnDevice
-            ? "Create a pairing file on this device. AltLoad uses it to install apps."
-            : "AltLoad needs this device's pairing file to install apps."
-        case .waiting: "Listening on your local network."
-        case .showPin: "Almost there."
-        case .success: "Your pairing file is ready."
-        case .failed: "Something went wrong."
+            ? String(localized: "Create a pairing file on this device. AltLoad uses it to install apps.")
+            : String(localized: "AltLoad needs this device's pairing file to install apps.")
+        case .waiting: String(localized: "Listening on your local network.")
+        case .showPin: String(localized: "Almost there.")
+        case .success: String(localized: "Your pairing file is ready.")
+        case .failed: String(localized: "Something went wrong.")
         }
     }
 }

@@ -23,18 +23,20 @@ enum AppTab: Hashable {
 struct RootView: View {
     @State private var tab: AppTab = .install
     @StateObject private var install = InstallController.shared
+    @StateObject private var updates = UpdateChecker.shared
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         TabView(selection: $tab) {
-            Tab("Install", systemImage: "tray.and.arrow.down.fill", value: AppTab.install) {
+            Tab(String(localized: "Install"), systemImage: "tray.and.arrow.down.fill", value: AppTab.install) {
                 InstallView(selectedTab: $tab)
             }
-            Tab("Tools", systemImage: "wrench.and.screwdriver.fill", value: AppTab.tools) {
+            Tab(String(localized: "Tools"), systemImage: "wrench.and.screwdriver.fill", value: AppTab.tools) {
                 ToolsView()
             }
             .badge(expiringSoon)
-            Tab("About", systemImage: "info", value: AppTab.about) {
+            Tab(String(localized: "About"), systemImage: "info", value: AppTab.about) {
                 AboutView()
             }
         }
@@ -50,7 +52,24 @@ struct RootView: View {
             install.resumeWhenVPNReady()
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { AltServerHost.shared.refresh() }
+            if phase == .active {
+                AltServerHost.shared.refresh()
+                Task { await updates.check() }
+            }
+        }
+        .task { await updates.check() }
+        // Waits until an install isn't covering the screen.
+        .alert("Update available", isPresented: Binding(
+            get: { updates.available != nil && install.flow == nil },
+            set: { _ in }
+        )) {
+            Button("Get Update") {
+                updates.dismiss()
+                openURL(UpdateChecker.downloadPage)
+            }
+            Button("Later", role: .cancel) { updates.dismiss() }
+        } message: {
+            Text("AltLoad \(updates.available ?? "") is available. You have \(updates.currentVersion).")
         }
     }
 

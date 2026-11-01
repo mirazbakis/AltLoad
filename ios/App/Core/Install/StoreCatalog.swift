@@ -42,25 +42,25 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
     /// Short label under the name on the Install tab.
     var channel: String {
         switch self {
-        case .altstore: "Classic"
-        case .altstoreBeta: "Beta"
-        case .sidestore: "Standalone"
-        case .sidestoreLC: "LiveContainer"
-        case .sidestoreNightly: "Nightly"
-        case .sidestoreLCNightly: "LC Nightly"
-        case .husk: "Android"
+        case .altstore: String(localized: "Classic")
+        case .altstoreBeta: String(localized: "Beta")
+        case .sidestore: String(localized: "Standalone")
+        case .sidestoreLC: String(localized: "LiveContainer")
+        case .sidestoreNightly: String(localized: "Nightly")
+        case .sidestoreLCNightly: String(localized: "LC Nightly")
+        case .husk: String(localized: "Android")
         }
     }
 
     var tagline: String {
         switch self {
-        case .altstore: "The original alternative app store"
-        case .altstoreBeta: "Early builds of AltStore's next version"
-        case .sidestore: "Refreshes apps itself, no AltServer needed"
-        case .sidestoreLC: "SideStore inside LiveContainer: run apps without installing them"
-        case .sidestoreNightly: "Newest SideStore build from main. Untested"
-        case .sidestoreLCNightly: "Newest LiveContainer + SideStore build. Untested"
-        case .husk: "Android apps and games on your iPhone"
+        case .altstore: String(localized: "The original alternative app store")
+        case .altstoreBeta: String(localized: "Early builds of AltStore's next version")
+        case .sidestore: String(localized: "Refreshes apps itself, no AltServer needed")
+        case .sidestoreLC: String(localized: "SideStore inside LiveContainer: run apps without installing them")
+        case .sidestoreNightly: String(localized: "Newest SideStore build from main")
+        case .sidestoreLCNightly: String(localized: "Newest LiveContainer + SideStore build")
+        case .husk: String(localized: "Android apps and games on your iPhone")
         }
     }
 
@@ -451,10 +451,10 @@ enum StoreCatalog {
         var errorDescription: String? {
             switch self {
             case .repositoryDown(let store):
-                "\(store.name)'s repository is down right now and AltLoad has no copy saved. Try again later, or download the IPA elsewhere and pick it with Install IPA from Files."
-            case .notAnIPA: "That file isn't an .ipa."
-            case .http(let store, let code): "The \(store.name) source returned HTTP \(code)."
-            case .notListed(let store): "\(store.name) isn't listed in the configured source."
+                String(localized: "\(store.name)'s repository is down right now and AltLoad has no copy saved. Try again later, or download the IPA elsewhere and pick it with Install IPA from Files.")
+            case .notAnIPA: String(localized: "That file isn't an .ipa.")
+            case .http(let store, let code): String(localized: "The \(store.name) source returned HTTP \(code).")
+            case .notListed(let store): String(localized: "\(store.name) isn't listed in the configured source.")
             }
         }
     }

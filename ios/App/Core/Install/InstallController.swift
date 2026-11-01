@@ -45,13 +45,13 @@ enum InstallStep: Int, CaseIterable, Identifiable, Comparable {
 
     func title(for target: InstallTarget) -> String {
         switch self {
-        case .download: target.store == nil ? "Prepare the IPA" : "Download \(target.title)"
-        case .vpn: "Connect to LocalDevVPN"
-        case .link: "Open device link"
-        case .signIn: "Sign in to Apple"
-        case .sign: "Sign the app"
-        case .install: "Install the app"
-        case .pairing: "Place pairing file"
+        case .download: target.store == nil ? String(localized: "Prepare the IPA") : String(localized: "Download \(target.title)")
+        case .vpn: String(localized: "Connect to LocalDevVPN")
+        case .link: String(localized: "Open device link")
+        case .signIn: String(localized: "Sign in to Apple")
+        case .sign: String(localized: "Sign the app")
+        case .install: String(localized: "Install the app")
+        case .pairing: String(localized: "Place pairing file")
         }
     }
 
@@ -145,17 +145,17 @@ enum ExtensionsMode: Int, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .keep: "Keep Extensions"
-        case .mainProfile: "Keep, Use Main Profile"
-        case .remove: "Remove Extensions"
+        case .keep: String(localized: "Keep Extensions")
+        case .mainProfile: String(localized: "Keep, Use Main Profile")
+        case .remove: String(localized: "Remove Extensions")
         }
     }
 
     var detail: String {
         switch self {
-        case .keep: "Widgets and other extensions get their own App IDs."
-        case .mainProfile: "Extensions share the app's profile, so only one App ID is used. Some may not run."
-        case .remove: "Widgets and other extensions are left out. Saves App IDs."
+        case .keep: String(localized: "Widgets and other extensions get their own App IDs.")
+        case .mainProfile: String(localized: "Extensions share the app's profile, so only one App ID is used. Some may not run.")
+        case .remove: String(localized: "Widgets and other extensions are left out. Saves App IDs.")
         }
     }
 
@@ -482,7 +482,7 @@ final class InstallController: ObservableObject {
 
     private func run(_ credentials: AppleIDCredentials, target: InstallTarget, ipaOverride: URL? = nil, skipVPNCheck: Bool = false) async {
         guard let pairing = PairingStore.shared.selfPairing else {
-            phase = .failed("There's no pairing file for this iPhone yet. Create one in Tools › Pair first.")
+            phase = .failed(String(localized: "There's no pairing file for this iPhone yet. Create one in Tools › Pair first."))
             return
         }
 
@@ -512,7 +512,7 @@ final class InstallController: ObservableObject {
                         }
                     } catch {
                         guard let cached = StoreCatalog.newestCachedIPA(store) else {
-                            phase = .failed("Couldn't download \(store.name): \(error.localizedDescription)")
+                            phase = .failed(String(localized: "Couldn't download \(store.name): \(error.localizedDescription)"))
                             return
                         }
                         ipa = cached
@@ -520,7 +520,7 @@ final class InstallController: ObservableObject {
                 } else if let cached = StoreCatalog.newestCachedIPA(store) {
                     ipa = cached
                 } else {
-                    phase = .failed(catalogErrors[store] ?? "Couldn't reach the \(store.name) source.")
+                    phase = .failed(catalogErrors[store] ?? String(localized: "Couldn't reach the \(store.name) source."))
                     return
                 }
             }
@@ -537,7 +537,7 @@ final class InstallController: ObservableObject {
 
         // 3. Rust does the rest.
         enter(.link)
-        phase = .working("Connecting to this device…", nil)
+        phase = .working(String(localized: "Connecting to this device…"), nil)
         let outcome = await runSession(
             credentials: credentials,
             pairingPath: pairing.fileURL.path,
@@ -565,7 +565,7 @@ final class InstallController: ObservableObject {
             if message == "Cancelled." {
                 phase = .idle
             } else if message.localizedCaseInsensitiveContains("anisette") || message.contains("-80045") || message.contains("-45061") {
-                phase = .failed(message + "\n\nApple refused the sign-in data from the anisette servers AltLoad tried. Open Settings › Anisette, tap Reset Anisette Data, and try again in a few minutes.")
+                phase = .failed(message + String(localized: "\n\nApple refused the sign-in data from the anisette servers AltLoad tried. Open Settings › Anisette, tap Reset Anisette Data, and try again in a few minutes."))
             } else {
                 phase = .failed(message)
             }
@@ -585,7 +585,7 @@ final class InstallController: ObservableObject {
         fallbackName: String
     ) async -> Outcome {
         guard let session = altload_install_session_new() else {
-            return .failed("Couldn't start an install session.")
+            return .failed(String(localized: "Couldn't start an install session."))
         }
         self.session = session
         let ctx = Unmanaged.passRetained(self).toOpaque()
@@ -600,7 +600,7 @@ final class InstallController: ObservableObject {
         let outcome: Outcome = await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 guard let session = OpaquePointer(bitPattern: sessionBits) else {
-                    continuation.resume(returning: .failed("Invalid session."))
+                    continuation.resume(returning: .failed(String(localized: "Invalid session.")))
                     return
                 }
                 var owned: [UnsafeMutablePointer<CChar>] = []
@@ -654,7 +654,7 @@ final class InstallController: ObservableObject {
                         installedAt: .now))
                 } else {
                     let message = string(result.error)
-                    outcome = .failed(message.isEmpty ? "Install failed (code \(rc))." : message)
+                    outcome = .failed(message.isEmpty ? String(localized: "Install failed (code \(rc)).") : message)
                 }
                 altload_install_result_free(&result)
 
@@ -682,13 +682,13 @@ final class InstallController: ObservableObject {
     /// the app still works once the file is added from Tools › Pairing File to Apps.
     private func placePairingFile(in bundleID: String, pairing: URL) async {
         enter(.pairing)
-        phase = .working("Placing pairing file…", nil)
+        phase = .working(String(localized: "Placing pairing file…"), nil)
         do {
             try await PairingDestination.place(pairing, in: bundleID)
             // iOS caches an app's settings once it has run, until the next restart.
-            pairingNote = "This iPhone's pairing file is already inside the app. If the app still asks for it, restart your iPhone."
+            pairingNote = String(localized: "This iPhone's pairing file is already inside the app. If the app still asks for it, restart your iPhone.")
         } catch {
-            pairingNote = "Couldn't place the pairing file (\(error.localizedDescription)). Add it from Tools › Pairing File to Apps."
+            pairingNote = String(localized: "Couldn't place the pairing file (\(error.localizedDescription)). Add it from Tools › Pairing File to Apps.")
         }
     }
 
@@ -752,8 +752,8 @@ final class InstallController: ObservableObject {
         center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
             guard granted else { return }
             let content = UNMutableNotificationContent()
-            content.title = "\(app.name) expires tomorrow"
-            content.body = "Open AltLoad and tap Refresh to keep it working."
+            content.title = String(localized: "\(app.name) expires tomorrow")
+            content.body = String(localized: "Open AltLoad and tap Refresh to keep it working.")
             content.sound = .default
             let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
             let request = UNNotificationRequest(

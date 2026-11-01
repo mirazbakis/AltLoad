@@ -38,7 +38,7 @@ struct JITView: View {
                 GlassCard {
                     HStack(spacing: 14) {
                         ProgressRing(value: nil, lineWidth: 4, size: 28, showsPercent: false)
-                        Text(stage ?? "Enabling JIT for \(working)…").font(.subheadline)
+                        Text(stage ?? String(localized: "Enabling JIT for \(working)…")).font(.subheadline)
                     }
                 }
             }
@@ -47,13 +47,13 @@ struct JITView: View {
                 GlassCard {
                     HStack(spacing: 14) {
                         ProgressRing(value: nil, lineWidth: 4, size: 28, showsPercent: false)
-                        Text(stage ?? "Reading installed apps…").font(.subheadline)
+                        Text(stage ?? String(localized: "Reading installed apps…")).font(.subheadline)
                     }
                 }
             } else if let loadError {
                 GlassCard(tint: Aurora.danger) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Label("Couldn't read the apps", systemImage: "exclamationmark.triangle.fill")
+                        Label(String(localized: "Couldn't read the apps"), systemImage: "exclamationmark.triangle.fill")
                             .font(.headline)
                         Text(loadError)
                             .font(.footnote)
@@ -74,26 +74,26 @@ struct JITView: View {
                     SectionLabel(title: showAll ? "All apps" : "Development-signed apps", trailing: "\(filtered.count)")
                     ForEach(filtered) { app in
                         AppBannerRow(name: app.name, detail: app.bundleID, symbol: "app.fill") {
-                            PillButton(title: "JIT", tint: Aurora.accent) { enable(app) }
+                            PillButton(title: String(localized: "JIT"), tint: Aurora.accent) { enable(app) }
                                 .disabled(working != nil || !app.debuggable)
                                 .opacity(app.debuggable ? 1 : 0.4)
                         }
                     }
-                    Toggle("Show apps that can't use JIT", isOn: $showAll)
+                    Toggle(String(localized: "Show apps that can't use JIT"), isOn: $showAll)
                         .font(.footnote)
                         .padding(.horizontal, 4)
                 }
             }
         }
-        .navigationTitle("JIT")
+        .navigationTitle(String(localized: "JIT"))
         .toolbarTitleDisplayMode(.inline)
-        .searchable(text: $search, prompt: "Search apps")
+        .searchable(text: $search, prompt: String(localized: "Search apps"))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     Task { await load() }
                 } label: {
-                    Label("Reload", systemImage: "arrow.clockwise")
+                    Label(String(localized: "Reload"), systemImage: "arrow.clockwise")
                 }
                 .disabled(loading || working != nil || pairings.selfPairing == nil)
             }
@@ -135,7 +135,7 @@ struct JITView: View {
             defer { working = nil; stage = nil }
             do {
                 try await DeviceOps.enableJIT(app.bundleID) { text, _ in stage = text }
-                result = Result(success: true, message: "\(app.name) is open with JIT. It keeps JIT until you close it.")
+                result = Result(success: true, message: String(localized: "\(app.name) is open with JIT. It keeps JIT until you close it."))
             } catch {
                 result = Result(success: false, message: error.localizedDescription)
             }

@@ -27,11 +27,11 @@ struct SettingsView: View {
                 sourcesCard
                 keepAliveCard
             }
-            .navigationTitle("Settings")
+            .navigationTitle(String(localized: "Settings"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button(String(localized: "Done")) { dismiss() }
                         .fontWeight(.semibold)
                 }
             }
@@ -87,17 +87,17 @@ struct SettingsView: View {
                 }
                 .buttonStyle(AltLoadButtonStyle(prominent: false, tint: Aurora.danger))
                 .disabled(appleID.isEmpty)
-                .accessibilityLabel("Forget Apple ID and password")
+                .accessibilityLabel(String(localized: "Forget Apple ID and password"))
             }
-            footnote("Signing in here checks your Apple ID with Apple straight away, including two-factor, without installing anything.")
+            footnote(String(localized: "Signing in here checks your Apple ID with Apple straight away, including two-factor, without installing anything."))
         }
     }
 
     private var signInTitle: String {
         switch account.phase {
-        case .loaded: "Check Again"
-        case .loading: "Signing In…"
-        default: appleID.isEmpty ? "Sign In" : "Sign In Again"
+        case .loaded: String(localized: "Check Again")
+        case .loading: String(localized: "Signing In…")
+        default: appleID.isEmpty ? String(localized: "Sign In") : String(localized: "Sign In Again")
         }
     }
 
@@ -112,12 +112,12 @@ struct SettingsView: View {
                 Text(stage).font(.subheadline).foregroundStyle(Aurora.secondaryText)
             }
         case .loaded:
-            Label("Signed in\(account.overview.map { " · \($0.team.name)" } ?? "")", systemImage: "checkmark.seal.fill")
+            Label(account.overview.map { String(localized: "Signed in · \($0.team.name)") } ?? String(localized: "Signed in"), systemImage: "checkmark.seal.fill")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Aurora.success)
         case .failed(let message):
             VStack(alignment: .leading, spacing: 6) {
-                Label("Sign-in failed", systemImage: "exclamationmark.triangle.fill")
+                Label(String(localized: "Sign-in failed"), systemImage: "exclamationmark.triangle.fill")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Aurora.danger)
                 Text(message)
@@ -137,7 +137,7 @@ struct SettingsView: View {
                 Text("Server").foregroundStyle(Aurora.secondaryText)
                 if anisette.isLoading { ProgressView() }
                 Spacer()
-                Picker("Server", selection: $anisetteChoice) {
+                Picker(String(localized: "Server"), selection: $anisetteChoice) {
                     Text("Automatic").tag(AnisetteServers.automatic)
                     Divider()
                     ForEach(anisette.servers) { server in
@@ -169,14 +169,14 @@ struct SettingsView: View {
                 AnisetteServers.resetProvisioning()
                 anisetteReset = true
             } label: {
-                Label(anisetteReset ? "Anisette Data Reset" : "Reset Anisette Data",
-                      systemImage: anisetteReset ? "checkmark" : "arrow.counterclockwise")
+                Label(anisetteReset ? String(localized: "Anisette Data Reset") : String(localized: "Reset Anisette Data"),
+                      systemImage: anisetteReset ? String(localized: "checkmark") : "arrow.counterclockwise")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(AltLoadButtonStyle(prominent: false))
             .disabled(anisetteReset)
 
-            footnote("Apple needs device-identity headers (\"anisette\") to sign in; the server never sees your password. Automatic checks which servers answer and moves on to the next one if Apple refuses a server's data. Reset if sign-in keeps failing.")
+            footnote(String(localized: "Apple needs device-identity headers (\"anisette\") to sign in; the server never sees your password. Automatic checks which servers answer and moves on to the next one if Apple refuses a server's data. Reset if sign-in keeps failing."))
         }
     }
 
@@ -194,11 +194,11 @@ struct SettingsView: View {
             Button {
                 LocalDevVPN.turnOn()
             } label: {
-                Label(LocalDevVPN.isInstalled ? "Turn On LocalDevVPN" : "Get LocalDevVPN", systemImage: "power")
+                Label(LocalDevVPN.isInstalled ? String(localized: "Turn On LocalDevVPN") : String(localized: "Get LocalDevVPN"), systemImage: "power")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(AltLoadButtonStyle(prominent: false))
-            footnote("Installs go through LocalDevVPN, which loops this address back into the iPhone. Only change it if you changed LocalDevVPN's peer IP.")
+            footnote(String(localized: "Installs go through LocalDevVPN, which loops this address back into the iPhone. Only change it if you changed LocalDevVPN's peer IP."))
         }
     }
 
@@ -226,20 +226,20 @@ struct SettingsView: View {
                     saveSource(store)
                 }
             } label: {
-                Label("Use Official Sources", systemImage: "arrow.uturn.backward").frame(maxWidth: .infinity)
+                Label(String(localized: "Use Official Sources"), systemImage: "arrow.uturn.backward").frame(maxWidth: .infinity)
             }
             .buttonStyle(AltLoadButtonStyle(prominent: false))
-            footnote("AltLoad installs the newest build each source lists. If SideStore's source or repository is down, it falls back to a mirror, its GitHub releases and then a known-good build.")
+            footnote(String(localized: "AltLoad installs the newest build each source lists. If SideStore's source or repository is down, it falls back to a mirror, its GitHub releases and then a known-good build."))
         }
     }
 
     private var keepAliveCard: some View {
         CardSection(title: "Background Keep-Alive", symbol: "bolt.horizontal.fill") {
-            Toggle("Silent audio", systemImage: "speaker.wave.2", isOn: $pairing.keepAliveAudio)
+            Toggle(String(localized: "Silent audio"), systemImage: "speaker.wave.2", isOn: $pairing.keepAliveAudio)
                 .frame(minHeight: 44)
-            Toggle("Location", systemImage: "location", isOn: $pairing.keepAliveLocation)
+            Toggle(String(localized: "Location"), systemImage: "location", isOn: $pairing.keepAliveLocation)
                 .frame(minHeight: 44)
-            footnote("Turn one on if the Live Activity doesn't start while you pair from Settings.")
+            footnote(String(localized: "Turn one on if the Live Activity doesn't start while you pair from Settings."))
         }
     }
 

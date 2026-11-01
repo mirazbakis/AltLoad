@@ -282,7 +282,7 @@ struct CloseButton: View {
         if #available(iOS 26, *) {
             Button(role: .close, action: action)
         } else {
-            Button("Close", action: action)
+            Button(String(localized: "Close"), action: action)
         }
     }
 }
@@ -299,7 +299,7 @@ struct SettingsToolbarButton: ToolbarContent {
             Button {
                 isPresented = true
             } label: {
-                Label("Settings", systemImage: "gearshape")
+                Label(String(localized: "Settings"), systemImage: "gearshape")
             }
         }
     }
@@ -520,7 +520,7 @@ struct ProgressRing: View {
         }
         .frame(width: size, height: size)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(value.map { "\(Int($0 * 100)) percent" } ?? "In progress")
+        .accessibilityLabel(value.map { String(localized: "\(Int($0 * 100)) percent") } ?? String(localized: "In progress"))
     }
 }
 
@@ -542,7 +542,7 @@ struct GlassProgressBar: View {
         .frame(height: height)
         .animation(.spring(duration: 0.5), value: value)
         .accessibilityElement()
-        .accessibilityLabel("Progress")
+        .accessibilityLabel(String(localized: "Progress"))
         .accessibilityValue(Text(value.formatted(.percent.precision(.fractionLength(0)))))
     }
 }

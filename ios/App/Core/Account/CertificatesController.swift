@@ -19,7 +19,7 @@ struct DevCertificate: Identifiable, Hashable, Decodable {
     var isExpired: Bool { (expiration ?? .distantFuture) < .now }
     /// Made by AltLoad itself (isideload names the machine after the app).
     var isAltLoad: Bool { machineName.caseInsensitiveCompare("AltLoad") == .orderedSame }
-    var displayName: String { machineName.isEmpty ? (name.isEmpty ? "Unnamed certificate" : name) : machineName }
+    var displayName: String { machineName.isEmpty ? (name.isEmpty ? String(localized: "Unnamed certificate") : name) : machineName }
 }
 
 struct DevAppID: Identifiable, Hashable, Decodable {
@@ -143,11 +143,11 @@ final class CertificatesController: ObservableObject {
         guard let requestData = try? JSONSerialization.data(withJSONObject: request),
               let requestJSON = String(data: requestData, encoding: .utf8),
               let session = altload_install_session_new() else {
-            phase = .failed("Couldn't start a session.")
+            phase = .failed(String(localized: "Couldn't start a session."))
             return
         }
         self.session = session
-        phase = .loading((request["op"] as? String) == "revoke" ? "Revoking certificate…" : "Signing in to Apple…")
+        phase = .loading((request["op"] as? String) == "revoke" ? String(localized: "Revoking certificate…") : String(localized: "Signing in to Apple…"))
 
         let preferred = InstallController.shared.anisetteURL
         let ctx = Unmanaged.passRetained(self).toOpaque()
@@ -159,7 +159,7 @@ final class CertificatesController: ObservableObject {
             let result: Result<Data, AccountError> = await withCheckedContinuation { continuation in
                 DispatchQueue.global(qos: .userInitiated).async {
                     guard let session = OpaquePointer(bitPattern: sessionBits) else {
-                        continuation.resume(returning: .failure(.message("Invalid session.")))
+                        continuation.resume(returning: .failure(.message(String(localized: "Invalid session."))))
                         return
                     }
                     var out: UnsafeMutablePointer<CChar>?
@@ -179,7 +179,7 @@ final class CertificatesController: ObservableObject {
                     if let out { altload_string_free(out) }
                     continuation.resume(returning: rc == 0
                         ? .success(Data(text.utf8))
-                        : .failure(.message(text.isEmpty ? "Request failed (code \(rc))." : text)))
+                        : .failure(.message(text.isEmpty ? String(localized: "Request failed (code \(rc)).") : text)))
                 }
             }
 
@@ -195,7 +195,7 @@ final class CertificatesController: ObservableObject {
                     lastUpdated = .now
                     phase = .loaded
                 } catch {
-                    phase = .failed("Couldn't read the account data: \(error.localizedDescription)")
+                    phase = .failed(String(localized: "Couldn't read the account data: \(error.localizedDescription)"))
                 }
             case .failure(.message(let message)):
                 if message == "Cancelled." {

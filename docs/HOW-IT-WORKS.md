@@ -95,6 +95,10 @@ Afterwards AltLoad reads `CFBundleIdentifier`, the version, `TeamIdentifier` and
 
 A free-account profile lasts 7 days. AltStore's built-in refresh expects to find AltServer on the network, which doesn't exist in this setup. Tapping **Refresh AltStore** in AltLoad runs the same pipeline with the cached IPA. Because the bundle ID and team are the same, iOS treats it as an update, and AltStore's data and the apps it manages are kept.
 
+## Update notice
+
+`UpdateChecker` asks GitHub for AltLoad's latest release when the app opens or returns to the foreground, at most every 6 hours. If it's newer than the running version, an alert links to the install site. **Later** hides that version until a newer one is out.
+
 ## FFI surface
 
 ```c
@@ -128,14 +132,16 @@ void    altload_install_session_cancel(session);
 
 ## Pairing file into apps
 
-`place_file` uses house_arrest (`VendDocuments`, falling back to `VendContainer`) to write this iPhone's RPPairing file into another app. The same bytes go to every path:
+`place_file` uses house_arrest (`VendDocuments`, falling back to `VendContainer`) to write this iPhone's pairing file into another app, as an XML plist with the device's `UDID` added.
 
 | App | Paths |
 |---|---|
-| SideStore | `Documents/ALTPairingFile.mobiledevicepairing`, `Documents/PairingFile_RemoteRP.plist`, `Documents/PairingFile_Lockdown.plist` |
-| SideStore + LiveContainer | `Documents/SideStore/Documents/ALTPairingFile.mobiledevicepairing` |
+| SideStore | `Documents/ALTPairingFile.mobiledevicepairing`, `Documents/PairingFile_RemoteRP.plist`, plus `Documents/PairingFile_Lockdown.plist` when the file has a complete lockdown record |
+| SideStore + LiveContainer | The same files under `Documents/SideStore/Documents/` |
 | Husk | `Documents/StikJIT/pairingFile.plist` |
 | StikDebug and other idevice apps | `Documents/rp_pairing_file.plist` |
+
+Newer SideStore builds also need `isPairingReset = false` and `activePairingProtocol` in their preferences, so `merge_plist` sets them in `Library/Preferences/<bundle id>.plist`, or `Documents/SideStore/Library/Preferences/com.SideStore.SideStore.plist` inside LiveContainer. iOS caches an app's settings once it has run, so these take effect after a reinstall or restart.
 
 After installing SideStore, SideStore + LiveContainer or Husk, AltLoad does this automatically.
 

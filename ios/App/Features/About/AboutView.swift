@@ -28,22 +28,22 @@ struct AboutView: View {
                 VStack(spacing: 10) {
                     SectionLabel(title: "Special Thanks")
                     VStack(spacing: 0) {
-                        credit("jkcoxson", work: "idevice and LocalDevVPN: the link from this iPhone to itself",
+                        credit("jkcoxson", work: String(localized: "idevice and LocalDevVPN: the link from this iPhone to itself"),
                                symbol: "cable.connector", tint: Aurora.accentDeep, url: "https://github.com/jkcoxson")
                         divider
-                        credit("nab138", work: "isideload: Apple ID sign-in and code signing",
+                        credit("nab138", work: String(localized: "isideload: Apple ID sign-in and code signing"),
                                symbol: "signature", tint: Aurora.forest, url: "https://github.com/nab138/isideload")
                         divider
-                        credit("StephenDev0", work: "StikPair and StikDebug: pairing and JIT",
+                        credit("StephenDev0", work: String(localized: "StikPair and StikDebug: pairing and JIT"),
                                symbol: "antenna.radiowaves.left.and.right", tint: Color(red: 0.42, green: 0.30, blue: 0.70), url: "https://github.com/StephenDev0")
                         divider
-                        credit("Riley Testut", work: "AltStore and the AltServer protocol",
+                        credit(String(localized: "Riley Testut"), work: String(localized: "AltStore and the AltServer protocol"),
                                symbol: "square.stack.3d.up.fill", tint: Color(red: 0.02, green: 0.48, blue: 0.48), url: "https://github.com/altstoreio/AltStore")
                         divider
-                        credit("SideStore Team", work: "SideStore and the public anisette servers",
+                        credit(String(localized: "SideStore Team"), work: String(localized: "SideStore and the public anisette servers"),
                                symbol: "arrow.triangle.2.circlepath", tint: Color(red: 0.55, green: 0.30, blue: 0.62), url: "https://github.com/SideStore")
                         divider
-                        credit("LiveContainer", work: "Running apps without installing them",
+                        credit(String(localized: "LiveContainer"), work: String(localized: "Running apps without installing them"),
                                symbol: "shippingbox.fill", tint: Color(red: 0.70, green: 0.42, blue: 0.16), url: "https://github.com/LiveContainer/LiveContainer")
                     }
                     .cardSurface()
@@ -52,13 +52,13 @@ struct AboutView: View {
                 VStack(spacing: 10) {
                     SectionLabel(title: "Legal")
                     VStack(spacing: 0) {
-                        link("Terms of Service", symbol: "doc.text", url: "https://mirazbakis.github.io/terms.html")
+                        link(String(localized: "Terms of Service"), symbol: "doc.text", url: "https://mirazbakis.github.io/terms.html")
                         divider
-                        link("AltLoad License", symbol: "checkmark.seal", url: "https://github.com/mirazbakis/AltLoad/blob/main/LICENSE.md")
+                        link(String(localized: "AltLoad License"), symbol: "checkmark.seal", url: "https://github.com/mirazbakis/AltLoad/blob/main/LICENSE.md")
                         divider
-                        link("Third-Party Notices", symbol: "list.bullet", url: "https://github.com/mirazbakis/AltLoad/blob/main/THIRD_PARTY_NOTICES.md")
+                        link(String(localized: "Third-Party Notices"), symbol: "list.bullet", url: "https://github.com/mirazbakis/AltLoad/blob/main/THIRD_PARTY_NOTICES.md")
                         divider
-                        link("Security Policy", symbol: "lock.shield", url: "https://github.com/mirazbakis/AltLoad/blob/main/SECURITY.md")
+                        link(String(localized: "Security Policy"), symbol: "lock.shield", url: "https://github.com/mirazbakis/AltLoad/blob/main/SECURITY.md")
                     }
                     .cardSurface()
                 }
@@ -66,11 +66,11 @@ struct AboutView: View {
                 VStack(spacing: 10) {
                     SectionLabel(title: "Project")
                     VStack(spacing: 0) {
-                        link("Website", symbol: "globe", url: "https://mirazbakis.github.io/AltLoad.html")
+                        link(String(localized: "Website"), symbol: "globe", url: "https://mirazbakis.github.io/AltLoad.html")
                         divider
-                        link("Source Code", symbol: "chevron.left.forwardslash.chevron.right", url: "https://github.com/mirazbakis/AltLoad")
+                        link(String(localized: "Source Code"), symbol: "chevron.left.forwardslash.chevron.right", url: "https://github.com/mirazbakis/AltLoad")
                         divider
-                        link("Report a Problem", symbol: "exclamationmark.bubble", url: "https://github.com/mirazbakis/AltLoad/issues")
+                        link(String(localized: "Report a Problem"), symbol: "exclamationmark.bubble", url: "https://github.com/mirazbakis/AltLoad/issues")
                     }
                     .cardSurface()
                 }
@@ -81,7 +81,7 @@ struct AboutView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 8)
             }
-            .navigationTitle("About")
+            .navigationTitle(String(localized: "About"))
             .toolbarTitleDisplayMode(.inlineLarge)
             .settingsButton()
         }

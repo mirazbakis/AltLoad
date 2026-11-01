@@ -30,7 +30,7 @@ enum DeveloperDiskImage {
         let dir = directory
         let missing = files.filter { !FileManager.default.fileExists(atPath: dir.appendingPathComponent($0).path) }
         for (index, name) in missing.enumerated() {
-            await progress("Downloading the Developer Disk Image (\(index + 1) of \(missing.count))…", nil)
+            await progress(String(localized: "Downloading the Developer Disk Image (\(index + 1) of \(missing.count))…"), nil)
             guard let url = URL(string: base + name) else { continue }
             let (temp, response) = try await URLSession.shared.download(from: url)
             if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
@@ -53,7 +53,7 @@ enum DeveloperDiskImage {
 
         var errorDescription: String? {
             switch self {
-            case .http(let name, let code): "Couldn't download \(name) (HTTP \(code))."
+            case .http(let name, let code): String(localized: "Couldn't download \(name) (HTTP \(code)).")
             }
         }
     }

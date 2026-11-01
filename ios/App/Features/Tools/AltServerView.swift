@@ -29,14 +29,14 @@ struct AltServerView: View {
                 SectionLabel(title: "Server")
                 VStack(spacing: 0) {
                     Toggle(isOn: $host.isEnabled) {
-                        Label("AltServer", systemImage: "server.rack")
+                        Label(String(localized: "AltServer"), systemImage: "server.rack")
                             .font(.system(size: 17, weight: .semibold))
                     }
                     .padding(.horizontal, 16)
                     .frame(minHeight: 52)
                     Divider().overlay(Color.white.opacity(0.15)).padding(.horizontal, 16)
                     Toggle(isOn: $host.keepAwake) {
-                        Label("Keep running in background", systemImage: "speaker.wave.2")
+                        Label(String(localized: "Keep running in background"), systemImage: "speaker.wave.2")
                             .font(.system(size: 17, weight: .semibold))
                     }
                     .disabled(!host.isEnabled)
@@ -57,22 +57,22 @@ struct AltServerView: View {
                         StatusRow(
                             title: "On-device link",
                             detail: host.isRunning
-                                ? "Answers AltStore's USB-style server check on this iPhone. AltStore prefers this one."
-                                : "Off",
+                                ? String(localized: "Answers AltStore's USB-style server check on this iPhone. AltStore prefers this one.")
+                                : String(localized: "Off"),
                             state: host.isRunning ? .done : .pending)
                         StatusRow(
                             title: "Wi-Fi (Bonjour)",
-                            detail: host.wifiState == "Advertising"
-                                ? "Advertised as AltLoad with AltStore's server ID"
+                            detail: host.wifiState == String(localized: "Advertising")
+                                ? String(localized: "Advertised as AltLoad with AltStore's server ID")
                                 : host.wifiState,
-                            state: host.wifiState == "Advertising" ? .done : .pending)
+                            state: host.wifiState == String(localized: "Advertising") ? .done : .pending)
                         StatusRow(
                             title: "Pairing file",
-                            detail: pairings.selfPairing?.displayName ?? "Needed. Create one in Tools › Pair",
+                            detail: pairings.selfPairing?.displayName ?? String(localized: "Needed. Create one in Tools › Pair"),
                             state: pairings.selfPairing == nil ? .attention : .done)
                         StatusRow(
                             title: "LocalDevVPN",
-                            detail: vpnActive ? "Connected" : "Turn it on before refreshing in AltStore",
+                            detail: vpnActive ? String(localized: "Connected") : String(localized: "Turn it on before refreshing in AltStore"),
                             state: vpnActive ? .done : .attention)
                     }
                 }
@@ -94,7 +94,7 @@ struct AltServerView: View {
                     }
                 }
                 if !host.events.isEmpty {
-                    Button("Clear Activity") { host.clearLog() }
+                    Button(String(localized: "Clear Activity")) { host.clearLog() }
                         .font(.footnote)
                         .foregroundStyle(Aurora.secondaryText)
                 }
@@ -106,7 +106,7 @@ struct AltServerView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 8)
         }
-        .navigationTitle("AltServer")
+        .navigationTitle(String(localized: "AltServer"))
         .toolbarTitleDisplayMode(.inlineLarge)
         .animation(.spring(duration: 0.4), value: host.activity)
         .onChange(of: scenePhase) { _, phase in
@@ -126,7 +126,7 @@ struct AltServerView: View {
                     Text(host.isRunning ? "AltServer is running" : "AltServer is off")
                         .font(.title3.bold())
                     Text(host.lastContact.map { "AltStore last connected \($0.formatted(.relative(presentation: .named)))" }
-                         ?? "AltStore hasn't connected yet")
+                         ?? String(localized: "AltStore hasn't connected yet"))
                         .font(.subheadline)
                         .foregroundStyle(Aurora.secondaryText)
                 }

@@ -14,26 +14,26 @@ struct EntitlementsView: View {
 
             CardSection(title: "Free Apple ID", symbol: "person") {
                 ForEach(Capability.all.filter { $0.tier == .free }) { row($0) }
-                note("Personal teams can usually enable these.")
+                note(String(localized: "Personal teams can usually enable these."))
             }
 
             CardSection(title: "Paid Developer Account", symbol: "star", tint: Aurora.ember) {
                 ForEach(Capability.all.filter { $0.tier == .paid }) { row($0) }
-                note("These need an Apple Developer Program membership. On a free Apple ID, Apple refuses them and the install stops with the reason, so leave them off there.")
+                note(String(localized: "These need an Apple Developer Program membership. On a free Apple ID, Apple refuses them and the install stops with the reason, so leave them off there."))
             }
 
             Button(role: .destructive) {
                 settings.enabled = []
             } label: {
-                Label("Turn All Off", systemImage: "xmark.circle").frame(maxWidth: .infinity)
+                Label(String(localized: "Turn All Off"), systemImage: "xmark.circle").frame(maxWidth: .infinity)
             }
             .buttonStyle(AltLoadButtonStyle(prominent: false, tint: Aurora.danger))
             .disabled(settings.enabled.isEmpty)
 
-            note("Turning one off stops AltLoad asking for it. Apple keeps it on the App ID until you remove it at developer.apple.com, so the profile may still include it.")
+            note(String(localized: "Turning one off stops AltLoad asking for it. Apple keeps it on the App ID until you remove it at developer.apple.com, so the profile may still include it."))
                 .multilineTextAlignment(.center)
         }
-        .navigationTitle("Entitlements")
+        .navigationTitle(String(localized: "Entitlements"))
         .toolbarTitleDisplayMode(.inline)
     }
 

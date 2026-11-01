@@ -27,40 +27,40 @@ struct ToolsView: View {
             AuroraScreen {
                 VStack(spacing: 10) {
                     SectionLabel(title: "Stores")
-                    toolRow(.altServer, symbol: "server.rack", title: "AltServer",
+                    toolRow(.altServer, symbol: "server.rack", title: String(localized: "AltServer"),
                             detail: altServerDetail,
                             tint: altServer.isRunning ? Aurora.success : Aurora.accent)
                 }
 
                 VStack(spacing: 10) {
                     SectionLabel(title: "Developer")
-                    toolRow(.jit, symbol: "bolt.fill", title: "JIT",
-                            detail: "Open an emulator or other JIT app with JIT enabled")
-                    toolRow(.location, symbol: "location.fill", title: "Location",
+                    toolRow(.jit, symbol: "bolt.fill", title: String(localized: "JIT"),
+                            detail: String(localized: "Open an emulator or other JIT app with JIT enabled"))
+                    toolRow(.location, symbol: "location.fill", title: String(localized: "Location"),
                             detail: locationDetail,
                             tint: location.isRunning ? Aurora.success : Aurora.accent)
                 }
 
                 VStack(spacing: 10) {
                     SectionLabel(title: "Pairing")
-                    toolRow(.pair, symbol: "antenna.radiowaves.left.and.right", title: "Pair",
-                            detail: pairings.selfPairing.map { "This iPhone: \($0.displayName)" } ?? "Create this iPhone's pairing file")
-                    toolRow(.pairingToApps, symbol: "doc.badge.gearshape", title: "Pairing File to Apps",
-                            detail: "Put the pairing file inside SideStore, StikDebug and others")
+                    toolRow(.pair, symbol: "antenna.radiowaves.left.and.right", title: String(localized: "Pair"),
+                            detail: pairings.selfPairing.map { String(localized: "This iPhone: \($0.displayName)") } ?? String(localized: "Create this iPhone's pairing file"))
+                    toolRow(.pairingToApps, symbol: "doc.badge.gearshape", title: String(localized: "Pairing File to Apps"),
+                            detail: String(localized: "Put the pairing file inside SideStore, StikDebug and others"))
                 }
 
                 VStack(spacing: 10) {
                     SectionLabel(title: "Signing & Account")
-                    toolRow(.entitlements, symbol: "checkmark.shield.fill", title: "Entitlements",
-                            detail: entitlements.enabled.isEmpty ? "Extra capabilities for apps AltLoad signs"
-                                : "\(entitlements.enabled.count) on · added on the next install or refresh")
-                    toolRow(.appIDs, symbol: "app.badge", title: "App IDs",
+                    toolRow(.entitlements, symbol: "checkmark.shield.fill", title: String(localized: "Entitlements"),
+                            detail: entitlements.enabled.isEmpty ? String(localized: "Extra capabilities for apps AltLoad signs")
+                                : String(localized: "\(entitlements.enabled.count) on · added on the next install or refresh"))
+                    toolRow(.appIDs, symbol: "app.badge", title: String(localized: "App IDs"),
                             detail: appIDsDetail)
-                    toolRow(.certificates, symbol: "checkmark.seal.fill", title: "Certificates",
-                            detail: "Your Apple ID's certificates, App IDs and devices")
+                    toolRow(.certificates, symbol: "checkmark.seal.fill", title: String(localized: "Certificates"),
+                            detail: String(localized: "Your Apple ID's certificates, App IDs and devices"))
                 }
             }
-            .navigationTitle("Tools")
+            .navigationTitle(String(localized: "Tools"))
             .toolbarTitleDisplayMode(.inlineLarge)
             .settingsButton()
             .navigationDestination(for: ToolRoute.self) { route in
@@ -79,25 +79,25 @@ struct ToolsView: View {
     }
 
     private var altServerDetail: String {
-        guard altServer.isRunning else { return "Off. AltStore will say \"AltServer not found\"" }
+        guard altServer.isRunning else { return String(localized: "Off. AltStore will say \"AltServer not found\"") }
         if let date = altServer.lastContact {
-            return "Running · AltStore connected \(date.formatted(.relative(presentation: .named)))"
+            return String(localized: "Running · AltStore connected \(date.formatted(.relative(presentation: .named)))")
         }
-        return "Running · AltStore can find it on this iPhone"
+        return String(localized: "Running · AltStore can find it on this iPhone")
     }
 
     private var appIDsDetail: String {
         if let ids = account.overview?.appIds, let max = ids.max, let available = ids.available {
-            return "\(max - available) of \(max) used · \(available) available"
+            return String(localized: "\(max - available) of \(max) used · \(available) available")
         }
-        return "See which App IDs are in use and when they free up"
+        return String(localized: "See which App IDs are in use and when they free up")
     }
 
     private var locationDetail: String {
         if case .active(let c) = location.state {
-            return String(format: "Simulating %.4f, %.4f", c.latitude, c.longitude)
+            return String(format: String(localized: "Simulating %.4f, %.4f"), c.latitude, c.longitude)
         }
-        return "Make this iPhone report another location"
+        return String(localized: "Make this iPhone report another location")
     }
 
     private func toolRow(_ route: ToolRoute, symbol: String, title: String, detail: String, tint: Color = Aurora.accent) -> some View {

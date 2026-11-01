@@ -173,7 +173,7 @@ final class PairingController: ObservableObject {
             self.finishTask(success: false)
             PairingLiveActivity.shared.finish(success: false)
             if self.isRunning {
-                self.phase = .failed("Background time expired before a device connected. Tap Pair to try again.")
+                self.phase = .failed(String(localized: "Background time expired before a device connected. Tap Pair to try again."))
             }
         }
 
@@ -196,7 +196,7 @@ final class PairingController: ObservableObject {
                     }
                 }
             }
-            let raw = Self.rawOutcome(rc: rc, result: result, fallback: "Pairing failed")
+            let raw = Self.rawOutcome(rc: rc, result: result, fallback: String(localized: "Pairing failed"))
             altload_result_free(&result)
             if let ctx = ctx { Unmanaged<PairingController>.fromOpaque(ctx).release() }
 
@@ -238,7 +238,7 @@ final class PairingController: ObservableObject {
                 let saved = try store.save(fromTemporaryPath: path, name: name, model: model, udid: udid)
                 return .success(saved)
             } catch {
-                return .failed("Paired, but the pairing file couldn't be saved: \(error.localizedDescription)")
+                return .failed(String(localized: "Paired, but the pairing file couldn't be saved: \(error.localizedDescription)"))
             }
         }
     }
@@ -267,12 +267,12 @@ final class PairingController: ObservableObject {
         PairingLiveActivity.shared.show(code: pin)
         if #available(iOS 26, *) {
             bgTask?.progress.completedUnitCount = 50
-            bgTask?.updateTitle("AltLoad", subtitle: "Enter code \(pin) on this device")
+            bgTask?.updateTitle(String(localized: "AltLoad"), subtitle: String(localized: "Enter code \(pin) on this device"))
         }
         if keepAliveAudio || keepAliveLocation {
             notify(id: "altload.pin",
-                   title: "AltLoad pairing code",
-                   body: "Enter \(pin) on this device to pair.")
+                   title: String(localized: "AltLoad pairing code"),
+                   body: String(localized: "Enter \(pin) on this device to pair."))
         }
     }
 
@@ -283,8 +283,8 @@ final class PairingController: ObservableObject {
 
     private func postReturnNotification() {
         notify(id: "altload.done",
-               title: "Pairing complete",
-               body: "Return to AltLoad to export the pairing file.")
+               title: String(localized: "Pairing complete"),
+               body: String(localized: "Return to AltLoad to export the pairing file."))
     }
 
     private func notify(id: String, title: String, body: String) {
@@ -297,7 +297,7 @@ final class PairingController: ObservableObject {
     }
 
     private static let localNetworkMessage =
-        "Local Network permission is required. Enable it in Settings › AltLoad › Local Network, then try again."
+        String(localized: "Local Network permission is required. Enable it in Settings › AltLoad › Local Network, then try again.")
 }
 
 // MARK: - C callbacks

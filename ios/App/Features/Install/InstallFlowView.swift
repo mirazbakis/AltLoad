@@ -115,27 +115,27 @@ struct InstallFlowView: View {
         switch target {
         case .store(let store):
             if let release = controller.releases[store] {
-                return "Version \(release.version) · \(store.tagline)"
+                return String(localized: "Version \(release.version) · \(store.tagline)")
             }
             return store.tagline
         case .ipa:
-            return "Signed with your Apple ID"
+            return String(localized: "Signed with your Apple ID")
         }
     }
 
     private var navigationTitle: String {
         switch controller.phase {
-        case .success: "Installed"
-        case .failed: "Install Failed"
+        case .success: String(localized: "Installed")
+        case .failed: String(localized: "Install Failed")
         case .idle: actionVerb
-        default: "Installing"
+        default: String(localized: "Installing")
         }
     }
 
     private var actionVerb: String {
-        guard let store = target.store else { return "Sign & Install" }
-        guard controller.isOnDevice(store) else { return "Install" }
-        return controller.updateAvailable(store) ? "Update" : "Refresh"
+        guard let store = target.store else { return String(localized: "Sign & Install") }
+        guard controller.isOnDevice(store) else { return String(localized: "Install") }
+        return controller.updateAvailable(store) ? String(localized: "Update") : String(localized: "Refresh")
     }
 
     // MARK: - Steps
@@ -147,7 +147,7 @@ struct InstallFlowView: View {
             if pairings.selfPairing == nil {
                 GlassCard(tint: Aurora.danger) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Label("Pair this iPhone first", systemImage: "link.badge.plus")
+                        Label(String(localized: "Pair this iPhone first"), systemImage: "link.badge.plus")
                             .font(.headline)
                         Text("AltLoad needs this iPhone's pairing file to talk to it, the way a computer would.")
                             .font(.subheadline)
@@ -159,17 +159,17 @@ struct InstallFlowView: View {
             }
 
         case .checking:
-            stepsCard(detail: "Getting ready…")
+            stepsCard(detail: String(localized: "Getting ready…"))
 
         case .downloading:
-            stepsCard(detail: "Downloading \(target.title)…")
+            stepsCard(detail: String(localized: "Downloading \(target.title)…"))
 
         case .needsVPN:
             VStack(spacing: 16) {
                 stepsCard(detail: nil)
                 GlassCard(tint: Aurora.accent) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Label("Turn on LocalDevVPN", systemImage: "network.badge.shield.half.filled")
+                        Label(String(localized: "Turn on LocalDevVPN"), systemImage: "network.badge.shield.half.filled")
                             .font(.headline)
                         Text("LocalDevVPN loops traffic for \(LocalDevVPN.targetIP) back into this iPhone, so AltLoad can reach it like a computer would. It only carries that one address, and your normal internet traffic isn't affected.")
                             .font(.subheadline)
@@ -198,12 +198,12 @@ struct InstallFlowView: View {
                                 .foregroundStyle(Aurora.secondaryText)
                         }
                         if app.store == .altstore || app.store == .altstoreBeta {
-                            Label("AltStore uses AltLoad as its AltServer. Keep AltLoad open while AltStore installs or refreshes, or turn on background mode in Tools › AltServer.", systemImage: "server.rack")
+                            Label(String(localized: "AltStore uses AltLoad as its AltServer. Keep AltLoad open while AltStore installs or refreshes, or turn on background mode in Tools › AltServer."), systemImage: "server.rack")
                                 .font(.footnote)
                                 .foregroundStyle(Aurora.mist)
                         }
                         if app.store?.isSideStore == true {
-                            Label("SideStore refreshes apps by itself. Keep LocalDevVPN on when it does.", systemImage: "arrow.triangle.2.circlepath")
+                            Label(String(localized: "SideStore refreshes apps by itself. Keep LocalDevVPN on when it does."), systemImage: "arrow.triangle.2.circlepath")
                                 .font(.footnote)
                                 .foregroundStyle(Aurora.mist)
                         }
@@ -223,7 +223,7 @@ struct InstallFlowView: View {
             VStack(spacing: 18) {
                 GlassCard(tint: Aurora.danger) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("Stopped at: \(controller.step.title(for: target))", systemImage: controller.step.symbol)
+                        Label(String(localized: "Stopped at: \(controller.step.title(for: target))"), systemImage: controller.step.symbol)
                             .font(.subheadline.weight(.semibold))
                         Text(message)
                             .font(.footnote)
@@ -321,7 +321,7 @@ struct InstallFlowView: View {
         VStack(alignment: .leading, spacing: 10) {
             SectionLabel(title: "Apple ID")
             VStack(spacing: 0) {
-                TextField("Apple ID email", text: $email)
+                TextField(String(localized: "Apple ID email"), text: $email)
                     .textContentType(.username)
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
@@ -337,7 +337,7 @@ struct InstallFlowView: View {
                 Divider()
                     .overlay(Color.white.opacity(0.15))
                     .padding(.horizontal, 16)
-                SecureField("Password", text: $password)
+                SecureField(String(localized: "Password"), text: $password)
                     .textContentType(.password)
                     .focused($focus, equals: .password)
                     .submitLabel(.go)
@@ -347,7 +347,7 @@ struct InstallFlowView: View {
                 Divider()
                     .overlay(Color.white.opacity(0.15))
                     .padding(.horizontal, 16)
-                Toggle("Remember password", isOn: $remember)
+                Toggle(String(localized: "Remember password"), isOn: $remember)
                     .font(.system(size: 17, weight: .semibold))
                     .padding(.horizontal, 16)
                     .frame(minHeight: 50)
@@ -374,7 +374,7 @@ struct InstallFlowView: View {
         VStack(alignment: .leading, spacing: 10) {
             SectionLabel(title: "App Extensions")
             Menu {
-                Picker("App Extensions", selection: $extensionsRaw) {
+                Picker(String(localized: "App Extensions"), selection: $extensionsRaw) {
                     ForEach(ExtensionsMode.allCases) { mode in
                         Label(mode.title, systemImage: mode.symbol).tag(mode.rawValue)
                     }
@@ -409,12 +409,12 @@ struct InstallFlowView: View {
     }
 
     private var anisetteHost: String {
-        if controller.anisetteURL == AnisetteServers.automatic { return "a public server that's working right now" }
+        if controller.anisetteURL == AnisetteServers.automatic { return String(localized: "a public server that's working right now") }
         return URL(string: controller.anisetteURL)?.host() ?? controller.anisetteURL
     }
 
     private var limitNote: String {
-        "With a free Apple ID apps last 7 days."
+        String(localized: "With a free Apple ID apps last 7 days.")
     }
 
     private var canStart: Bool {

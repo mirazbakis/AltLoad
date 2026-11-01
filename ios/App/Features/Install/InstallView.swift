@@ -27,7 +27,7 @@ struct InstallView: View {
                 if pairings.selfPairing == nil {
                     GlassCard(tint: Aurora.danger) {
                         VStack(alignment: .leading, spacing: 6) {
-                            Label("Pair this iPhone first", systemImage: "link.badge.plus")
+                            Label(String(localized: "Pair this iPhone first"), systemImage: "link.badge.plus")
                                 .font(.headline)
                             Text("AltLoad needs this iPhone's pairing file to talk to it, the way a computer would.")
                                 .font(.subheadline)
@@ -48,7 +48,7 @@ struct InstallView: View {
                 }
 
                 VStack(spacing: 10) {
-                    SectionLabel(title: "Setup", trailing: "\(readyCount) of 4 ready")
+                    SectionLabel(title: "Setup", trailing: String(localized: "\(readyCount) of 4 ready"))
                     checklist
                 }
 
@@ -62,24 +62,24 @@ struct InstallView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 8)
             }
-            .navigationTitle("Install")
+            .navigationTitle(String(localized: "Install"))
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Menu {
-                        Button("Check for Updates", systemImage: "arrow.clockwise") {
+                        Button(String(localized: "Check for Updates"), systemImage: "arrow.clockwise") {
                             Task {
                                 await controller.loadCatalogs()
                                 await controller.checkDevice(store)
                             }
                         }
                         .disabled(controller.isBusy)
-                        Button("Install IPA from Files…", systemImage: "doc.badge.plus") {
+                        Button(String(localized: "Install IPA from Files…"), systemImage: "doc.badge.plus") {
                             showImporter = true
                         }
                         .disabled(pairings.selfPairing == nil || controller.isBusy)
                     } label: {
-                        Label("More", systemImage: "ellipsis")
+                        Label(String(localized: "More"), systemImage: "ellipsis")
                     }
                 }
             }
@@ -107,8 +107,8 @@ struct InstallView: View {
                     importError = error.localizedDescription
                 }
             }
-            .alert("Couldn't import the IPA", isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
-                Button("OK") { importError = nil }
+            .alert(String(localized: "Couldn't import the IPA"), isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
+                Button(String(localized: "OK")) { importError = nil }
             } message: {
                 Text(importError ?? "")
             }
@@ -121,20 +121,20 @@ struct InstallView: View {
     /// One dropdown for every store, grouped by family.
     private var storeMenu: some View {
         Menu {
-            Section("AltStore") {
-                menuItem(.altstore, title: "AltStore")
-                menuItem(.altstoreBeta, title: "AltStore Beta")
+            Section(String(localized: "AltStore")) {
+                menuItem(.altstore, title: String(localized: "AltStore"))
+                menuItem(.altstoreBeta, title: String(localized: "AltStore Beta"))
             }
-            Section("SideStore") {
-                menuItem(.sidestore, title: "SideStore")
-                menuItem(.sidestoreNightly, title: "SideStore Nightly")
+            Section(String(localized: "SideStore")) {
+                menuItem(.sidestore, title: String(localized: "SideStore"))
+                menuItem(.sidestoreNightly, title: String(localized: "SideStore Nightly"))
             }
-            Section("SideStore + LiveContainer") {
-                menuItem(.sidestoreLC, title: "SideStore + LC")
-                menuItem(.sidestoreLCNightly, title: "SideStore + LC Nightly")
+            Section(String(localized: "SideStore + LiveContainer")) {
+                menuItem(.sidestoreLC, title: String(localized: "SideStore + LC"))
+                menuItem(.sidestoreLCNightly, title: String(localized: "SideStore + LC Nightly"))
             }
-            Section("Husk") {
-                menuItem(.husk, title: "Husk")
+            Section(String(localized: "Husk")) {
+                menuItem(.husk, title: String(localized: "Husk"))
             }
         } label: {
             HStack(spacing: 12) {
@@ -178,11 +178,11 @@ struct InstallView: View {
     private var repositoryDownCard: some View {
         GlassCard(tint: Aurora.ember) {
             VStack(alignment: .leading, spacing: 10) {
-                Label("\(store.name)'s repository is down", systemImage: "exclamationmark.icloud.fill")
+                Label(String(localized: "\(store.name)'s repository is down"), systemImage: "exclamationmark.icloud.fill")
                     .font(.headline)
                 Text(StoreCatalog.newestCachedIPA(store) != nil
-                     ? "AltLoad will use the copy it downloaded last time. You can also pick an IPA you have."
-                     : "AltLoad tried the source, its mirror and GitHub. Try again later, or pick a \(store.name) IPA you already have.")
+                     ? String(localized: "AltLoad will use the copy it downloaded last time. You can also pick an IPA you have.")
+                     : String(localized: "AltLoad tried the source, its mirror and GitHub. Try again later, or pick a \(store.name) IPA you already have."))
                     .font(.subheadline)
                     .foregroundStyle(Aurora.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -190,13 +190,13 @@ struct InstallView: View {
                     Button {
                         Task { await controller.loadCatalog(store) }
                     } label: {
-                        Label("Retry", systemImage: "arrow.clockwise").frame(maxWidth: .infinity)
+                        Label(String(localized: "Retry"), systemImage: "arrow.clockwise").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(AltLoadButtonStyle(prominent: false))
                     Button {
                         showImporter = true
                     } label: {
-                        Label("Pick IPA", systemImage: "doc.badge.plus").frame(maxWidth: .infinity)
+                        Label(String(localized: "Pick IPA"), systemImage: "doc.badge.plus").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(AltLoadButtonStyle(prominent: false))
                     .disabled(pairings.selfPairing == nil)
@@ -245,21 +245,21 @@ struct InstallView: View {
     private var chips: some View {
         statusChip
         if !entitlements.enabled.isEmpty {
-            GlassChip(text: "\(entitlements.enabled.count) entitlement\(entitlements.enabled.count == 1 ? "" : "s")",
+            GlassChip(text: entitlements.enabled.count == 1 ? String(localized: "1 entitlement") : String(localized: "\(entitlements.enabled.count) entitlements"),
                       systemImage: "checkmark.shield.fill", tint: Aurora.sky)
         }
     }
 
     private var versionLine: String {
         if let release = controller.releases[store] {
-            var line = store.isNightly ? "Nightly build" : "Latest \(release.version)"
+            var line = store.isNightly ? String(localized: "Nightly build") : String(localized: "Latest \(release.version)")
             if let date = release.date.flatMap(Self.parseDate) {
-                line += " · \(date.formatted(date: .abbreviated, time: .omitted))"
+                line += String(localized: " · \(date.formatted(date: .abbreviated, time: .omitted))")
             }
-            if let min = release.minOSVersion { line += " · iOS \(min)+" }
+            if let min = release.minOSVersion { line += String(localized: " · iOS \(min)+") }
             return line
         }
-        return controller.catalogErrors[store] ?? "Checking the \(store.name) source…"
+        return controller.catalogErrors[store] ?? String(localized: "Checking the \(store.name) source…")
     }
 
     /// What's really on the iPhone, from the device check, next to AltLoad's record.
@@ -268,35 +268,35 @@ struct InstallView: View {
         let record = controller.installed(store)
         switch controller.presence[store.base] {
         case .checking where record == nil:
-            GlassChip(text: "Checking this iPhone…", systemImage: "magnifyingglass")
+            GlassChip(text: String(localized: "Checking this iPhone…"), systemImage: "magnifyingglass")
         case .missing:
             if record != nil {
-                GlassChip(text: "Not on this iPhone any more", systemImage: "exclamationmark.triangle.fill", tint: Aurora.danger)
+                GlassChip(text: String(localized: "Not on this iPhone any more"), systemImage: "exclamationmark.triangle.fill", tint: Aurora.danger)
             } else {
-                GlassChip(text: "Not installed", systemImage: "circle.dashed")
+                GlassChip(text: String(localized: "Not installed"), systemImage: "circle.dashed")
             }
         case .installed(let version) where record == nil:
-            GlassChip(text: "On this iPhone\(version.map { " · \($0)" } ?? ""), not signed by AltLoad",
+            GlassChip(text: version.map { String(localized: "On this iPhone · \($0), not signed by AltLoad") } ?? String(localized: "On this iPhone, not signed by AltLoad"),
                       systemImage: "checkmark.circle", tint: Aurora.sky)
         default:
             if let record {
                 if record.isExpired {
-                    GlassChip(text: "Expired, refresh to reopen", systemImage: "exclamationmark.triangle.fill", tint: Aurora.danger)
+                    GlassChip(text: String(localized: "Expired, refresh to reopen"), systemImage: "exclamationmark.triangle.fill", tint: Aurora.danger)
                 } else if let days = record.daysLeft {
-                    GlassChip(text: "Installed \(record.version) · \(days) day\(days == 1 ? "" : "s") left", systemImage: "checkmark.seal.fill", tint: Aurora.success)
+                    GlassChip(text: days == 1 ? String(localized: "Installed \(record.version) · 1 day left") : String(localized: "Installed \(record.version) · \(days) days left"), systemImage: "checkmark.seal.fill", tint: Aurora.success)
                 } else {
-                    GlassChip(text: "Installed \(record.version)", systemImage: "checkmark.seal.fill", tint: Aurora.success)
+                    GlassChip(text: String(localized: "Installed \(record.version)"), systemImage: "checkmark.seal.fill", tint: Aurora.success)
                 }
             } else {
-                GlassChip(text: "Not installed", systemImage: "circle.dashed")
+                GlassChip(text: String(localized: "Not installed"), systemImage: "circle.dashed")
             }
         }
     }
 
     private var primaryTitle: String {
         let latest = controller.releases[store]?.version ?? ""
-        guard controller.isOnDevice(store) else { return store.isNightly ? "Install \(store.name)" : "Install \(store.name) \(latest)" }
-        return controller.updateAvailable(store) ? "Update to \(latest)" : "Refresh \(store.name)"
+        guard controller.isOnDevice(store) else { return store.isNightly ? String(localized: "Install \(store.name)") : String(localized: "Install \(store.name) \(latest)") }
+        return controller.updateAvailable(store) ? String(localized: "Update to \(latest)") : String(localized: "Refresh \(store.name)")
     }
 
     private var primarySymbol: String {
@@ -314,11 +314,11 @@ struct InstallView: View {
                 appRow(app)
                     .contextMenu {
                         if let target = app.refreshTarget {
-                            Button("Refresh", systemImage: "arrow.triangle.2.circlepath") {
+                            Button(String(localized: "Refresh"), systemImage: "arrow.triangle.2.circlepath") {
                                 controller.begin(target)
                             }
                         }
-                        Button("Stop Tracking", systemImage: "minus.circle", role: .destructive) {
+                        Button(String(localized: "Stop Tracking"), systemImage: "minus.circle", role: .destructive) {
                             controller.forget(app)
                         }
                     }
@@ -341,17 +341,17 @@ struct InstallView: View {
         ) {
             if let target = app.refreshTarget {
                 if app.isExpired {
-                    PillButton(caption: "Expired", title: "Refresh", tint: Aurora.danger) { controller.begin(target) }
+                    PillButton(caption: String(localized: "Expired"), title: String(localized: "Refresh"), tint: Aurora.danger) { controller.begin(target) }
                 } else if let store = app.store, controller.updateAvailable(store) {
-                    PillButton(title: "Update") { controller.begin(target) }
+                    PillButton(title: String(localized: "Update")) { controller.begin(target) }
                 } else if let days = app.daysLeft {
-                    PillButton(caption: "Expires in", title: "\(days) day\(days == 1 ? "" : "s")") { controller.begin(target) }
+                    PillButton(caption: String(localized: "Expires in"), title: days == 1 ? String(localized: "1 day") : String(localized: "\(days) days")) { controller.begin(target) }
                 } else {
-                    PillButton(title: "Refresh") { controller.begin(target) }
+                    PillButton(title: String(localized: "Refresh")) { controller.begin(target) }
                 }
             } else {
                 // An IPA whose cached file is gone: it has to be picked again.
-                PillButton(caption: "Expires in", title: "\(app.daysLeft ?? 0) days", tint: Aurora.mist, prominent: false) {}
+                PillButton(caption: String(localized: "Expires in"), title: String(localized: "\(app.daysLeft ?? 0) days"), tint: Aurora.mist, prominent: false) {}
                     .disabled(true)
             }
         }
@@ -359,11 +359,11 @@ struct InstallView: View {
 
     private func appDetail(_ app: InstalledApp) -> String {
         if app.store == nil && app.refreshTarget == nil {
-            return "Version \(app.version) · Pick the IPA again to refresh"
+            return String(localized: "Version \(app.version) · Pick the IPA again to refresh")
         }
-        guard let expiration = app.expiration else { return "Version \(app.version)" }
+        guard let expiration = app.expiration else { return String(localized: "Version \(app.version)") }
         let when = expiration.formatted(.relative(presentation: .named))
-        return "Version \(app.version) · \(app.isExpired ? "Expired" : "Expires") \(when)"
+        return app.isExpired ? String(localized: "Version \(app.version) · Expired \(when)") : String(localized: "Version \(app.version) · Expires \(when)")
     }
 
     // MARK: - Checklist
@@ -373,17 +373,17 @@ struct InstallView: View {
             VStack(alignment: .leading, spacing: 14) {
                 StatusRow(
                     title: "Pairing file",
-                    detail: pairings.selfPairing.map { "\($0.displayName), saved \($0.date.formatted(.relative(presentation: .named)))" }
-                        ?? "Create one in Tools › Pair",
+                    detail: pairings.selfPairing.map { String(localized: "\($0.displayName), saved \($0.date.formatted(.relative(presentation: .named)))") }
+                        ?? String(localized: "Create one in Tools › Pair"),
                     state: pairings.selfPairing == nil ? .attention : .done)
                 StatusRow(
                     title: "LocalDevVPN",
-                    detail: vpnActive ? "Connected, reaching this iPhone at \(LocalDevVPN.targetIP)"
-                        : (LocalDevVPN.isInstalled ? "Installed but off. AltLoad will ask you to turn it on" : "Needed for installs. It's free on the App Store"),
+                    detail: vpnActive ? String(localized: "Connected, reaching this iPhone at \(LocalDevVPN.targetIP)")
+                        : (LocalDevVPN.isInstalled ? String(localized: "Installed but off. AltLoad will ask you to turn it on") : String(localized: "Needed for installs. It's free on the App Store")),
                     state: vpnActive ? .done : .pending)
                 StatusRow(
                     title: "Apple ID",
-                    detail: AppleIDStore.email.isEmpty ? "You'll sign in when you install" : AppleIDStore.email,
+                    detail: AppleIDStore.email.isEmpty ? String(localized: "You'll sign in when you install") : AppleIDStore.email,
                     state: AppleIDStore.email.isEmpty ? .pending : .done)
                 StatusRow(
                     title: LocalizedStringKey(store.name),
@@ -412,12 +412,12 @@ struct InstallView: View {
     private var storeDetail: String {
         let record = controller.installed(store)
         guard controller.isOnDevice(store) else {
-            return record == nil ? "Not installed yet" : "Deleted from this iPhone. Install it again"
+            return record == nil ? String(localized: "Not installed yet") : String(localized: "Deleted from this iPhone. Install it again")
         }
         guard let record else {
-            return "On this iPhone. Refresh once so AltLoad can keep it signed"
+            return String(localized: "On this iPhone. Refresh once so AltLoad can keep it signed")
         }
-        return "\(controller.installedVersion(store) ?? record.version), installed \(record.installedAt.formatted(.relative(presentation: .named)))"
+        return String(localized: "\(controller.installedVersion(store) ?? record.version), installed \(record.installedAt.formatted(.relative(presentation: .named)))")
     }
 
     private static func parseDate(_ s: String) -> Date? {

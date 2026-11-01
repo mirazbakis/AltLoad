@@ -17,7 +17,7 @@ struct LocationView: View {
             MapReader { proxy in
                 Map(position: $position) {
                     if let pin {
-                        Marker("Simulated", systemImage: "location.fill", coordinate: pin)
+                        Marker(String(localized: "Simulated"), systemImage: "location.fill", coordinate: pin)
                             .tint(Aurora.accent)
                     }
                     UserAnnotation()
@@ -32,16 +32,16 @@ struct LocationView: View {
             controls
                 .padding(16)
         }
-        .navigationTitle("Location")
+        .navigationTitle(String(localized: "Location"))
         .toolbarTitleDisplayMode(.inline)
-        .searchable(text: $query, prompt: "Search for a place")
+        .searchable(text: $query, prompt: String(localized: "Search for a place"))
         .searchSuggestions {
             ForEach(results, id: \.self) { item in
                 Button {
                     choose(item)
                 } label: {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(item.name ?? "Place")
+                        Text(item.name ?? String(localized: "Place"))
                         if let subtitle = item.subtitle {
                             Text(subtitle).font(.caption).foregroundStyle(Aurora.secondaryText)
                         }
@@ -77,7 +77,7 @@ struct LocationView: View {
                     Button {
                         if let pin { spoofer.simulate(pin) }
                     } label: {
-                        Label(spoofer.isRunning ? "Move Here" : "Simulate", systemImage: "location.fill")
+                        Label(spoofer.isRunning ? String(localized: "Move Here") : String(localized: "Simulate"), systemImage: "location.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(AltLoadButtonStyle())
@@ -87,7 +87,7 @@ struct LocationView: View {
                         Button {
                             spoofer.stop()
                         } label: {
-                            Label("Stop", systemImage: "stop.fill").frame(maxWidth: .infinity)
+                            Label(String(localized: "Stop"), systemImage: "stop.fill").frame(maxWidth: .infinity)
                         }
                         .buttonStyle(AltLoadButtonStyle(prominent: false))
                     }
@@ -101,7 +101,7 @@ struct LocationView: View {
     private var statusLine: some View {
         switch spoofer.state {
         case .idle:
-            Label(pairings.selfPairing == nil ? "Pair this iPhone first" : "Using the real location",
+            Label(pairings.selfPairing == nil ? String(localized: "Pair this iPhone first") : String(localized: "Using the real location"),
                   systemImage: "location")
                 .font(.subheadline.weight(.semibold))
         case .starting(let stage):
@@ -110,7 +110,7 @@ struct LocationView: View {
                 Text(stage).font(.subheadline)
             }
         case .active:
-            Label("Simulating. Every app sees the pin.", systemImage: "location.fill")
+            Label(String(localized: "Simulating. Every app sees the pin."), systemImage: "location.fill")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Aurora.success)
         case .failed(let message):
