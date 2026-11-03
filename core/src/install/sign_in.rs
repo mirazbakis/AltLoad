@@ -8,8 +8,9 @@ use super::*;
 ///
 /// `anisette_urls` is one server or several separated by newlines, best first.
 /// When Apple or a server rejects the anisette data (a dead server, -45061,
-/// -80045 and the like) one more is tried. Wrong passwords, 2FA problems and
-/// cancellations stop right away so the account isn't hammered.
+/// -80045 and the like) one more is tried. So is -22406, which Apple also sends
+/// for anisette data it won't accept. 2FA problems and cancellations stop right
+/// away so the account isn't hammered.
 pub(super) async fn sign_in(
     apple_id: &str,
     password: &str,
@@ -31,6 +32,7 @@ pub(super) async fn sign_in(
     check_pause(apple_id)?;
 
     let mut failures: Vec<String> = Vec::new();
+    let mut refused = false;
     for (i, url) in urls.iter().enumerate() {
         if i > 0 {
             cbs.progress(&format!("Signing in to Apple (trying {})…", host_of(url)), -1.0);
@@ -41,9 +43,13 @@ pub(super) async fn sign_in(
                 return Ok(session);
             }
             Err((e, detail)) => match classify_failure(&detail) {
-                SignInFailure::WrongPassword => {
-                    record_rejection(apple_id, false);
-                    return Err(WRONG_PASSWORD.to_string());
+                SignInFailure::PasswordOrAnisette => {
+                    refused = true;
+                    failures.push(format!("{}: {e}", host_of(url)));
+                    if i + 1 == urls.len() {
+                        record_rejection(apple_id, false);
+                        return Err(PASSWORD_OR_ANISETTE.to_string());
+                    }
                 }
                 SignInFailure::Locked => {
                     record_rejection(apple_id, true);
@@ -64,6 +70,10 @@ pub(super) async fn sign_in(
         }
     }
 
+    // One sign-in counts once towards the pause, however many servers it tried.
+    if refused {
+        record_rejection(apple_id, false);
+    }
     let last = failures.last().cloned().unwrap_or_default();
     if failures.len() > 1 {
         Err(format!(
@@ -129,8 +139,9 @@ const REJECTIONS_BEFORE_PAUSE: u64 = 2;
 const PAUSE_SECS: u64 = 15 * 60;
 const PAUSE_KEY: &str = "pause";
 
-// AppleIDStore.forgetPasswordIfRejected looks for this wording.
-const WRONG_PASSWORD: &str = "Apple ID sign-in failed: your Apple ID or password is incorrect. Check them before trying again, because too many failed tries can lock your account.";
+// AppleIDStore.forgetPasswordIfRejected looks for LOCKED's wording. This one
+// mustn't match it, since the password may well be right.
+const PASSWORD_OR_ANISETTE: &str = "Apple ID sign-in failed: Apple turned down the sign-in with the anisette servers AltLoad tried. Apple answers the same way for a wrong password and for anisette data it won't accept, so check your Apple ID and password, then pick a different server in Settings › Anisette. Too many failed tries can lock your account.";
 const LOCKED: &str = "Apple ID sign-in failed: Apple says this Apple ID is locked. Unlock it at iforgot.apple.com, then sign in again.";
 const RATE_LIMITED: &str = "Apple ID sign-in failed: Apple is receiving too many requests from this account. Try again later.";
 
@@ -176,7 +187,8 @@ fn clear_pause() {
 
 #[derive(Debug, PartialEq)]
 enum SignInFailure {
-    WrongPassword,
+    /// -22406 and -20101: a wrong password, or Apple refusing the anisette data.
+    PasswordOrAnisette,
     Locked,
     RateLimited,
     /// The anisette server or Apple refusing its data, where another server may well work.
@@ -194,11 +206,11 @@ fn classify_failure(message: &str) -> SignInFailure {
     }
     if let Some(code) = auth_error_code(&m) {
         return match code {
-            -22406 | -20101 => SignInFailure::WrongPassword,
+            -22406 | -20101 => SignInFailure::PasswordOrAnisette,
             -20209 => SignInFailure::Locked,
             -45061 | -45054 | -80045 | -22410 | -22411 => SignInFailure::Anisette,
             _ if m.contains("locked") || m.contains("disabled") => SignInFailure::Locked,
-            _ if m.contains("incorrect") => SignInFailure::WrongPassword,
+            _ if m.contains("incorrect") => SignInFailure::PasswordOrAnisette,
             _ => SignInFailure::Other,
         };
     }
@@ -235,10 +247,17 @@ mod tests {
     #[test]
     fn apple_codes_decide_over_the_rest_of_the_report() {
         let wrong = "Auth error -22406: Your Apple ID or password was incorrect. src/anisette/remote_v3.rs connection";
-        assert_eq!(classify_failure(wrong), SignInFailure::WrongPassword);
+        assert_eq!(classify_failure(wrong), SignInFailure::PasswordOrAnisette);
         assert_eq!(classify_failure("Auth error -20209: This Apple ID has been locked"), SignInFailure::Locked);
         assert_eq!(classify_failure("Auth error -80045: password anisette"), SignInFailure::Anisette);
         assert_eq!(classify_failure("Auth error -99999: Something else"), SignInFailure::Other);
+    }
+
+    #[test]
+    fn a_refused_sign_in_keeps_the_saved_password() {
+        // AppleIDStore deletes the saved password on this wording; -22406 alone can't prove it's wrong.
+        assert!(!PASSWORD_OR_ANISETTE.contains("Apple ID or password is incorrect"));
+        assert!(LOCKED.contains("Apple ID is locked"));
     }
 
     #[test]

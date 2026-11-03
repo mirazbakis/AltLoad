@@ -60,10 +60,11 @@ enum AppleIDStore {
         }
     }
 
-    /// Deletes the saved password once Apple has turned it down or locked the account,
-    /// so it can't be sent again. The wording comes from sign_in.rs in the Rust core.
+    /// Deletes the saved password once Apple has locked the account, so it can't be
+    /// sent again. A plain refusal keeps it, since Apple gives the same answer for
+    /// anisette data it won't accept. The wording comes from sign_in.rs in the Rust core.
     static func forgetPasswordIfRejected(message: String, email: String) {
-        if message.contains("Apple ID or password is incorrect") || message.contains("Apple ID is locked") {
+        if message.contains("Apple ID is locked") {
             deletePassword(for: email)
         }
     }
