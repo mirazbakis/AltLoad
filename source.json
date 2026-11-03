@@ -23,9 +23,9 @@
         {
           "version": "1.4.0",
           "date": "2026-11-01T09:56:00Z",
-          "localizedDescription": "## AltLoad 1.4.0\n\n### New\n- **Husk.** Install Husk from the store list, with this iPhone's pairing file already inside it for its built-in JIT.\n- **French, German, Italian, Chinese and Russian.** AltLoad follows your iPhone's language.\n- **Update notices.** AltLoad tells you when a newer version is out.\n\n### Fixed\n- **Pairing files for SideStore and SideStore + LiveContainer.** They now include this iPhone's UDID and go everywhere SideStore looks, along with the settings newer builds need.\n- Fixed potential issues with Apple IDs",
+          "localizedDescription": "## AltLoad 1.4.0\n\n### New\n- **Husk.** Install Husk from the store list, with this iPhone's pairing file already inside it for its built-in JIT.\n- **French, German, Italian, Chinese and Russian.** AltLoad follows your iPhone's language.\n- **Update notices.** AltLoad tells you when a newer version is out.\n\n### Fixed\n- **Pairing files for SideStore and SideStore + LiveContainer.** They now include this iPhone's UDID and go everywhere SideStore looks, along with the settings newer builds need.\n- **\"Apple ID or password incorrect\" with Anisette on Automatic.** Apple gives that answer for anisette data it won't accept too, so AltLoad now tries the next server instead of stopping, and keeps your saved password.\n- Fixed potential issues with Apple IDs",
           "downloadURL": "https://github.com/mirazbakis/AltLoad/releases/download/v1.4.0/AltLoad.ipa",
-          "size": 11792459,
+          "size": 11794981,
           "minOSVersion": "27.0"
         },
         {
