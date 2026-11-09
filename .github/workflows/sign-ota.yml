@@ -60,7 +60,7 @@ jobs:
 
       - name: Configure Pages
         id: pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Download latest non-beta AltLoad IPA
         env:
@@ -151,13 +151,13 @@ jobs:
           signing/scripts/build-site.sh "site" "_site"
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: "_site"
 
       - name: Deploy to GitHub Pages
         id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
       # source.json at the repo root is the AltStore / SideStore source. Rewrite it
       # from the releases and commit it to main when it changed. Runs after the
