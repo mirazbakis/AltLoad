@@ -156,6 +156,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run sign-ota.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME"
 
+      # The same goes for AltPair: build its two tools and attach them to this
+      # release, where the install page and install.sh look for them.
+      - name: Build AltPair for this release
+        if: inputs.publish == 'Release' && !contains(inputs.version, '-')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.version }}
+        run: gh workflow run altpair.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME" -f tag="$TAG"
+
       # Points the public "Nightly build" release at the commit this run built,
       # so anyone can download the IPA without a GitHub account.
       - name: Publish nightly build

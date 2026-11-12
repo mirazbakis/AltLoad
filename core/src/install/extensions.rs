@@ -52,6 +52,7 @@ pub(super) async fn sign_with_main_profile<C: MaxCertsCallback>(
     max_certs: &MaxCertsBehavior<C>,
     app_dir: PathBuf,
     udid: &str,
+    pairing: Option<&[u8]>,
     cbs: Callbacks,
 ) -> Result<PathBuf, String> {
     let cert = CertificateIdentity::retrieve(machine_name, apple_id, dev, team, storage, max_certs)
@@ -101,7 +102,7 @@ pub(super) async fn sign_with_main_profile<C: MaxCertsCallback>(
         .map_err(|e| err("Couldn't assign the app group", e))?;
     cbs.progress("Signing…", 0.15);
 
-    app.apply_special_app_behavior(&special, &group_identifier, &cert, None, Some(udid))
+    app.apply_special_app_behavior(&special, &group_identifier, &cert, pairing, Some(udid))
         .await
         .map_err(|e| err("Couldn't prepare the app", e))?;
 

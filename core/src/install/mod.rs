@@ -49,6 +49,7 @@ use isideload::sideload::builder::MaxCertsBehavior;
 use isideload::sideload::application::SpecialApp;
 use isideload::sideload::cert_identity::CertificateIdentity;
 use isideload::sideload::{SideloaderBuilder, TeamSelection};
+#[cfg(not(target_os = "linux"))]
 use isideload::util::keyring_storage::KeyringStorage;
 use isideload::util::storage::SideloadingStorage;
 use tokio::net::TcpStream;
@@ -58,6 +59,7 @@ mod account;
 mod bundle;
 mod device;
 mod extensions;
+mod jit;
 mod prompts;
 mod sign_in;
 mod storage;
@@ -422,28 +424,54 @@ async fn run_install(
         }
     };
 
-    // 1. Apple ID first, so a sign-in problem shows up straight away instead of
-    // after the device link, and 2FA is done before anything touches the device.
-    cbs.progress("Signing in to Apple…", -1.0);
-    let dev_session = sign_in(&cfg.apple_id, &cfg.password, &cfg.anisette_url, cbs, replies.clone()).await?;
-    check()?;
+    // The IPA unpacks on a blocking thread while the Apple ID sign-in and the
+    // device link run. Only the AltStore keys need the UDID, so they come later.
+    let mut unpack = Some({
+        let ipa = cfg.ipa_path.clone();
+        tokio::task::spawn_blocking(move || unpack_ipa(&ipa))
+    });
+    let mut work_dir: Option<PathBuf> = None;
 
-    // 2. Tunnel to this device.
-    cbs.progress("Connecting to this device…", -1.0);
-    let (mut adapter, mut handshake) = open_tunnel(&cfg).await?;
-    let udid = handshake
-        .properties
-        .get("UniqueDeviceID")
-        .and_then(|v| v.as_string())
-        .map(str::to_string)
-        .ok_or("This device didn't report its UDID over RSD.")?;
-    check()?;
+    let result = async {
+        // 1. Apple ID first, so a sign-in problem shows up straight away instead of
+        // after the device link, and 2FA is done before anything touches the device.
+        cbs.progress("Signing in to Apple…", -1.0);
+        let dev_session = sign_in(&cfg.apple_id, &cfg.password, &cfg.anisette_url, cbs, replies.clone()).await?;
+        check()?;
 
-    // 3. Unpack the IPA and add AltStore's device keys.
-    cbs.progress("Preparing the app…", -1.0);
-    let (work_dir, app_dir) = prepare_app(&cfg.ipa_path, &udid, &cfg.server_id)?;
-    let result = sign_and_install(&cfg, dev_session, cbs, replies, &check, &udid, app_dir, &mut adapter, &mut handshake).await;
-    let _ = std::fs::remove_dir_all(&work_dir);
+        // 2. Tunnel to this device.
+        cbs.progress("Connecting to this device…", -1.0);
+        let (mut adapter, mut handshake) = open_tunnel(&cfg).await?;
+        let udid = handshake
+            .properties
+            .get("UniqueDeviceID")
+            .and_then(|v| v.as_string())
+            .map(str::to_string)
+            .ok_or("This device didn't report its UDID over RSD.")?;
+        check()?;
+
+        // 3. Wait for the unpacked IPA and add AltStore's device keys.
+        cbs.progress("Preparing the app…", -1.0);
+        let handle = unpack.take().ok_or("The IPA unpack was already collected.")?;
+        let (work, app_dir) = handle
+            .await
+            .map_err(|e| err("Couldn't unpack the IPA", e))??;
+        work_dir = Some(work);
+        stamp_app(&app_dir, &udid, &cfg.server_id)?;
+        sign_and_install(&cfg, dev_session, cbs, replies, &check, &udid, app_dir, &mut adapter, &mut handshake).await
+    }
+    .await;
+
+    // If an earlier step ended the run first, wait for the unpack so its temp dir
+    // can still be removed.
+    if let Some(handle) = unpack.take() {
+        if let Ok(Ok((work, _))) = handle.await {
+            work_dir = Some(work);
+        }
+    }
+    if let Some(work) = work_dir {
+        let _ = std::fs::remove_dir_all(&work);
+    }
     result
 }
 
@@ -494,6 +522,10 @@ async fn sign_and_install(
         .map_err(|e| err("Couldn't register this device", e))?;
     check()?;
 
+    // This iPhone's pairing file, for AltStore's Remote AltServer setup. AltStore works
+    // without it, so a file that can't be read doesn't stop the install.
+    let pairing = pairing_for_altstore(&cfg.pairing_file_path, udid);
+
     // 4b. isideload only recognises AltStore by its exact bundle ID. AltStore Beta
     // needs the same keys: the certificate (so it refreshes apps with it instead of
     // making a new one) and its app group.
@@ -511,6 +543,9 @@ async fn sign_and_install(
         .await
         .map_err(|e| err("Couldn't get a signing certificate", e))?;
         inject_store_keys(&app_dir, ALTSTORE_BETA_BUNDLE_ID, &team.team_id, &cert).await?;
+        if let Some(pairing) = pairing.as_deref() {
+            seal_pairing_file(&app_dir, &cert, pairing)?;
+        }
         check()?;
     }
 
@@ -538,6 +573,7 @@ async fn sign_and_install(
             &MaxCertsBehavior::Prompt(revoke_prompt.clone()),
             app_dir,
             udid,
+            pairing.as_deref(),
             cbs,
         )
         .await?
@@ -547,9 +583,10 @@ async fn sign_and_install(
             std::future::ready(())
         };
         sideloader
-            // No pairing file: that's for AltStore's remote-AltServer setup, and AltLoad
-            // is AltStore's AltServer itself. The UDID matches the ALTDeviceID we wrote.
-            .sign_app(app_dir, Some(team.clone()), false, Some(sign_progress), None, Some(udid))
+            // AltLoad is AltStore's AltServer itself, but AltStore also gets the pairing
+            // file, so its Remote AltServer setup has one and skips pairing. isideload
+            // only uses it for AltStore. The UDID matches the ALTDeviceID we wrote.
+            .sign_app(app_dir, Some(team.clone()), false, Some(sign_progress), pairing.as_deref(), Some(udid))
             .await
             .map_err(|e| err("Signing failed", e))?
             .0

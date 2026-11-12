@@ -8,8 +8,8 @@
 //     juggling for the 3-active-apps limit.
 //   * Copying a pairing file into an installed app's container (house_arrest).
 //   * Tools › JIT and Location: mounting the Developer Disk Image (cryptexd),
-//     launching an app under debugserver and detaching so it keeps JIT, and
-//     simulating a location through DVT.
+//     launching an app under debugserver, answering its JIT requests and
+//     detaching so it keeps JIT, and simulating a location through DVT.
 //
 // One op per call; each call opens its own tunnel. `simulate_location` keeps its
 // tunnel open until `altload_location_stop`, so Swift runs it on its own thread.
@@ -52,7 +52,9 @@ use super::{
 ///   {"op":"remove_app","bundleId":"com.x"}
 ///   {"op":"ddi_status"} → {"mounted":bool}
 ///   {"op":"mount_ddi","dir":"/…/DDI"} (BuildManifest.plist + the cryptex files)
-///   {"op":"enable_jit","bundleId":"com.x","ddiDir":"/…/DDI"} → {"pid":n}
+///   {"op":"enable_jit","bundleId":"com.x","ddiDir":"/…/DDI","dialect":"universal"|"legacy"}
+///   → {"pid":n,"requests":n,"ended":"app"|"quiet"|"exited"}: blocks while the app
+///   is making JIT requests (see jit.rs)
 ///   {"op":"simulate_location","lat":f,"lon":f,"ddiDir":"/…/DDI"}: blocks, re-sending
 ///   the location every few seconds, until `altload_location_stop`. Move it with
 ///   `altload_location_update`.
@@ -212,8 +214,9 @@ async fn run(
             let bundle_id = string_field(&request, "bundleId")?;
             let dir = string_field(&request, "ddiDir")?;
             ensure_ddi(&mut adapter, &mut handshake, &dir, cbs).await?;
-            let pid = enable_jit(&mut adapter, &mut handshake, &bundle_id, cbs).await?;
-            Ok(serde_json::json!({ "pid": pid }))
+            let dialect = super::jit::Dialect::named(request.get("dialect").and_then(|v| v.as_str()).unwrap_or_default());
+            let (pid, served) = enable_jit(&mut adapter, &mut handshake, &bundle_id, dialect, cbs).await?;
+            Ok(serde_json::json!({ "pid": pid, "requests": served.requests, "ended": served.ended }))
         }
         "simulate_location" => {
             let lat = request.get("lat").and_then(|v| v.as_f64()).ok_or("Missing latitude.")?;
@@ -682,15 +685,17 @@ async fn ensure_ddi(
     Ok(())
 }
 
-/// Launches `bundle_id` suspended, attaches debugserver and detaches again. The
-/// attach marks the process as debugged, which is what lets it map executable
-/// memory (JIT) for the rest of its life.
+/// Launches `bundle_id` suspended and attaches debugserver. The attach marks the
+/// process as debugged, which is what lets it map executable memory (JIT) for the
+/// rest of its life. The debugger then stays for as long as the app keeps asking
+/// it to prepare JIT memory, and detaches when the app says so or goes quiet.
 async fn enable_jit(
     adapter: &mut AdapterHandle,
     handshake: &mut RsdHandshake,
     bundle_id: &str,
+    dialect: super::jit::Dialect,
     cbs: Callbacks,
-) -> Result<u64, String> {
+) -> Result<(u64, super::jit::Served), String> {
     cbs.progress("Launching the app…", -1.0);
     let mut server = RemoteServerClient::connect_rsd(adapter, handshake)
         .await
@@ -723,11 +728,9 @@ async fn enable_jit(
             return Err(format!("debugserver refused to attach ({reply}). The app has to be signed for development."));
         }
     }
-    debug
-        .send_command(DebugserverCommand::new("D".to_string(), Vec::new()))
-        .await
-        .map_err(|e| err("Couldn't detach from the app", e))?;
-    Ok(pid)
+    cbs.progress("Waiting for the app's JIT requests…", -1.0);
+    let served = super::jit::serve(&mut debug, dialect, cbs).await?;
+    Ok((pid, served))
 }
 
 static LOCATION_RUNNING: AtomicBool = AtomicBool::new(false);

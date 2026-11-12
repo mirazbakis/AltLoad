@@ -1,0 +1,33 @@
+[package]
+name = "altpair"
+version = "0.1.0"
+edition = "2021"
+description = "Installs AltLoad onto the iPhone it runs on, from a Linux shell, signed with your own Apple ID"
+publish = false
+
+# A workspace of its own, so it builds apart from the iOS core.
+[workspace]
+
+[[bin]]
+name = "altpair"
+path = "src/main.rs"
+
+[dependencies]
+# AltLoad's Rust core: Apple ID sign-in, tunnel to this iPhone, signing, install.
+altload_ffi = { path = "../../core" }
+libc = "0.2"
+plist = "1.8"
+serde_json = "1"
+# The same TLS stack the core uses (rustls with ring, no OpenSSL).
+reqwest = { version = "0.13", default-features = false, features = ["rustls-no-provider"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+tokio = { version = "1", features = ["rt", "net", "time", "macros"] }
+
+# Patches are not inherited from a path dependency, so the core's idevice pin is repeated here.
+[patch.crates-io]
+idevice = { git = "https://github.com/jkcoxson/idevice.git", rev = "d32c8189c51c2789496b0768039419c3705498c3" }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = true

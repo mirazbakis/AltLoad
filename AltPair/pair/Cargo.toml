@@ -1,0 +1,38 @@
+[package]
+name = "altpair"
+version = "0.1.0"
+edition = "2021"
+description = "Pairs an iPhone with itself from rootshell's local shell and hands the pairing file to the installer"
+publish = false
+
+[[bin]]
+name = "altpair"
+path = "src/main.rs"
+
+# Kept out of AltLoad's other Cargo projects.
+[workspace]
+
+[dependencies]
+plist = "1.8"
+
+# Only the wasm build talks to the device; host builds run the unit tests.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# Same idevice revision as core/Cargo.toml (see [patch.crates-io] below), but only
+# the pairing code: no tcp/ring/aws-lc, which pull in tokio's net driver or C code.
+# idevice needs some rustls backend to compile, and on every wasm32 target it
+# routes its timers through `wasmtimer`, which only its `wasm` feature enables.
+# `wasm` selects the pure-Rust rustcrypto backend; the pairing path never
+# touches TLS or timers, so link-time dead-code removal drops them.
+idevice = { version = "0.1.61", default-features = false, features = ["remote_pairing", "wasm"] }
+tokio = { version = "1", default-features = false, features = ["rt", "io-util", "macros", "time", "sync"] }
+getrandom = "0.2"
+
+[patch.crates-io]
+idevice = { git = "https://github.com/jkcoxson/idevice.git", rev = "d32c8189c51c2789496b0768039419c3705498c3" }
+
+[profile.release]
+opt-level = "z"
+lto = true
+panic = "abort"
+strip = true
+codegen-units = 1

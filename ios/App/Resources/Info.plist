@@ -80,6 +80,10 @@
         <string>sidestore</string>
         <string>livecontainer</string>
         <string>husk</string>
+        <!-- Emulators AltLoad installs. -->
+        <string>UTM</string>
+        <string>melonx</string>
+        <string>madeira</string>
     </array>
     <key>NSLocalNetworkUsageDescription</key>
     <string>AltLoad uses your local network to discover devices and complete pairing.</string>

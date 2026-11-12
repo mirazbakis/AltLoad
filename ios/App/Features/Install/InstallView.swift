@@ -133,8 +133,11 @@ struct InstallView: View {
                 menuItem(.sidestoreLC, title: String(localized: "SideStore + LC"))
                 menuItem(.sidestoreLCNightly, title: String(localized: "SideStore + LC Nightly"))
             }
-            Section(String(localized: "Husk")) {
+            Section(String(localized: "Emulators")) {
                 menuItem(.husk, title: String(localized: "Husk"))
+                menuItem(.utm, title: String(localized: "UTM"))
+                menuItem(.melonx, title: String(localized: "MeloNX"))
+                menuItem(.madeira, title: String(localized: "Madeira"))
             }
         } label: {
             HStack(spacing: 12) {

@@ -104,13 +104,15 @@ enum DeviceOps {
         }
     }
 
-    /// Launches `bundleID` under debugserver and detaches, which leaves it able to JIT.
+    /// Launches `bundleID` under debugserver, answers its JIT requests and detaches,
+    /// which leaves it able to JIT. Returns once the app has what it asked for.
     /// Mounts the Developer Disk Image first if needed. Returns the app's pid.
     @discardableResult
     static func enableJIT(_ bundleID: String,
                           progress: @escaping @MainActor (String, Double?) -> Void = { _, _ in }) async throws -> Int {
         let dir = try await DeveloperDiskImage.ensureDownloaded(progress: progress)
-        let result = try await run(["op": "enable_jit", "bundleId": bundleID, "ddiDir": dir.path], progress: progress)
+        let result = try await run(["op": "enable_jit", "bundleId": bundleID, "ddiDir": dir.path,
+                                    "dialect": StoreApp.jitDialect(forBundleID: bundleID)], progress: progress)
         return (result as? [String: Any])?["pid"] as? Int ?? 0
     }
 
@@ -162,7 +164,8 @@ enum PairingDestination {
     }
 
     /// Gives an app the pairing file, with the UDID in it, so it doesn't ask on launch.
-    static func place(_ pairing: URL, in bundleID: String) async throws {
+    /// `stikJIT` is for an app known to keep it where Husk does, whatever its bundle ID.
+    static func place(_ pairing: URL, in bundleID: String, stikJIT: Bool = false) async throws {
         let folder = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -179,7 +182,7 @@ enum PairingDestination {
         }
 
         guard let home = sideStoreHome(for: bundleID) else {
-            try await put(record, as: isHusk(bundleID) ? "Documents/StikJIT/pairingFile.plist" : idevice)
+            try await put(record, as: isHusk(bundleID) || stikJIT ? "Documents/StikJIT/pairingFile.plist" : idevice)
             return
         }
 

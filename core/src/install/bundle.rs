@@ -2,7 +2,9 @@
 
 use super::*;
 
-pub(super) fn prepare_app(ipa_path: &str, udid: &str, server_id: &str) -> Result<(PathBuf, PathBuf), String> {
+/// Unzips the IPA into a fresh temp dir and finds the .app inside it.
+/// Returns `(work_dir, app_dir)`; the caller removes `work_dir` when done.
+pub(super) fn unpack_ipa(ipa_path: &str) -> Result<(PathBuf, PathBuf), String> {
     let stamp = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_nanos())
@@ -17,13 +19,26 @@ pub(super) fn prepare_app(ipa_path: &str, udid: &str, server_id: &str) -> Result
         .map_err(|e| err("Couldn't unpack the IPA", e))?;
 
     let payload = work.join("Payload");
-    let app_dir = std::fs::read_dir(&payload)
-        .map_err(|e| err("IPA has no Payload folder", e))?
-        .filter_map(Result::ok)
-        .map(|e| e.path())
-        .find(|p| p.extension().is_some_and(|x| x == "app"))
-        .ok_or("IPA has no .app bundle")?;
+    let found = std::fs::read_dir(&payload)
+        .map_err(|e| err("IPA has no Payload folder", e))
+        .and_then(|entries| {
+            entries
+                .filter_map(Result::ok)
+                .map(|e| e.path())
+                .find(|p| p.extension().is_some_and(|x| x == "app"))
+                .ok_or_else(|| "IPA has no .app bundle".to_string())
+        });
+    match found {
+        Ok(app_dir) => Ok((work, app_dir)),
+        Err(e) => {
+            let _ = std::fs::remove_dir_all(&work);
+            Err(e)
+        }
+    }
+}
 
+/// Writes the device keys AltStore reads from the app's Info.plist.
+pub(super) fn stamp_app(app_dir: &Path, udid: &str, server_id: &str) -> Result<(), String> {
     // AltServer normally writes these. AltStore reads ALTDeviceID to know which
     // device it runs on. ALTServerID is the server it would look for to refresh.
     // AltLoad does the refreshing, so that ID is simply AltLoad's own.
@@ -34,7 +49,7 @@ pub(super) fn prepare_app(ipa_path: &str, udid: &str, server_id: &str) -> Result
     info.insert("ALTServerID".into(), plist::Value::String(server_id.to_string()));
     plist::to_file_binary(&info_path, &info).map_err(|e| err("Couldn't write Info.plist", e))?;
 
-    Ok((work, app_dir))
+    Ok(())
 }
 
 pub(super) const ALTSTORE_BETA_BUNDLE_ID: &str = "com.rileytestut.AltStore.Beta";
@@ -175,6 +190,54 @@ pub(super) async fn inject_store_keys(app: &Path, bundle_id: &str, team_id: &str
     Ok(())
 }
 
+/// Where AltStore reads its pairing file: `ALTPairingFile.dat` in the bundle.
+const ALT_PAIRING_FILE: &str = "ALTPairingFile.dat";
+
+/// The pairing file AltStore gets, with this iPhone's UDID in it, as the other
+/// stores' copies have. None when it can't be read.
+pub(super) fn pairing_for_altstore(path: &str, udid: &str) -> Option<Vec<u8>> {
+    let raw = std::fs::read(path).ok()?;
+    Some(with_udid(&raw, udid).unwrap_or(raw))
+}
+
+/// None when the file isn't a property list dictionary, or already names a UDID.
+fn with_udid(raw: &[u8], udid: &str) -> Option<Vec<u8>> {
+    let mut record: plist::Dictionary = plist::from_bytes(raw).ok()?;
+    let named = record.get("UDID").and_then(|v| v.as_string()).is_some_and(|s| !s.is_empty());
+    if named || udid.is_empty() {
+        return None;
+    }
+    record.insert("UDID".into(), plist::Value::String(udid.to_string()));
+    let mut out = Vec::new();
+    plist::to_writer_xml(&mut out, &record).ok()?;
+    Some(out)
+}
+
+/// What isideload's `apply_special_app_behavior` writes for AltStore's pairing file,
+/// for AltStore Beta: the nonce, then the file under AES-256-GCM, keyed with the
+/// SHA-256 of the certificate's machine ID. Runs before `sign_app`, so it gets signed.
+pub(super) fn seal_pairing_file(app: &Path, cert: &CertificateIdentity, pairing: &[u8]) -> Result<(), String> {
+    let sealed = seal(cert.machine_id.as_bytes(), pairing)?;
+    std::fs::write(app.join(ALT_PAIRING_FILE), sealed)
+        .map_err(|e| err("Couldn't write the pairing file for AltStore", e))
+}
+
+fn seal(secret: &[u8], data: &[u8]) -> Result<Vec<u8>, String> {
+    use aes_gcm::{aead::{Aead, Generate}, Aes256Gcm, KeyInit, Nonce};
+    use sha2::{Digest, Sha256};
+
+    let key = Sha256::digest(secret);
+    let cipher = Aes256Gcm::new(&key);
+    let nonce = Nonce::generate();
+    let ciphertext = cipher
+        .encrypt(&nonce, data)
+        .map_err(|e| err("Couldn't seal the pairing file for AltStore", e))?;
+    let mut sealed = Vec::with_capacity(nonce.len() + ciphertext.len());
+    sealed.extend_from_slice(&nonce);
+    sealed.extend_from_slice(&ciphertext);
+    Ok(sealed)
+}
+
 pub(super) fn read_installed(app: &Path) -> Installed {
     let info: plist::Dictionary = plist::from_file(app.join("Info.plist")).unwrap_or_default();
     let s = |k: &str| {
@@ -225,4 +288,39 @@ pub(super) fn read_profile(path: &Path) -> (i64, String) {
         .unwrap_or_default()
         .to_string();
     (expiration, team)
+}
+
+#[cfg(test)]
+mod pairing_tests {
+    use super::*;
+
+    #[test]
+    fn the_sealed_file_opens_with_the_machine_id() {
+        use aes_gcm::{aead::Aead, Aes256Gcm, KeyInit, Nonce};
+        use sha2::{Digest, Sha256};
+
+        let sealed = seal(b"machine", b"pairing").unwrap();
+        let (nonce, ciphertext) = sealed.split_at(12);
+        let cipher = Aes256Gcm::new(&Sha256::digest(b"machine"));
+        let nonce = Nonce::try_from(nonce).unwrap();
+        assert_eq!(cipher.decrypt(&nonce, ciphertext).unwrap(), b"pairing");
+        assert!(Aes256Gcm::new(&Sha256::digest(b"other")).decrypt(&nonce, ciphertext).is_err());
+    }
+
+    #[test]
+    fn the_udid_is_added_only_when_missing() {
+        let mut record = plist::Dictionary::new();
+        record.insert("identifier".into(), plist::Value::String("host".into()));
+        let mut raw = Vec::new();
+        plist::to_writer_xml(&mut raw, &record).unwrap();
+
+        let added: plist::Dictionary = plist::from_bytes(&with_udid(&raw, "0000-A").unwrap()).unwrap();
+        assert_eq!(added["UDID"].as_string(), Some("0000-A"));
+        assert_eq!(added["identifier"].as_string(), Some("host"));
+
+        let mut named = Vec::new();
+        plist::to_writer_xml(&mut named, &added).unwrap();
+        assert!(with_udid(&named, "0000-B").is_none());
+        assert!(with_udid(b"not a plist", "0000-A").is_none());
+    }
 }

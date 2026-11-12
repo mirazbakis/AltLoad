@@ -9,33 +9,36 @@
 <meta property="og:description" content="Your iPhone is the computer now. Sideload AltStore, SideStore and LiveContainer without a Mac or PC.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://mirazbakis.github.io/AltLoad/AltLoad.png">
-<meta name="theme-color" content="#050b1f">
+<meta name="theme-color" content="#000000">
 <link rel="icon" type="image/png" href="AltLoad.png">
 <link rel="apple-touch-icon" href="AltLoad.png">
+<script>
+  // Turn on the scroll-driven stage only with JS and without reduced motion; otherwise it stays static.
+  if(!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) document.documentElement.className += ' motion';
+</script>
 <style>
   :root{
-    --bg:#000000;
-    --bg-2:#070707;
-    --card:#0c0c0c;
-    --card-hi:#121212;
-    --edge:rgba(255,255,255,.10);
-    --edge-hi:rgba(255,255,255,.24);
-    --ink:#f2f5ff;
-    --ink-2:rgba(220,229,255,.74);
-    --ink-3:rgba(220,229,255,.5);
-    --blue:#4c8dff;
-    --mint:#3be0a0;
-    --warn:#ffb547;
-    --grad:linear-gradient(120deg,#5b9bff 0%,#3be0a0 100%);
-    --grad-btn:linear-gradient(120deg,#1f66e0 0%,#3f8bff 100%);
-    --btn-ink:#eaf0ff;
+    --bg:#000;
+    --bg-2:#000;
+    --card:#0a0a0a;
+    --card-hi:#101010;
+    --edge:rgba(255,255,255,.1);
+    --edge-hi:rgba(255,255,255,.28);
+    --ink:#fff;
+    --ink-2:rgba(255,255,255,.66);
+    --ink-3:rgba(255,255,255,.42);
+    /* The one accent: a mint that leans blue. Used for small marks only. */
+    --mint:#86ead8;
+    --blue:#9fd4ff;
+    --grad:linear-gradient(100deg,#86ead8 0%,#9fd4ff 100%);
+    --btn:#fff;
+    --btn-ink:#000;
     --sans:-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",Roboto,sans-serif;
     color-scheme:dark;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{background:var(--bg);scroll-behavior:smooth}
-  body{font-family:var(--sans);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:clip;
-    background:radial-gradient(55% 38% at 26% 0%,rgba(91,155,255,.09),transparent 60%),radial-gradient(52% 38% at 78% 3%,rgba(59,224,160,.05),transparent 60%),#000;background-attachment:fixed}
+  body{font-family:var(--sans);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:clip;background:#000}
   a{color:inherit}
   img{display:block}
   .wrap{width:min(1080px,100% - 40px);margin-inline:auto}
@@ -43,69 +46,136 @@
 
   /* ---- nav ---- */
   .nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
-    background:rgba(0,0,0,.72);border-bottom:1px solid var(--edge)}
+    background:rgba(0,0,0,.78);border-bottom:1px solid var(--edge)}
   .nav .wrap{display:flex;align-items:center;gap:10px;height:60px}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;text-decoration:none}
   .brand img{width:30px;height:30px;border-radius:8px}
   .nav nav{margin-left:auto;display:flex;align-items:center;gap:4px}
-  .nav nav a{padding:8px 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:none}
+  .nav nav a{padding:8px 12px;border-radius:99px;font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:none}
   .nav nav a:hover{color:var(--ink);background:var(--card)}
-  .nav .go{color:var(--btn-ink);background:var(--grad-btn)}
-  .nav .go:hover{color:var(--btn-ink);background:var(--grad-btn);filter:brightness(1.12)}
-  @media (max-width:560px){.nav nav a.opt{display:none}}
+  .nav .go{color:var(--btn-ink);background:var(--btn);padding-inline:16px}
+  .nav .go:hover{color:var(--btn-ink);background:var(--btn);opacity:.86}
+  /* all three links stay visible; tighter spacing on narrow screens so they fit at 320px */
+  @media (max-width:420px){
+    .nav nav{gap:2px}
+    .nav nav a{padding:7px 9px;font-size:13.5px}
+    .nav .go{padding-inline:13px}
+    .brand{gap:8px;font-size:16px}
+    .brand img{width:26px;height:26px}
+  }
+  @media (max-width:380px){.brand{font-size:0}}
+  #install,#faq{scroll-margin-top:60px}
 
-  /* ---- hero ---- */
-  .hero{position:relative;padding:84px 0 70px;text-align:center;overflow:hidden}
-  .hero::before{content:"";position:absolute;inset:-40% -10% auto;height:120%;z-index:-1;
-    background:radial-gradient(40% 50% at 35% 40%,rgba(76,141,255,.28),transparent 70%),
-               radial-gradient(35% 45% at 68% 45%,rgba(59,224,160,.18),transparent 70%)}
-  .hero img{width:112px;height:112px;margin:0 auto 26px;border-radius:26px;
-    box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 60px -20px rgba(59,224,160,.45)}
-  .hero h1{font-size:clamp(40px,7vw,68px);font-weight:850;letter-spacing:-.045em;line-height:1.02}
-  .hero h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .hero p{max-width:560px;margin:20px auto 0;font-size:clamp(16px,2.2vw,19px);color:var(--ink-2)}
-  .hero .ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:32px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:52px;padding:0 24px;border-radius:16px;
+  /* ---- stage: the scroll-driven phone ad at the top ----
+     Static by default (no JS, reduced motion): --p is 1, so everything shows in its
+     final state in normal flow. The script adds .motion to <html> and writes --p
+     (0 to 1, progress through the stage); then the stage grows tall, the inner
+     box pins, and every move below is derived from --p with transform/opacity. */
+  .stage{--p:1;--vh:1vh;--pw:min(300px,calc(42 * var(--vh)));--ph:calc(var(--pw) * 2.066);padding:56px 0 72px}
+  @supports (height:1svh){.stage{--vh:1svh}}
+  @media (max-width:899px){.stage{--pw:clamp(150px,calc(28 * var(--vh)),230px)}}
+  @media (prefers-reduced-motion:reduce){.stage{--p:1 !important}}
+  .stage-pin{
+    /* phases, each 0 to 1: r rise (eased), t title out, w screen wakes, f payoff (eased), h hint out */
+    --r0:clamp(0,calc((var(--p) - .10) / .35),1);
+    --r:calc(var(--r0) * var(--r0) * (3 - 2 * var(--r0)));
+    --t:clamp(0,calc((var(--p) - .10) / .30),1);
+    --w:clamp(0,calc((var(--p) - .12) / .25),1);
+    --h:clamp(0,calc(1 - var(--p) / .08),1);
+    display:flex;flex-direction:column;align-items:center;gap:48px;padding:0 16px}
+  .stage-head{text-align:center}
+  .stage-title{font-size:clamp(40px,7vw,80px);font-weight:800;letter-spacing:-.05em;line-height:1}
+  .stage-title span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stage-head .meta{margin-top:22px}
+  .stage-hint{display:none}
+
+  /* the phone: body, side edge, screen, island, status row, wallpaper */
+  .phone-wrap{position:relative;width:var(--pw);height:var(--ph);perspective:1400px}
+  .phone-shadow{position:absolute;left:6%;right:6%;bottom:-30px;height:44px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.75),transparent);
+    opacity:calc(.9 - .5 * var(--r));transform:scale(calc(1.3 - .5 * var(--r)))}
+  .phone{position:relative;width:100%;height:100%;border-radius:calc(var(--pw) * .1467);background:#000;border:1px solid rgba(255,255,255,.24);transform-style:preserve-3d;
+    transform:rotateX(calc((1 - var(--r)) * 58deg)) rotateY(calc(var(--r) * (1 - var(--r)) * -64deg)) rotateZ(calc((1 - var(--r)) * -24deg)) scale(calc(.82 + .18 * var(--r)))}
+  .phone::before{content:"";position:absolute;inset:-1px;border-radius:inherit;background:#141414;transform:translateZ(-7px)}
+  .screen{position:absolute;inset:10px;border-radius:calc(var(--pw) * .1467 - 10px);overflow:hidden;background:#030404}
+  .wall{position:absolute;inset:0;opacity:calc(.18 + .82 * var(--w));
+    background:radial-gradient(120% 60% at 20% 8%,rgba(134,234,216,.2),transparent 62%),radial-gradient(110% 60% at 85% 100%,rgba(159,212,255,.17),transparent 62%),#06080a}
+  .island{position:absolute;z-index:3;top:calc(var(--pw) * .033);left:50%;width:33%;height:calc(var(--pw) * .09);margin-left:-16.5%;border-radius:99px;background:#000}
+  .status{position:absolute;z-index:2;top:calc(var(--pw) * .045);left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 calc(var(--pw) * .085);
+    font-size:calc(var(--pw) * .045);font-weight:650;letter-spacing:-.01em;line-height:1;opacity:var(--w)}
+  .status svg{height:calc(var(--pw) * .036);width:auto}
+  .home-bar{position:absolute;bottom:calc(var(--pw) * .018);left:50%;width:36%;height:4px;margin-left:-18%;border-radius:4px;background:rgba(255,255,255,.55);opacity:var(--w)}
+
+  /* home screen icons; each pops in on its own slice of --p, set by its --i */
+  .apps{position:absolute;top:calc(var(--pw) * .25);left:calc(var(--pw) * .06);right:calc(var(--pw) * .06);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:calc(var(--pw) * .065) calc(var(--pw) * .05)}
+  .app{--k:clamp(0,calc((var(--p) - .35 - var(--i) * .038) / .08),1);display:flex;flex-direction:column;align-items:center;min-width:0;
+    opacity:var(--k);transform:scale(calc(.6 + .4 * var(--k)))}
+  .ico{display:grid;place-items:center;width:100%;aspect-ratio:1;border-radius:22%;overflow:hidden;background:#141414;color:#fff;font-weight:750;font-size:calc(var(--pw) * .048);letter-spacing:-.02em}
+  .ico img{width:100%;height:100%;object-fit:cover}
+  .ico.off::after{content:attr(data-n)}
+  .app small{display:block;max-width:100%;margin-top:calc(var(--pw) * .018);font-size:calc(var(--pw) * .032);line-height:1.2;color:rgba(255,255,255,.86);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dock{position:absolute;left:calc(var(--pw) * .04);right:calc(var(--pw) * .04);bottom:calc(var(--pw) * .06);height:calc(var(--pw) * .25);display:flex;align-items:center;justify-content:center;
+    border-radius:calc(var(--pw) * .09);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.07);opacity:var(--w)}
+  .dock .ico{width:calc(var(--pw) * .17)}
+
+  /* motion mode: tall stage, pinned box, everything placed absolutely and driven by --p.
+     The nav (60px) overlaps the pin, so vertical centres sit 30px lower. */
+  .motion .stage{height:calc(260 * var(--vh));padding:0}
+  .motion .stage-pin{display:block;position:sticky;top:0;height:calc(100 * var(--vh));padding:0;overflow:hidden;overflow:clip;
+    --y0:calc(50 * var(--vh) - 30px - .1 * var(--ph))}
+  .motion .stage-head{position:absolute;z-index:1;left:16px;right:16px;top:calc(43% + 30px);
+    transform:translateY(-50%) translateY(calc(var(--t) * -30 * var(--vh))) scale(calc(1 - .45 * var(--t)));opacity:calc(1 - var(--t))}
+  .motion .stage-title{font-size:clamp(44px,9vw,112px)}
+  .motion .phone-wrap{position:absolute;z-index:2;left:50%;top:calc(50% + 30px);margin:calc(var(--ph) / -2) 0 0 calc(var(--pw) / -2);pointer-events:none;
+    transform:translateY(calc((1 - var(--r)) * var(--y0)))}
+  .motion .stage-hint{display:flex;flex-direction:column;align-items:center;gap:4px;position:absolute;z-index:3;left:0;right:0;bottom:calc(.36 * var(--ph) + 8px);
+    font-size:12px;font-weight:650;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);opacity:var(--h);pointer-events:none}
+  .stage-hint svg{width:16px;height:16px}
+  @media (max-width:899px){.motion .stage{height:calc(240 * var(--vh))}}
+  .motion .stage-head{pointer-events:none}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:50px;padding:0 24px;border-radius:99px;
     font:700 16px var(--sans);text-decoration:none;cursor:pointer;border:1px solid transparent;transition:filter .15s,transform .15s,border-color .15s,box-shadow .15s}
   .btn svg{width:19px;height:19px}
   .btn:active{transform:scale(.98)}
-  .btn-main{color:var(--btn-ink);background:var(--grad-btn);box-shadow:0 14px 34px -14px rgba(42,72,148,.6)}
-  .btn-main:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 20px 40px -14px rgba(63,139,255,.55)}
-  .btn-line{color:var(--ink);background:var(--card);border-color:var(--edge)}
-  .btn-line:hover{border-color:var(--edge-hi)}
-  .btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;box-shadow:none}
+  .btn-main{color:var(--btn-ink);background:var(--btn)}
+  .btn-main:hover{opacity:.88}
+  .btn-line{color:var(--ink);background:transparent;border-color:var(--edge-hi)}
+  .btn-line:hover{border-color:#fff}
+  .btn[aria-disabled="true"]{opacity:.35;cursor:not-allowed}
   .meta{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;margin-top:26px;font-size:14px;color:var(--ink-3)}
   .meta b{color:var(--ink-2);font-weight:650}
 
   /* ---- sections ---- */
-  section{padding:56px 0}
-  .eyebrow{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-  h2{font-size:clamp(28px,4vw,40px);font-weight:820;letter-spacing:-.035em;line-height:1.08;margin-top:8px}
+  section{padding:64px 0}
+  .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mint)}
+  h2{font-size:clamp(28px,4vw,40px);font-weight:720;letter-spacing:-.035em;line-height:1.08;margin-top:10px}
   .lede{color:var(--ink-2);font-size:17px;max-width:620px;margin-top:12px}
 
   /* ---- how it works ---- */
   .how{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px;counter-reset:s}
   @media (max-width:820px){.how{grid-template-columns:1fr}}
-  .how li{list-style:none;counter-increment:s;padding:24px;border-radius:24px;background:var(--card);border:1px solid var(--edge)}
-  .how li::before{content:counter(s,decimal-leading-zero);display:block;font-size:13px;font-weight:800;color:var(--mint);letter-spacing:.06em;margin-bottom:14px}
-  .how h3{font-size:19px;font-weight:780;letter-spacing:-.02em}
+  .how li{list-style:none;counter-increment:s;padding:24px;border-radius:20px;border:1px solid var(--edge)}
+  .how li::before{content:counter(s,decimal-leading-zero);display:block;font-size:13px;font-weight:700;color:var(--ink-3);letter-spacing:.06em;margin-bottom:14px}
+  .how h3{font-size:19px;font-weight:720;letter-spacing:-.02em}
   .how p{color:var(--ink-2);font-size:15px;margin-top:6px}
 
   /* ---- install ---- */
-  .install{background:linear-gradient(180deg,transparent,var(--bg-2) 20%,var(--bg-2) 80%,transparent)}
+  .install{border-block:1px solid var(--edge)}
   .install-top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 30px;justify-content:space-between}
-  .agree{display:flex;align-items:center;gap:12px;margin-top:26px;padding:16px 18px;border-radius:18px;cursor:pointer;
-    background:var(--card);border:1px solid var(--edge);font-weight:600;transition:border-color .2s,box-shadow .2s}
-  .agree input{width:22px;height:22px;accent-color:#2cc48b;flex:none}
-  .agree a{color:var(--mint);text-decoration:none;font-weight:700}
-  .agree.nudge{border-color:var(--mint);box-shadow:0 0 0 4px rgba(59,224,160,.16)}
+  .agree{display:flex;align-items:center;gap:12px;margin-top:26px;padding:16px 18px;border-radius:16px;cursor:pointer;
+    border:1px solid var(--edge);font-weight:600;transition:border-color .2s,box-shadow .2s}
+  .agree input{width:22px;height:22px;accent-color:#86ead8;flex:none}
+  .agree a{color:var(--ink);font-weight:700;text-underline-offset:3px}
+  .agree.nudge{border-color:var(--mint);box-shadow:0 0 0 4px rgba(134,234,216,.14)}
 
   .step-row{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
   @media (max-width:820px){.step-row{grid-template-columns:1fr}}
-  .box{padding:22px;border-radius:24px;background:var(--card);border:1px solid var(--edge)}
-  .box h3{font-size:18px;font-weight:780;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
-  .box h3 i{font-style:normal;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:800;
-    color:#04140d;background:var(--grad)}
+  .box{padding:22px;border-radius:18px;background:var(--card);border:1px solid var(--edge)}
+  .box h3{font-size:18px;font-weight:720;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+  .box h3 i{font-style:normal;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:750;
+    color:var(--mint);border:1px solid var(--edge-hi);border-radius:50%}
   .box p{color:var(--ink-2);font-size:14.5px;margin-top:8px}
   .box ol{color:var(--ink-2);font-size:14px;margin:12px 0 0 18px}
   .box ol li{padding:2px 0}
@@ -120,36 +190,108 @@
   .copies-head{display:flex;align-items:center;gap:10px}
   .copies-head .count{margin-left:auto;font-size:13px;font-weight:700;color:var(--ink-3)}
   .notice{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:11px 14px;border-radius:14px;font-size:13.5px;color:var(--ink-2);
-    background:rgba(255,181,71,.08);border:1px solid rgba(255,181,71,.25)}
-  .notice svg{width:17px;height:17px;flex:none;color:var(--warn);margin-top:1px}
-  .copies{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
-  .copy{display:flex;flex-direction:column;gap:16px;padding:18px;border-radius:22px;background:var(--card-hi);border:1px solid var(--edge);transition:border-color .15s}
+    background:rgba(255,255,255,.04);border:1px solid var(--edge)}
+  .notice svg{width:17px;height:17px;flex:none;color:var(--ink);margin-top:1px}
+  .copies{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:12px;margin-top:16px}
+  .copy{display:flex;flex-direction:column;gap:16px;padding:18px;border-radius:16px;background:var(--card-hi);border:1px solid var(--edge);transition:border-color .15s}
   .copy:hover{border-color:var(--edge-hi)}
   .copy .head{display:flex;align-items:flex-start;gap:14px}
   .copy img{width:56px;height:56px;border-radius:14px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
   .copy .t{min-width:0}
   /* App id is the label; it varies in length, so let it wrap on the dots and
      keep the type size steady so no card stands out. */
-  .copy .n{font-weight:780;font-size:16px;letter-spacing:-.01em;line-height:1.25;overflow-wrap:anywhere;word-break:break-word}
+  .copy .n{font-weight:720;font-size:16px;letter-spacing:-.01em;line-height:1.25;overflow-wrap:anywhere;word-break:break-word}
   .copy .v{font-size:14px;color:var(--ink-3);margin-top:2px}
-  .get{display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;margin-top:auto;border-radius:15px;font-size:16px;font-weight:800;
-    text-decoration:none;color:var(--btn-ink);background:var(--grad-btn);box-shadow:0 12px 26px -14px rgba(31,102,224,.55);transition:filter .15s,transform .15s,box-shadow .15s}
+  .get{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;margin-top:auto;border-radius:99px;font-size:15.5px;font-weight:750;
+    text-decoration:none;color:var(--btn-ink);background:var(--btn);transition:opacity .15s,transform .15s}
   .get svg{width:18px;height:18px}
-  .get:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 18px 34px -12px rgba(63,139,255,.6)}
+  .get:hover{opacity:.88}
   .get:active{transform:scale(.98)}
-  .get[aria-disabled="true"]{opacity:.4;cursor:not-allowed;box-shadow:none}
+  .get[aria-disabled="true"]{opacity:.3;cursor:not-allowed}
   .copy.empty{grid-column:1/-1;align-items:center;color:var(--ink-2);padding:28px}
   @media (max-width:420px){
     .box{padding:18px 14px}
     .copy{padding:16px}
   }
 
+  /* ---- install methods ---- */
+  .method{margin-top:22px;border-radius:24px;padding:28px;border:1px solid var(--edge)}
+  .method + .method{margin-top:18px}
+  .method-head{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px 16px}
+  .method-head .mh{flex:1 1 320px;min-width:0}
+  .method-head h3{font-size:clamp(21px,3vw,26px);font-weight:760;letter-spacing:-.03em;line-height:1.15}
+  .method-head h3 small{font-size:.62em;font-weight:700;letter-spacing:0;color:var(--ink-3);white-space:nowrap}
+  .method-head p{color:var(--ink-2);font-size:15.5px;margin-top:6px;max-width:600px}
+  .tag{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:99px;font-size:12.5px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+  .tag svg{width:13px;height:13px}
+  .tag-new{color:var(--mint);border:1px solid rgba(134,234,216,.45)}
+  .tag-dns{color:var(--ink-2);border:1px solid var(--edge-hi)}
+  .tag-alt{color:var(--ink-2);border:1px solid var(--edge-hi)}
+  /* The recommended route is the only card with an accent edge. */
+  .method.prime{border-color:rgba(134,234,216,.4)}
+  .needs{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;list-style:none}
+  .needs li{display:flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-radius:99px;font-size:13px;font-weight:600;color:var(--ink-2);border:1px solid var(--edge)}
+  .needs svg{width:14px;height:14px;color:var(--mint)}
+
+  /* checklist: one card per app, ticked off as you go */
+  .prog{display:flex;align-items:center;gap:12px;margin-top:24px;font-size:13px;font-weight:650;color:var(--ink-3)}
+  .prog-bar{flex:1;height:3px;border-radius:3px;background:var(--edge);overflow:hidden}
+  .prog-bar i{display:block;height:100%;width:0;border-radius:3px;background:var(--mint);transition:width .3s}
+  .steps{list-style:none;margin-top:14px;display:grid;gap:10px}
+  .stp{border:1px solid var(--edge);border-radius:18px;background:var(--card);transition:border-color .2s,background .2s}
+  .stp-top{display:flex;align-items:center;gap:14px;padding:16px 18px}
+  .tick{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:transparent;background:transparent;border:1.5px solid var(--edge-hi);transition:background .15s,border-color .15s,color .15s}
+  .tick svg{width:14px;height:14px}
+  .tick:hover{border-color:#fff}
+  .stp-h{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+  .idx{font:600 12.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--mint)}
+  .stp h4{font-size:17.5px;font-weight:720;letter-spacing:-.02em}
+  .where{font-size:13.5px;color:var(--ink-3)}
+  .getapp{flex:none;height:32px;padding:0 14px;border-radius:99px;display:grid;place-items:center;font-size:13px;font-weight:700;text-decoration:none;color:#000;background:#fff;white-space:nowrap}
+  .getapp:hover{opacity:.88}
+  .stp-body{padding:0 18px 18px 60px;display:grid;gap:12px}
+  .stp-body p{color:var(--ink-2);font-size:15px}
+  .stp-body b{color:var(--ink);font-weight:650}
+  .stp-body .term{margin-top:0}
+  .stp.done{background:transparent}
+  .stp.done .tick{color:#000;background:var(--mint);border-color:var(--mint)}
+  .stp.done .stp-body,.stp.done .getapp{display:none}
+  .stp.done h4{color:var(--ink-3);text-decoration:line-through;text-decoration-thickness:1px}
+  @media (max-width:560px){
+    .stp-top{flex-wrap:wrap;padding:14px}
+    .getapp{margin-left:42px}
+    .stp-body{padding:0 14px 16px}
+  }
+
+  /* a terminal line with its own Copy */
+  .term{margin-top:10px;border-radius:14px;background:#060606;border:1px solid var(--edge);overflow:hidden}
+  .cmd{display:flex;align-items:flex-start;gap:10px;padding:11px 10px 11px 14px}
+  .cmd + .cmd{border-top:1px solid rgba(255,255,255,.06)}
+  .cmd code{flex:1;min-width:0;font:500 13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#f2f2f2;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all}
+  .cmd code::before{content:"$ ";color:var(--mint);user-select:none;-webkit-user-select:none}
+  .cp{flex:none;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:99px;cursor:pointer;
+    font:650 13px var(--sans);color:var(--ink);background:transparent;border:1px solid var(--edge);transition:background .15s,border-color .15s,color .15s}
+  .cp svg{width:14px;height:14px}
+  .cp:hover{border-color:var(--edge-hi)}
+  .cp.done{color:#000;background:#fff;border-color:transparent}
+  .cp[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+  .fine{font-size:13px;color:var(--ink-3);margin-top:20px}
+  .fine a{color:var(--ink-2)}
+  .method .step-row{margin-top:20px}
+  @media (max-width:560px){
+    .method{padding:20px 16px;border-radius:20px}
+  }
+  @media (max-width:420px){
+    .cmd{flex-direction:column;gap:8px}
+    .cp{align-self:flex-end}
+  }
+
   /* ---- features ---- */
   .feats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:30px}
   @media (max-width:720px){.feats{grid-template-columns:1fr}}
-  .feat{padding:24px;border-radius:24px;background:var(--card);border:1px solid var(--edge)}
-  .feat svg{width:26px;height:26px;color:var(--mint)}
-  .feat h3{font-size:18px;font-weight:780;letter-spacing:-.02em;margin-top:14px}
+  .feat{padding:24px;border-radius:20px;border:1px solid var(--edge)}
+  .feat svg{width:24px;height:24px;color:var(--ink)}
+  .feat h3{font-size:18px;font-weight:720;letter-spacing:-.02em;margin-top:14px}
   .feat p{color:var(--ink-2);font-size:15px;margin-top:6px}
   .feat.wide{grid-column:1/-1;display:flex;gap:20px;align-items:center}
   .feat.wide h3{margin-top:0}
@@ -179,35 +321,58 @@
   <div class="wrap">
     <a class="brand" href="./"><img src="AltLoad.png" alt="">AltLoad</a>
     <nav>
-      <a class="opt" href="#features">Features</a>
-      <a class="opt" href="#faq">Help</a>
-      <a href="https://github.com/mirazbakis/AltLoad">GitHub</a>
       <a class="go" href="#install">Install</a>
+      <a href="https://github.com/mirazbakis/AltLoad">GitHub</a>
+      <a href="#faq">Troubleshoot</a>
     </nav>
   </div>
 </header>
 
 <main>
-  <div class="hero">
-    <div class="wrap">
-      <img src="AltLoad.png" alt="AltLoad icon">
-      <h1>Your iPhone is<br><span>the computer now.</span></h1>
-      <p>AltLoad pairs your iPhone with itself, signs AltStore, SideStore or LiveContainer with your Apple ID, and installs it. No Mac, no PC, no subscription.</p>
-      <div class="ctas">
-        <a class="btn btn-main" href="#install">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>Install AltLoad</a>
-        <a class="btn btn-line" href="https://github.com/mirazbakis/AltLoad/blob/main/docs/HOW-IT-WORKS.md">How it works</a>
+  <section class="stage" id="top">
+    <div class="stage-pin">
+      <div class="stage-head">
+        <h1 class="stage-title">Your iPhone is<br><span>the computer now.</span></h1>
+        <div class="meta"><span>Version <b id="ver">–</b></span><span><b>iOS 27</b> or later</span><span><b>Free</b> Apple ID works</span></div>
       </div>
-      <div class="meta"><span>Version <b id="ver">–</b></span><span><b>iOS 27</b> or later</span><span><b>Free</b> Apple ID works</span></div>
+
+      <div class="phone-wrap" aria-hidden="true">
+        <div class="phone-shadow"></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="wall"></div>
+            <div class="island"></div>
+            <div class="status"><span>9:41</span>
+              <svg viewBox="0 0 46 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/><rect x="23.5" y=".5" width="19" height="11" rx="3" fill="none" stroke="#fff" stroke-opacity=".45"/><rect x="25.5" y="2.5" width="13" height="7" rx="1.5"/><rect x="43.5" y="4" width="1.8" height="4" rx=".9" fill-opacity=".45"/></svg>
+            </div>
+            <div class="apps">
+              <div class="app" style="--i:1"><span class="ico" data-n="AS"><img src="https://user-images.githubusercontent.com/705880/65270980-1eb96f80-dad1-11e9-9367-78ccd25ceb02.png" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.className+=' off';this.remove()"></span><small>AltStore</small></div>
+              <div class="app" style="--i:2"><span class="ico" data-n="SS"><img src="https://apps.sidestore.io/apps/sidestore/v0.1.1/icon.png" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.className+=' off';this.remove()"></span><small>SideStore</small></div>
+              <div class="app" style="--i:3"><span class="ico" data-n="LC"><img src="https://raw.githubusercontent.com/LiveContainer/LiveContainer/main/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon1024.png" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.className+=' off';this.remove()"></span><small>LiveContainer</small></div>
+              <div class="app" style="--i:4"><span class="ico" data-n="UTM"><img src="https://raw.githubusercontent.com/utmapp/UTM/main/Platform/Assets.xcassets/AppIcon.appiconset/icon_60pt@3x.png" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.className+=' off';this.remove()"></span><small>UTM</small></div>
+              <div class="app" style="--i:5"><span class="ico" data-n="MX"><img src="https://starforgejo.dev/api/v1/repos/projects/MeloNX/raw/src/MeloNX/MeloNX/Assets/Assets.xcassets/AppIcon.appiconset/nxgradientpng.png?ref=master" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.className+=' off';this.remove()"></span><small>MeloNX</small></div>
+              <div class="app" style="--i:6"><span class="ico" data-n="Ma"><img src="https://raw.githubusercontent.com/willfaust/Madeira/HEAD/app/Madeira/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.className+=' off';this.remove()"></span><small>Madeira</small></div>
+              <div class="app" style="--i:7"><span class="ico" data-n="Hu"><img src="https://raw.githubusercontent.com/Leviidev/Husk/main/src/app/Husk/Assets.xcassets/AppIcon.appiconset/Icon-Default.png" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.className+=' off';this.remove()"></span><small>Husk</small></div>
+            </div>
+            <div class="dock">
+              <div class="app" style="--i:0"><span class="ico" data-n="AL"><img src="AltLoad.png" alt="" decoding="async" onerror="this.parentNode.className+=' off';this.remove()"></span></div>
+            </div>
+            <div class="home-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-hint" aria-hidden="true">Scroll
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
     </div>
-  </div>
+  </section>
 
   <section>
     <div class="wrap">
       <div class="eyebrow">How it works</div>
       <h2>Three steps, all on the phone.</h2>
       <ol class="how">
-        <li><h3>Install AltLoad</h3><p>Add the DNS profile, then tap any signed install below. Trust it in Settings once it lands.</p></li>
+        <li><h3>Install AltLoad</h3><p>Sign it with your own Apple ID from three free apps, or add the DNS profile and tap a signed install.</p></li>
         <li><h3>Pair it with itself</h3><p>Tools › Pair shows a code in your Dynamic Island. Type it into Settings › Developer.</p></li>
         <li><h3>Pick a store</h3><p>Turn on LocalDevVPN, choose AltStore, SideStore or LiveContainer, sign in, done.</p></li>
       </ol>
@@ -220,7 +385,7 @@
         <div>
           <div class="eyebrow">Install</div>
           <h2>Get AltLoad.</h2>
-          <p class="lede">Use Safari on your iPhone or iPad.</p>
+          <p class="lede">Open this page in Safari on the iPhone or iPad you're setting up, then pick a way in.</p>
         </div>
       </div>
 
@@ -229,7 +394,87 @@
         <span>I've read and accept the <a href="terms.html">Terms of Service</a>.</span>
       </label>
 
-      <div class="step-row">
+      <!-- Route 1: signed on the iPhone with the owner's Apple ID. -->
+      <div class="method prime" id="apple-id">
+        <div class="method-head">
+          <div class="mh">
+            <h3>Apple ID Install <small>(No DNS)</small></h3>
+            <p>AltLoad signed by you, on the iPhone, with three free App Store apps. Nothing shared, so nothing to be revoked. Tick each step as you go; this page keeps your place.</p>
+          </div>
+          <span class="tag tag-new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Recommended</span>
+        </div>
+        <ul class="needs">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>iOS 27 or later</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Wi-Fi</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Developer Mode on</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Any Apple ID, free works</li>
+        </ul>
+
+        <div class="prog" aria-live="polite"><span class="prog-bar"><i id="progFill"></i></span><span id="progText">0 of 4 done</span></div>
+        <ol class="steps" id="steps">
+          <li class="stp" data-step="1">
+            <div class="stp-top">
+              <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 1 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
+              <div class="stp-h"><span class="idx">01</span><h4>Pair the iPhone with itself</h4><span class="where">rootshell</span></div>
+              <a class="getapp" href="https://apps.apple.com/app/rootshell-local-terminal-ssh/id6755794662" target="_blank" rel="noopener">Get rootshell</a>
+            </div>
+            <div class="stp-body">
+              <p>First, in rootshell's settings, switch <b>Location Diary Mode</b> to <b>Session Only</b> so iOS doesn't pause it while you're in Settings. Then enter these two lines, one by one:</p>
+              <div class="term">
+                <div class="cmd"><code>curl -fsSLO https://github.com/mirazbakis/AltLoad/releases/latest/download/altpair.wasm</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
+                <div class="cmd"><code>ifconfig en0 | ./altpair.wasm</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
+              </div>
+              <p>A new row, <b>Pair with AltLoad</b>, appears at the very bottom of Settings › Privacy &amp; Security › <b>Developer Mode</b>. Tap it, enter your passcode and the 6 digits from rootshell. Don't close rootshell.</p>
+            </div>
+          </li>
+          <li class="stp" data-step="2">
+            <div class="stp-top">
+              <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 2 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
+              <div class="stp-h"><span class="idx">02</span><h4>Open the tunnel</h4><span class="where">LocalDevVPN</span></div>
+              <a class="getapp" href="https://apps.apple.com/app/id6755608044" target="_blank" rel="noopener">Get LocalDevVPN</a>
+            </div>
+            <div class="stp-body">
+              <p>Open LocalDevVPN and tap <b>Connect</b>. It only links the iPhone to itself; your internet traffic doesn't go through it.</p>
+            </div>
+          </li>
+          <li class="stp" data-step="3">
+            <div class="stp-top">
+              <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 3 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
+              <div class="stp-h"><span class="idx">03</span><h4>Sign and install</h4><span class="where">Open Minis</span></div>
+              <a class="getapp" href="https://apps.apple.com/app/id6759188481" target="_blank" rel="noopener">Get Open Minis</a>
+            </div>
+            <div class="stp-body">
+              <p>In Minis's terminal, enter:</p>
+              <div class="term">
+                <div class="cmd"><code>wget -qO- https://mirazbakis.github.io/AltLoad/install.sh | sh</code><button type="button" class="cp gated" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
+              </div>
+              <p>It asks for the transfer code from rootshell, then your Apple ID. Stay in Minis until it finishes; iOS pauses it in the background.</p>
+            </div>
+          </li>
+          <li class="stp" data-step="4">
+            <div class="stp-top">
+              <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 4 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
+              <div class="stp-h"><span class="idx">04</span><h4>Trust it</h4><span class="where">Settings</span></div>
+              
+            </div>
+            <div class="stp-body">
+              <p>Settings › General › VPN &amp; Device Management › your Apple ID › <b>Trust</b>. AltLoad is on your Home Screen, signed by you.</p>
+            </div>
+          </li>
+        </ol>
+        <p class="fine">Pairing and install run on AltPair, AltLoad's own <a href="https://github.com/mirazbakis/AltLoad/tree/main/AltPair">open-source tools</a>. Your Apple ID password is typed into AltPair on your iPhone and goes to Apple only.</p>
+      </div>
+
+      <!-- Route 2: the ready-signed copies, which only install through the DNS profile. -->
+      <div class="method" id="direct">
+        <div class="method-head">
+          <div class="mh">
+            <h3>Direct Install <small>(DNS Required)</small></h3>
+            <p>One tap, already signed. These use shared certificates, so any of them can stop working without notice.</p>
+          </div>
+          <span class="tag tag-dns">DNS profile</span>
+        </div>
+        <div class="step-row">
         <div class="box">
           <h3><i>1</i>DNS profile</h3>
           <p>Needed for the installs on this page.</p>
@@ -250,9 +495,22 @@
           </div>
           <ul class="copies" id="copies"><li class="copy empty">Loading…</li></ul>
         </div>
+        </div>
+        <p class="fine">Once AltLoad is on your Home Screen, trust it in Settings › General › VPN &amp; Device Management. You can remove the DNS profile afterwards.</p>
+      </div>
 
+      <!-- Route 3: for people who already sideload. -->
+      <div class="method" id="other">
+        <div class="method-head">
+          <div class="mh">
+            <h3>Already sideloading?</h3>
+            <p>Add AltLoad to the store you have, or sign the IPA yourself.</p>
+          </div>
+          <span class="tag tag-alt">Other ways</span>
+        </div>
+        <div class="step-row">
         <div class="box">
-          <h3><i>3</i>Or add the source</h3>
+          <h3>Add the source</h3>
           <p>Already use AltStore or SideStore? Add the AltLoad source to get it and its updates there.</p>
           <div class="src-row">
             <a class="btn btn-line gated" href="altstore://source?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json" aria-disabled="true">Add to AltStore</a>
@@ -262,14 +520,13 @@
         </div>
 
         <div class="box">
-          <h3><i>4</i>Or download the IPA</h3>
+          <h3>Download the IPA</h3>
           <p>Prefer your own signer? Get the unsigned build from the latest release and sign it yourself.</p>
           <a class="btn btn-line gated" id="dlBtn" href="https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa" aria-disabled="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>Download IPA</a>
         </div>
+        </div>
       </div>
-
-      <p class="lede" style="font-size:14.5px;margin-top:18px">Once AltLoad is on your Home Screen, trust it in Settings › General › VPN &amp; Device Management. You can remove the DNS profile afterwards.</p>
     </div>
   </section>
 
@@ -304,9 +561,11 @@
 
   <section id="faq">
     <div class="wrap faq">
-      <div class="eyebrow">Help</div>
+      <div class="eyebrow">Troubleshoot</div>
       <h2>Questions</h2>
-      <details><summary>Tapping Install does nothing.</summary><p>Open this page in Safari, accept the Terms and add the DNS profile first. If a signed install still won't install, its certificate may be revoked. Pick another one.</p></details>
+      <details><summary>Which install should I pick?</summary><p>Apple ID Install. It signs AltLoad with your own account, so there is no shared certificate to be revoked. Direct Install is quicker when one of its certificates is still valid.</p></details>
+      <details><summary>Tapping Install does nothing.</summary><p>That's Direct Install: open this page in Safari, accept the Terms and add the DNS profile first. If a signed install still won't install, its certificate may be revoked. Pick another one, or use Apple ID Install.</p></details>
+      <details><summary>"Pair with AltLoad" isn't in Settings.</summary><p>Developer Mode has to be on, rootshell needs Local Network access, and both must be on Wi-Fi. Run the two rootshell lines again, then reopen Settings › Privacy &amp; Security › Developer Mode.</p></details>
       <details><summary>It installed but won't open.</summary><p>Trust it in Settings › General › VPN &amp; Device Management. If it still closes right away, that install's certificate was revoked. Delete it and pick another signed install.</p></details>
       <details><summary>Sign-in fails inside AltLoad.</summary><p>Keep Settings › Anisette on Automatic. If it keeps failing, tap Reset Anisette Data and try again a few minutes later.</p></details>
       <details><summary>"Not enough available App IDs".</summary><p>A free Apple ID gets 10 a week. Set App Extensions to Keep, Use Main Profile or Remove Extensions before installing, and check Tools › App IDs to see when the next one frees up.</p></details>
@@ -356,6 +615,57 @@
     setTimeout(function(){ tosRow.classList.remove('nudge'); }, 900);
   });
 
+  // Copy buttons on the terminal lines.
+  function copyOldWay(t){
+    return new Promise(function(ok, no){
+      var a = document.createElement('textarea'); a.value = t; a.setAttribute('readonly','');
+      a.style.cssText = 'position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(a); a.select();
+      try{ document.execCommand('copy') ? ok() : no(); }catch(e){ no(e); } document.body.removeChild(a);
+    });
+  }
+  // The tap itself allows the old way, which answers at once. The clipboard API
+  // can wait on a permission prompt, so it is only the fallback.
+  function copyText(t){
+    return copyOldWay(t).catch(function(){
+      if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t);
+      throw new Error('copy');
+    });
+  }
+  document.addEventListener('click', function(e){
+    var b = e.target.closest && e.target.closest('.cp');
+    if(!b || b.getAttribute('aria-disabled') === 'true') return;
+    var label = b.querySelector('span');
+    copyText(b.parentNode.querySelector('code').textContent).then(function(){
+      b.classList.add('done'); label.textContent = 'Copied';
+      clearTimeout(b._t); b._t = setTimeout(function(){ b.classList.remove('done'); label.textContent = 'Copy'; }, 1600);
+    }, function(){ label.textContent = 'Select it'; });
+  });
+
+  // The checklist remembers what's done, since each step happens in another app.
+  var STEPS = 'altload-steps';
+  var stepEls = [].slice.call(document.querySelectorAll('.stp'));
+  var done = {};
+  try{ done = JSON.parse(localStorage.getItem(STEPS) || '{}') || {}; }catch(e){}
+  function paintSteps(){
+    var n = 0;
+    stepEls.forEach(function(li){
+      var on = !!done[li.dataset.step]; if(on) n++;
+      li.classList.toggle('done', on);
+      li.querySelector('.tick').setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    document.getElementById('progFill').style.width = (n / stepEls.length * 100) + '%';
+    document.getElementById('progText').textContent = n === stepEls.length ? 'All done' : n + ' of ' + stepEls.length + ' done';
+  }
+  document.getElementById('steps').addEventListener('click', function(e){
+    var t = e.target.closest && e.target.closest('.tick');
+    if(!t) return;
+    var k = t.closest('.stp').dataset.step;
+    if(done[k]) delete done[k]; else done[k] = 1;
+    try{ localStorage.setItem(STEPS, JSON.stringify(done)); }catch(e){}
+    paintSteps();
+  });
+  paintSteps();
+
   // Every signed install, always shown.
   function render(slots){
     if(!slots.length){
@@ -383,6 +693,32 @@
     .catch(function(){ render([]); });
 
   gate();
+})();
+
+(function(){
+  // Writes --p (0 to 1: how far the pinned stage has been scrolled through) once per frame.
+  var root = document.documentElement;
+  var stage = document.getElementById('top');
+  if(!stage || !/\bmotion\b/.test(root.className)) return;
+  var pin = stage.querySelector('.stage-pin');
+  var queued = false;
+
+  function update(){
+    queued = false;
+    if(!/\bmotion\b/.test(root.className)) return;
+    var run = stage.offsetHeight - pin.offsetHeight;
+    var p = run > 0 ? -stage.getBoundingClientRect().top / run : 1;
+    stage.style.setProperty('--p', Math.min(1, Math.max(0, p)).toFixed(4));
+  }
+  function queue(){ if(!queued){ queued = true; requestAnimationFrame(update); } }
+  addEventListener('scroll', queue, {passive:true});
+  addEventListener('resize', queue);
+  update();
+
+  // If reduced motion is switched on while the page is open, fall back to the static stage.
+  var mq = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)');
+  function off(e){ if(e.matches){ root.className = root.className.replace(/\s*\bmotion\b/, ''); stage.style.removeProperty('--p'); } }
+  if(mq && mq.addEventListener) mq.addEventListener('change', off);
 })();
 </script>
 </body>

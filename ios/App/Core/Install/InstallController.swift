@@ -229,6 +229,7 @@ final class InstallController: ObservableObject {
     @Published private(set) var steps: [InstallStep] = InstallStep.allCases
     /// Set after installing a SideStore-family app: whether the pairing file went in.
     @Published private(set) var pairingNote: String?
+    @Published private(set) var lastInstallDuration: TimeInterval?
     /// Whether each store is really on this iPhone, from the last device check.
     @Published private(set) var presence: [StoreApp: DevicePresence] = [:]
 
@@ -486,6 +487,8 @@ final class InstallController: ObservableObject {
             return
         }
 
+        let started = Date()
+        lastInstallDuration = nil
         phase = .checking
         pairingNote = nil
         enter(.download)
@@ -551,14 +554,19 @@ final class InstallController: ObservableObject {
             if case .store(let store) = target { app.channel = store.rawValue }
             // SideStore-family apps, LiveContainer's built-in SideStore included, and
             // Husk need this iPhone's pairing file in their Documents.
-            if PairingDestination.placesAutomatically(app.bundleID) {
-                await placePairingFile(in: app.bundleID, pairing: pairing.fileURL)
+            // An app with its own JIT helper is told apart by the store that was
+            // picked, since its bundle ID is whatever its build chose.
+            var builtInJIT = false
+            if case .store(let store) = target { builtInJIT = store.hasBuiltInJIT }
+            if PairingDestination.placesAutomatically(app.bundleID) || builtInJIT {
+                await placePairingFile(in: app.bundleID, pairing: pairing.fileURL, stikJIT: builtInJIT)
             }
             apps.removeAll { $0.bundleID == app.bundleID }
             apps.insert(app, at: 0)
             save()
             scheduleExpiryReminder(for: app)
             if let store = app.store { presence[store] = .installed(version: app.version) }
+            lastInstallDuration = Date().timeIntervalSince(started)
             phase = .success(app)
         case .failed(let message):
             AppleIDStore.forgetPasswordIfRejected(message: message, email: credentials.email)
@@ -680,11 +688,11 @@ final class InstallController: ObservableObject {
 
     /// Copies the pairing file into a freshly installed app that needs one. Not fatal:
     /// the app still works once the file is added from Tools › Pairing File to Apps.
-    private func placePairingFile(in bundleID: String, pairing: URL) async {
+    private func placePairingFile(in bundleID: String, pairing: URL, stikJIT: Bool = false) async {
         enter(.pairing)
         phase = .working(String(localized: "Placing pairing file…"), nil)
         do {
-            try await PairingDestination.place(pairing, in: bundleID)
+            try await PairingDestination.place(pairing, in: bundleID, stikJIT: stikJIT)
             // iOS caches an app's settings once it has run, until the next restart.
             pairingNote = String(localized: "This iPhone's pairing file is already inside the app. If the app still asks for it, restart your iPhone.")
         } catch {

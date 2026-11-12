@@ -14,7 +14,7 @@ This document describes each stage of the install, with the protocol, the librar
 | Apple ID + signing | [`isideload`](https://github.com/nab138/isideload) 0.4.6 (uses idevice, a fork of apple-codesign, rcgen, keyring) | `core/src/install/sign_in.rs`, `core/src/install/bundle.rs` |
 | Discovery | `NetServiceBrowser` / `NetService` (mDNSResponder), used for pairing, so no multicast entitlement is needed | `ios/App/Core/Pairing/PairingController.swift` |
 | Loopback | [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN): detection via `getifaddrs`, and control via `localdevvpn://` and `altload://` URLs | `ios/App/Core/Device/LocalDevVPN.swift` |
-| Catalog | AltStore-format sources (`https://apps.altstore.io` for AltStore and Beta, `https://apps.sidestore.io` for SideStore), GitHub releases for LiveContainer and both nightlies, Husk's `altsource.json` for Husk, with fallbacks for when SideStore's repository is down; `URLSession` download with progress, IPA cache in Application Support | `ios/App/Core/Install/StoreCatalog.swift` |
+| Catalog | AltStore-format sources (`https://apps.altstore.io` for AltStore and Beta, `https://apps.sidestore.io` for SideStore), GitHub releases for LiveContainer and both nightlies, Husk's `altsource.json` for Husk, the latest-release listings for UTM (GitHub), MeloNX (its Forgejo host) and Madeira (GitHub), which publish no source, with fallbacks for when SideStore's repository is down; `URLSession` download with progress, IPA cache in Application Support | `ios/App/Core/Install/StoreCatalog.swift` |
 | Secrets | Keychain (`kSecClassGenericPassword`, `WhenUnlockedThisDeviceOnly`) for the Apple ID password. files in `Application Support/AltLoad` (`FileStorage` in `core/src/install/storage.rs`) for the certificate key and anisette state, one folder per anisette server; values left in the Keychain by older builds are moved over | `ios/App/Core/Account/AppleIDStore.swift`, `core/src/install/storage.rs` |
 
 ## 1. Pairing (the Pair tab)
@@ -79,6 +79,11 @@ AltServer normally writes these keys, and AltStore reads them at runtime:
 | `ALTServerID` | AltLoad | ID of the "server" that installed it. This is a stable per-install UUID |
 | `ALTCertificateID` + `ALTCertificate.p12` | isideload (`apply_special_app_behavior`); for AltStore Beta, AltLoad (`inject_store_keys`) | The signing identity AltStore uses to re-sign the apps *it* installs |
 | `ALTAppGroups` | isideload; for AltStore Beta, AltLoad (`inject_store_keys`) | The registered app group |
+| `ALTPairingFile.dat` | isideload (`apply_special_app_behavior`); for AltStore Beta, AltLoad (`seal_pairing_file`) | This iPhone's pairing file, sealed, for AltStore's Remote AltServer setup |
+
+`ALTPairingFile.dat` is a file in the bundle, not an Info.plist key. `pairing_for_altstore` in `core/src/install/bundle.rs` reads this iPhone's pairing file and adds the `UDID` when it's missing. The file is then sealed with AES-256-GCM: a 12-byte nonce followed by the ciphertext, keyed with the SHA-256 of the certificate's machine ID. It is written before signing, so the signature covers it. AltLoad is still AltStore's AltServer; the file is there so AltStore's Remote AltServer setup already has one and skips pairing. AltStore works without it, so a pairing file that can't be read doesn't stop the install.
+
+The IPA is unpacked on a background thread (`unpack_ipa`, started with `spawn_blocking`) while the Apple ID sign-in and the device link run, so this stage only waits for it to finish. `stamp_app` then writes `ALTDeviceID` and `ALTServerID`, which need the UDID from the tunnel.
 
 isideload then re-signs every bundle with the matching profile's entitlements, using `apple-codesign-quick`.
 
@@ -89,7 +94,7 @@ isideload then re-signs every bundle with the matching profile's entitlements, u
 1. `AfcClient::connect_rsd` uploads the signed `.app` folder to `PublicStaging/` in 1 MB chunks. This covers 0–70% of the progress bar.
 2. `InstallationProxyClient::connect_rsd` → `install_with_callback(PackageType: Developer)`. This covers 70–100%.
 
-Afterwards AltLoad reads `CFBundleIdentifier`, the version, `TeamIdentifier` and `ExpirationDate` from the embedded profile. It stores them and schedules a reminder for 24 hours before expiry.
+Afterwards AltLoad reads `CFBundleIdentifier`, the version, `TeamIdentifier` and `ExpirationDate` from the embedded profile. It stores them and schedules a reminder for 24 hours before expiry. The success screen shows how long the install took, measured from the start of the run to the end of the install, pairing-file step included.
 
 ## Refreshing
 
@@ -138,20 +143,63 @@ void    altload_install_session_cancel(session);
 |---|---|
 | SideStore | `Documents/ALTPairingFile.mobiledevicepairing`, `Documents/PairingFile_RemoteRP.plist`, plus `Documents/PairingFile_Lockdown.plist` when the file has a complete lockdown record |
 | SideStore + LiveContainer | The same files under `Documents/SideStore/Documents/` |
-| Husk | `Documents/StikJIT/pairingFile.plist` |
+| Husk, Madeira | `Documents/StikJIT/pairingFile.plist` |
 | StikDebug and other idevice apps | `Documents/rp_pairing_file.plist` |
 
 Newer SideStore builds also need `isPairingReset = false` and `activePairingProtocol` in their preferences, so `merge_plist` sets them in `Library/Preferences/<bundle id>.plist`, or `Documents/SideStore/Library/Preferences/com.SideStore.SideStore.plist` inside LiveContainer. iOS caches an app's settings once it has run, so these take effect after a reinstall or restart.
 
-After installing SideStore, SideStore + LiveContainer or Husk, AltLoad does this automatically.
+After installing SideStore, SideStore + LiveContainer, Husk or Madeira, AltLoad does this automatically. Madeira is recognised by the store that was picked, not by its bundle ID, because it has its own JIT helper that reads the same path as Husk's.
+
+UTM and MeloNX get no pairing file. They need a debugger's help to run, so the success screen offers **Open with JIT** (see below). AltStore and AltStore Beta get theirs inside the bundle instead, as `ALTPairingFile.dat` (see step 5).
 
 
 ## JIT and location
 
 Both need the Developer Disk Image, which iOS 27 takes as a personalised cryptex. `ios/App/Core/Device/DeveloperDiskImage.swift` downloads it once (from [doronz88/DeveloperDiskImage](https://github.com/doronz88/DeveloperDiskImage)); `ensure_ddi` in `core/src/install/device.rs` asks cryptexd whether it's installed and, if not, personalises it through TSS and installs it.
 
-- **JIT** (`enable_jit`): DVT process control launches the app suspended, debugserver attaches with `vAttach;<pid>` and detaches with `D`. The attach marks the process as debugged, so it can map executable memory until it exits. Only development-signed apps (`get-task-allow`) can be attached.
+- **JIT** (`enable_jit`): DVT process control launches the app suspended and debugserver attaches with `vAttach;<pid>`. The attach marks the process as debugged, so it can map executable memory until it exits. Only development-signed apps (`get-task-allow`) can be attached. AltLoad then stays attached and answers the app's JIT requests (`core/src/install/jit.rs`, below) before detaching with `D`.
 - **Location** (`simulate_location`): DVT location simulation. The device keeps a simulated location only while the connection is open, so the op holds the tunnel and re-sends the coordinate every few seconds until `altload_location_stop`. It runs on its own queue so AltServer's device ops aren't blocked.
+
+### JIT requests
+
+Being attached once is enough for most apps. Where iOS checks each executable page it isn't, so emulators ask the attached debugger for help by stopping on a `brk` instruction with the request in their registers. `serve` in `jit.rs` lets the app run, reads each stop, and answers:
+
+| Request | Registers | What AltLoad does |
+|---|---|---|
+| `brk #0xf00d` | `x16 = 0` | Detaches: the app is done asking |
+| `brk #0xf00d` | `x16 = 1`, `x0` = address, `x1` = length | Prepares the region for JIT. With address 0, it allocates the region first and returns the address in `x0` |
+| `brk #0x69` | `x0` = address, `x1` = length | The older form of the same request, used by UTM, DolphiniOS and Flycast: prepares the region once, then detaches |
+| `brk #0xf00d` with `x16 = 2`, or `brk #0x68` | | Script requests. **Not supported**: the app continues past the `brk` with its registers unchanged |
+
+A region is prepared by writing one byte into each 16 KiB page through debugserver, in batches of 128 packets. A region over 16 GiB is refused. Any other stop is not a request, and the app gets its signal back as it would without a debugger.
+
+The app is matched to a form by bundle ID (`StoreApp.jitDialect`): UTM, DolphiniOS and Flycast use the older form, everything else the `0xf00d` form. An app written for the older form that is run without it gets an error value in `x0`.
+
+AltLoad detaches when the app asks, when the app exits, or when it goes quiet: 8 seconds with no first request (the app only needed the attach), or 5 minutes without another one. `enable_jit` blocks until then and returns the pid, the number of requests answered and how the session ended.
+
+The request protocol is the one the [StikDebug](https://github.com/StikDebug/StikDebug) project's scripts speak. AltLoad's debugger side is an independent implementation; no StikDebug code is used.
+
+> [!WARNING]
+> The JIT request handling has unit tests for its parsing and decisions, but it has **not been tested on a device yet**.
+
+## Installing AltLoad with an Apple ID
+
+The install page's **Apple ID Install** route signs AltLoad with the user's own Apple ID, on the iPhone, before AltLoad is there to do it. It runs on AltPair, two tools written for AltLoad:
+
+- **`altpair.wasm`** (`AltPair/pair/`, built as `altpair.wasm`) runs in the rootshell app and pairs the iPhone with itself. It is written against the WASM socket interface documented in rootshell's MIT repository. It adds a **Pair with AltLoad** row to Settings › Privacy & Security › Developer Mode.
+- **`altpair`** (`AltPair/installer/`) runs in the Open Minis app. It signs AltLoad with the user's Apple ID and installs it over the LocalDevVPN tunnel, using AltLoad's own Rust core (`core/`).
+
+The steps:
+
+1. In rootshell, the user downloads `altpair.wasm` from the latest release and runs it, then taps **Pair with AltLoad** in Settings.
+2. `altpair.wasm` hands the pairing file to `altpair` on the same iPhone over the loopback address. The hand-off is protected by a 6-digit transfer code that `altpair.wasm` shows and `altpair` asks for.
+3. In Open Minis's terminal, with LocalDevVPN connected, the user runs `site/install.sh`. It downloads the `altpair-aarch64` binary from AltLoad's latest GitHub release, checks its SHA-256 and runs it.
+4. `altpair` asks for the transfer code and the Apple ID, signs AltLoad and installs it. The password is typed into `altpair` on the iPhone and goes to Apple only.
+
+`.github/workflows/altpair.yml` builds both tools and attaches them to each AltLoad release.
+
+> [!WARNING]
+> AltPair has **not been tested on a device yet**.
 
 ## Entitlements
 

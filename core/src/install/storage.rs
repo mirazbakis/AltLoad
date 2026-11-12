@@ -1,4 +1,5 @@
-// Where isideload's state lives: files in Application Support/AltLoad.
+// Where isideload's state lives: files in Application Support/AltLoad
+// (~/.altload on Linux).
 
 use super::*;
 
@@ -10,17 +11,43 @@ use super::*;
 /// builds are still read once and moved over.
 pub(super) struct FileStorage {
     dir: PathBuf,
-    legacy: Option<KeyringStorage>,
+    legacy: Option<Legacy>,
+}
+
+/// Relative to $HOME.
+#[cfg(not(target_os = "linux"))]
+const STATE_DIR: &str = "Library/Application Support/AltLoad";
+#[cfg(target_os = "linux")]
+const STATE_DIR: &str = ".altload";
+
+#[cfg(not(target_os = "linux"))]
+type Legacy = KeyringStorage;
+#[cfg(target_os = "linux")]
+type Legacy = NoKeychain;
+
+/// Linux has no Keychain, so there are no older values to move over.
+#[cfg(target_os = "linux")]
+pub(super) struct NoKeychain;
+
+#[cfg(target_os = "linux")]
+impl NoKeychain {
+    fn new(_service: String) -> Self {
+        Self
+    }
+    fn retrieve(&self, _key: &str) -> Result<Option<String>, rootcause::Report> {
+        Ok(None)
+    }
+    fn delete(&self, _key: &str) -> Result<(), rootcause::Report> {
+        Ok(())
+    }
 }
 
 impl FileStorage {
     pub(super) fn new(sub: &str, legacy_service: Option<&str>) -> Self {
         let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-        let dir = PathBuf::from(home)
-            .join("Library/Application Support/AltLoad")
-            .join(sub);
+        let dir = PathBuf::from(home).join(STATE_DIR).join(sub);
         let _ = std::fs::create_dir_all(&dir);
-        Self { dir, legacy: legacy_service.map(|s| KeyringStorage::new(s.to_string())) }
+        Self { dir, legacy: legacy_service.map(|s| Legacy::new(s.to_string())) }
     }
 
     fn path(&self, key: &str) -> PathBuf {

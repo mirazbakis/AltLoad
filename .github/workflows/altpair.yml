@@ -1,0 +1,146 @@
+name: Build AltPair
+
+# Builds altpair (AltPair/installer), the static Linux installer that runs in Open Minis
+# on the iPhone, and altpair.wasm (AltPair/pair). Runs by hand
+# (Actions › Build AltPair › Run workflow) and when a release is published; on a
+# release the four files are attached to it, so install.sh finds them under
+# releases/latest/download.
+#
+# A release made by another workflow with the workflow token doesn't fire the
+# "release" event, so build.yml starts this one with the release's tag instead.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to attach the files to (leave empty to only build)"
+        required: false
+        default: ""
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  altpair:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # musl-tools gives musl-gcc for ring's C and assembly code; nothing else
+      # in the tree builds C on Linux.
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends musl-tools file
+          if ! command -v rustup >/dev/null; then
+            curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal
+            echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+            export PATH="$HOME/.cargo/bin:$PATH"
+          fi
+          rustup target add aarch64-unknown-linux-musl
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: AltPair/installer
+
+      - name: Test
+        working-directory: AltPair/installer
+        run: cargo test --locked
+
+      - name: Build
+        working-directory: AltPair/installer
+        env:
+          RUSTFLAGS: -C target-feature=+crt-static
+          CC_aarch64_unknown_linux_musl: musl-gcc
+        run: cargo build --target aarch64-unknown-linux-musl --release --locked
+
+      - name: Check and package
+        run: |
+          set -euo pipefail
+          BIN=AltPair/installer/target/aarch64-unknown-linux-musl/release/altpair
+          INFO="$(file -b "$BIN")"
+          echo "$INFO"
+          case "$INFO" in
+            *ARM\ aarch64*) ;;
+            *) echo "::error::altpair is not an aarch64 binary"; exit 1 ;;
+          esac
+          case "$INFO" in
+            *"statically linked"* | *"static-pie linked"*) ;;
+            *) echo "::error::altpair is not statically linked"; exit 1 ;;
+          esac
+          "$BIN" --version
+          cp "$BIN" altpair-aarch64
+          sha256sum altpair-aarch64 > altpair-aarch64.sha256
+          cat altpair-aarch64.sha256
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: altpair-aarch64
+          path: |
+            altpair-aarch64
+            altpair-aarch64.sha256
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Attach to release
+        if: github.event_name == 'release' || inputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: gh release upload "$TAG" altpair-aarch64 altpair-aarch64.sha256 --clobber --repo "$GITHUB_REPOSITORY"
+
+  altpair-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install tools
+        run: rustup target add wasm32-wasip1
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: AltPair/pair
+
+      - name: Build
+        run: bash AltPair/pair/build.sh
+
+      # Takes altpair.wasm from wherever build.sh left it (its own folder or
+      # cargo's release output).
+      - name: Package
+        run: |
+          set -euo pipefail
+          WASM="$(find AltPair/pair -name 'altpair.wasm' | grep -v '/deps/' | head -n 1)"
+          if [[ -z "$WASM" ]]; then
+            echo "::error::build.sh did not produce altpair.wasm"; exit 1
+          fi
+          echo "Using $WASM"
+          if [[ "$WASM" != "altpair.wasm" ]]; then cp "$WASM" altpair.wasm; fi
+          sha256sum altpair.wasm > altpair.wasm.sha256
+          cat altpair.wasm.sha256
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: altpair-wasm
+          path: |
+            altpair.wasm
+            altpair.wasm.sha256
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Attach to release
+        if: github.event_name == 'release' || inputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: gh release upload "$TAG" altpair.wasm altpair.wasm.sha256 --clobber --repo "$GITHUB_REPOSITORY"

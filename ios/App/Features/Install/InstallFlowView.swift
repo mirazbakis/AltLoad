@@ -14,6 +14,8 @@ struct InstallFlowView: View {
     @State private var email = AppleIDStore.email
     @State private var password = ""
     @State private var remember = true
+    @State private var openingWithJIT = false
+    @State private var jitError: String?
     @AppStorage(ExtensionsMode.defaultsKey) private var extensionsRaw = ExtensionsMode.keep.rawValue
     @FocusState private var focus: Field?
 
@@ -192,6 +194,12 @@ struct InstallFlowView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("\(app.name) \(app.version) is on your Home Screen")
                             .font(.headline)
+                        if let duration = controller.lastInstallDuration {
+                            let formatted = duration.formatted(.number.precision(.fractionLength(1)))
+                            Label(String(localized: "Installed in \(formatted) seconds"), systemImage: "bolt.fill")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Aurora.success)
+                        }
                         if let expiration = app.expiration {
                             Text("Signed until \(expiration.formatted(date: .abbreviated, time: .shortened)). AltLoad reminds you the day before.")
                                 .font(.subheadline)
@@ -204,6 +212,11 @@ struct InstallFlowView: View {
                         }
                         if app.store?.isSideStore == true {
                             Label(String(localized: "SideStore refreshes apps by itself. Keep LocalDevVPN on when it does."), systemImage: "arrow.triangle.2.circlepath")
+                                .font(.footnote)
+                                .foregroundStyle(Aurora.mist)
+                        }
+                        if app.store?.needsJIT == true {
+                            Label(String(localized: "\(app.name) needs JIT to run. Open it with JIT here, or from Tools › JIT, each time."), systemImage: "bolt.fill")
                                 .font(.footnote)
                                 .foregroundStyle(Aurora.mist)
                         }
@@ -429,6 +442,19 @@ struct InstallFlowView: View {
             remember: remember)
     }
 
+    /// Opens a freshly installed emulator under the debugger, so it starts with JIT.
+    private func openWithJIT(_ app: InstalledApp) {
+        openingWithJIT = true
+        Task {
+            defer { openingWithJIT = false }
+            do {
+                try await DeviceOps.enableJIT(app.bundleID)
+            } catch {
+                jitError = error.localizedDescription
+            }
+        }
+    }
+
     // MARK: - Bottom actions
 
     @ViewBuilder
@@ -463,9 +489,23 @@ struct InstallFlowView: View {
                 }
             }
 
-        case .success:
-            GlassActionButton(title: "Done", systemImage: "checkmark", prominent: true, tint: Aurora.success) {
-                controller.finish()
+        case .success(let app):
+            VStack(spacing: 12) {
+                if app.store?.needsJIT == true {
+                    GlassActionButton(title: "Open with JIT", systemImage: "bolt.fill", prominent: true) {
+                        openWithJIT(app)
+                    }
+                    .disabled(openingWithJIT)
+                    .opacity(openingWithJIT ? 0.55 : 1)
+                }
+                GlassActionButton(title: "Done", systemImage: "checkmark", prominent: app.store?.needsJIT != true, tint: Aurora.success) {
+                    controller.finish()
+                }
+            }
+            .alert("Couldn't enable JIT", isPresented: Binding(get: { jitError != nil }, set: { if !$0 { jitError = nil } })) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(jitError ?? "")
             }
 
         case .failed:

@@ -281,6 +281,41 @@
         }
       }
     },
+    "%@ needs JIT to run. Open it with JIT here, or from Tools › JIT, each time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ braucht JIT. Öffne es jedes Mal hier mit JIT oder über Tools › JIT."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a besoin du JIT. Ouvrez-le avec JIT ici, ou depuis Outils › JIT, à chaque fois."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ richiede il JIT. Aprilo con JIT da qui, o da Strumenti › JIT, ogni volta."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для %@ нужен JIT. Каждый раз открывайте его с JIT здесь или в «Инструменты › JIT»."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 需要 JIT 才能运行。每次请在此处或“工具 › JIT”中使用 JIT 打开。"
+          }
+        }
+      }
+    },
     "%@ now has the pairing file. Reopen the app so it picks the file up.": {
       "extractionState": "manual",
       "localizations": {
@@ -4691,6 +4726,41 @@
         }
       }
     },
+    "Emulators": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emulatoren"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Émulateurs"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emulatori"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Эмуляторы"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模拟器"
+          }
+        }
+      }
+    },
     "Enable JIT": {
       "extractionState": "manual",
       "localizations": {
@@ -6721,6 +6791,41 @@
         }
       }
     },
+    "Installed in %@ seconds": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In %@ Sekunden installiert"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installé en %@ secondes"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installato in %@ secondi"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Установлено за %@ с"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装用时 %@ 秒"
+          }
+        }
+      }
+    },
     "Installing": {
       "extractionState": "manual",
       "localizations": {
@@ -8191,6 +8296,41 @@
         }
       }
     },
+    "Nintendo Switch emulator": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nintendo-Switch-Emulator"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Émulateur Nintendo Switch"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emulatore Nintendo Switch"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Эмулятор Nintendo Switch"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nintendo Switch 模拟器"
+          }
+        }
+      }
+    },
     "No App IDs yet. One is made the first time you install an app.": {
       "extractionState": "manual",
       "localizations": {
@@ -9132,6 +9272,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "打开 **设置** App"
+          }
+        }
+      }
+    },
+    "Open with JIT": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit JIT öffnen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir avec JIT"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apri con JIT"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть с JIT"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 JIT 打开"
           }
         }
       }
@@ -11411,6 +11586,41 @@
         }
       }
     },
+    "Run Windows, Linux and more in virtual machines": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows, Linux und mehr in virtuellen Maschinen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows, Linux et plus encore dans des machines virtuelles"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows, Linux e altro in macchine virtuali"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows, Linux и другие системы в виртуальных машинах"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在虚拟机中运行 Windows、Linux 等系统"
+          }
+        }
+      }
+    },
     "Running apps without installing them": {
       "extractionState": "manual",
       "localizations": {
@@ -13616,6 +13826,41 @@
         }
       }
     },
+    "Switch": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch"
+          }
+        }
+      }
+    },
     "Switched-on entitlements are enabled on AltStore's App ID with your Apple ID, then added to its signature the next time you install or refresh it.": {
       "extractionState": "manual",
       "localizations": {
@@ -15261,6 +15506,41 @@
         }
       }
     },
+    "Virtual machines": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virtuelle Maschinen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Machines virtuelles"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Macchine virtuali"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виртуальные машины"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "虚拟机"
+          }
+        }
+      }
+    },
     "Waiting": {
       "extractionState": "manual",
       "localizations": {
@@ -15607,6 +15887,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "小组件和其他扩展各自使用单独的 App ID。"
+          }
+        }
+      }
+    },
+    "Windows PC games on your iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows-PC-Spiele auf deinem iPhone"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Des jeux PC Windows sur votre iPhone"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giochi per PC Windows sul tuo iPhone"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Игры для ПК с Windows на вашем iPhone"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 iPhone 上玩 Windows 电脑游戏"
+          }
+        }
+      }
+    },
+    "Windows games": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows-Spiele"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeux Windows"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giochi Windows"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Игры для Windows"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows 游戏"
           }
         }
       }

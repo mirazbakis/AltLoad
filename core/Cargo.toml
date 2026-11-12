@@ -6,7 +6,8 @@ description = "C FFI for AltLoad: iOS 27 wireless pairing (idevice) + on-device 
 
 [lib]
 name = "altload_ffi"
-crate-type = ["staticlib"]
+# staticlib for the iOS app; rlib so Rust tools (AltPair/installer) can depend on it by path.
+crate-type = ["staticlib", "rlib"]
 
 [dependencies]
 # Device side: pairing host, RPPairing tunnel to this device, AFC + installation_proxy over RSD.
@@ -29,13 +30,21 @@ idevice = { version = "0.1.61", default-features = false, features = [
 # Apple ID sign-in (GSA + anisette), developer portal (cert, device, App IDs, profiles), code signing.
 # 0.4.5+ is needed for sign-in: Apple stopped accepting the old Android anisette
 # states, so it resets them, takes client info from the server and re-provisions on -45061.
-isideload = { version = "0.4.6", default-features = false, features = ["install", "keyring-storage", "tokio-mt"] }
+isideload = { version = "0.4.6", default-features = false, features = ["install", "tokio-mt"] }
 rootcause = "0.12.0"
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
 tokio = { version = "1", features = ["rt-multi-thread", "net", "macros", "fs", "time", "sync"] }
 serde_json = "1"
 plist = "1.8"
+# The same versions isideload uses, to seal AltStore Beta's pairing file the way it seals AltStore's.
+aes-gcm = "0.11.1"
+sha2 = "0.11"
 zip = { version = "8.3", default-features = false, features = ["deflate"] }
+
+# Keychain storage is only read to migrate values saved by older iOS builds. On Linux
+# it would pull in D-Bus (C code, no session bus in a phone shell), so it is left out.
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+isideload = { version = "0.4.6", default-features = false, features = ["install", "keyring-storage", "tokio-mt"] }
 
 # isideload pulls idevice from crates.io; pin both to the same recent git revision so
 # the tunnel types we build (AdapterHandle / RsdHandshake) are the ones it accepts.

@@ -16,6 +16,9 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
     case sidestoreLC
     case sidestoreLCNightly
     case husk
+    case utm
+    case melonx
+    case madeira
 
     var id: String { rawValue }
 
@@ -36,6 +39,9 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .sidestoreLC: "SideStore + LC"
         case .sidestoreLCNightly: "SideStore + LC Nightly"
         case .husk: "Husk"
+        case .utm: "UTM"
+        case .melonx: "MeloNX"
+        case .madeira: "Madeira"
         }
     }
 
@@ -49,6 +55,9 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .sidestoreNightly: String(localized: "Nightly")
         case .sidestoreLCNightly: String(localized: "LC Nightly")
         case .husk: String(localized: "Android")
+        case .utm: String(localized: "Virtual machines")
+        case .melonx: String(localized: "Switch")
+        case .madeira: String(localized: "Windows games")
         }
     }
 
@@ -61,6 +70,9 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .sidestoreNightly: String(localized: "Newest SideStore build from main")
         case .sidestoreLCNightly: String(localized: "Newest LiveContainer + SideStore build")
         case .husk: String(localized: "Android apps and games on your iPhone")
+        case .utm: String(localized: "Run Windows, Linux and more in virtual machines")
+        case .melonx: String(localized: "Nintendo Switch emulator")
+        case .madeira: String(localized: "Windows PC games on your iPhone")
         }
     }
 
@@ -71,10 +83,44 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .sidestore, .sidestoreNightly: "com.SideStore.SideStore"
         case .sidestoreLC, .sidestoreLCNightly: "com.kdt.livecontainer"
         case .husk: "com.husk.app"
+        case .utm: "com.utmapp.UTM"
+        case .melonx: "com.stossy11.MeloNX"
+        case .madeira: "com.madeira.emulator"
         }
     }
 
-    var isSideStore: Bool { self != .altstore && self != .altstoreBeta && self != .husk }
+    var isSideStore: Bool {
+        switch self {
+        case .sidestore, .sidestoreNightly, .sidestoreLC, .sidestoreLCNightly: true
+        default: false
+        }
+    }
+
+    /// Emulators that only run with a debugger's help. AltLoad offers to open them with JIT.
+    var needsJIT: Bool { self == .utm || self == .melonx }
+
+    /// Has its own JIT helper, which reads a pairing file from Documents/StikJIT.
+    var hasBuiltInJIT: Bool { self == .husk || self == .madeira }
+
+    /// How an app asks the debugger for JIT memory (see jit.rs). Older emulators
+    /// make one request and expect the debugger to leave.
+    static func jitDialect(forBundleID bundleID: String) -> String {
+        let legacy = ["com.utmapp.UTM", "me.oatmealdome.dolphinios", "com.flyinghead.Flycast"]
+        let id = bundleID.lowercased()
+        return legacy.contains { id == $0.lowercased() || id.hasPrefix($0.lowercased() + ".") || id.hasPrefix($0.lowercased() + "-") }
+            ? "legacy" : "universal"
+    }
+
+    /// The release feed of an app that publishes no AltStore source.
+    var releaseFeed: StoreFeed? {
+        switch self {
+        case .utm: .github(repo: "utmapp/UTM", asset: "UTM.ipa")
+        case .melonx: .releases(api: defaultSourceURL, prefix: "MeloNX")
+        // Its IPA carries the version in its name.
+        case .madeira: .releases(api: defaultSourceURL, prefix: "Madeira")
+        default: nil
+        }
+    }
 
     /// Nightlies install over the regular build (same bundle ID), so they share
     /// its record and on-device check.
@@ -100,6 +146,10 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .sidestoreNightly: URL(string: "https://api.github.com/repos/SideStore/SideStore/releases/tags/nightly")!
         case .sidestoreLCNightly: URL(string: "https://api.github.com/repos/LiveContainer/LiveContainer/releases/tags/nightly")!
         case .husk: URL(string: "https://raw.githubusercontent.com/Leviidev/Husk/main/altsource.json")!
+        // No sources of their own; the release listings are the feed.
+        case .utm: URL(string: "https://api.github.com/repos/utmapp/UTM/releases/latest")!
+        case .melonx: URL(string: "https://starforgejo.dev/api/v1/repos/projects/MeloNX/releases/latest")!
+        case .madeira: URL(string: "https://api.github.com/repos/willfaust/Madeira/releases/latest")!
         }
     }
 
@@ -129,6 +179,12 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
                 .github(repo: "Leviidev/Husk", asset: "Husk.ipa"),
                 .pinned(version: "3.3", url: URL(string: "https://github.com/Leviidev/Husk/releases/download/3.3/Husk.ipa")!)
             ]
+        case .utm:
+            [.pinned(version: "5.0.8", url: URL(string: "https://github.com/utmapp/UTM/releases/download/v5.0.8/UTM.ipa")!)]
+        case .melonx:
+            [.pinned(version: "2.7", url: URL(string: "https://starforgejo.dev/projects/MeloNX/releases/download/2.7/MeloNX.ipa")!)]
+        case .madeira:
+            [.pinned(version: "0.2.0", url: URL(string: "https://github.com/willfaust/Madeira/releases/download/v0.2.0/Madeira-0.2.0.ipa")!)]
         }
     }
 
@@ -140,14 +196,18 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .sidestore: "arrow.triangle.2.circlepath"
         case .sidestoreLC: "shippingbox.fill"
         case .sidestoreNightly, .sidestoreLCNightly: "moon.stars.fill"
-        case .husk: "gamecontroller.fill"
+        case .husk, .melonx: "gamecontroller.fill"
+        case .utm: "desktopcomputer"
+        case .madeira: "pc"
         }
     }
 
     /// Icon used when the feed doesn't name one (GitHub releases).
     var defaultIconURL: URL? {
         switch self {
-        case .altstore, .altstoreBeta: nil
+        case .altstore, .altstoreBeta, .utm: nil
+        case .melonx: URL(string: "https://starforgejo.dev/projects/MeloNX/raw/branch/master/src/MeloNX/MeloNX/Assets/Assets.xcassets/AppIcon.appiconset/nxgradientpng.png")
+        case .madeira: URL(string: "https://raw.githubusercontent.com/willfaust/Madeira/HEAD/app/Madeira/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png")
         case .husk: URL(string: "https://raw.githubusercontent.com/Leviidev/Husk/main/src/app/Husk/Assets.xcassets/AppIcon.appiconset/Icon-Default.png")
         default: URL(string: "https://apps.sidestore.io/apps/sidestore/v0.1.1/icon.png")
         }
@@ -160,6 +220,9 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
         case .sidestore, .sidestoreNightly: "sidestore"
         case .sidestoreLC, .sidestoreLCNightly: "livecontainer"
         case .husk: "husk"
+        case .utm: "UTM"
+        case .melonx: "melonx"
+        case .madeira: "madeira"
         }
     }
 
@@ -202,6 +265,9 @@ enum StoreFeed {
     /// A GitHub release by tag (the nightlies), using the asset called `asset`.
     /// Its version is the date the asset was last rebuilt.
     case githubTag(repo: String, tag: String, asset: String)
+    /// The latest release from a GitHub-style API at `api` (GitHub, or a Forgejo
+    /// host), using the .ipa whose name starts with `prefix`.
+    case releases(api: URL, prefix: String)
     /// A fixed build, last resort when everything else is offline.
     case pinned(version: String, url: URL)
 }
@@ -258,7 +324,11 @@ enum StoreCatalog {
         case .sidestoreLC where store.sourceURL() == store.defaultSourceURL:
             primary = .github(repo: "LiveContainer/LiveContainer", asset: "LiveContainer+SideStore.ipa")
         default:
-            primary = .source(store.sourceURL())
+            if let feed = store.releaseFeed, store.sourceURL() == store.defaultSourceURL {
+                primary = feed
+            } else {
+                primary = .source(store.sourceURL())
+            }
         }
         var firstError: Error?
         for feed in [primary] + store.fallbackFeeds {
@@ -298,6 +368,18 @@ enum StoreCatalog {
             let data = try await fetch(URL(string: "https://api.github.com/repos/\(repo)/releases/latest")!, store)
             let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
             guard let asset = release.assets.first(where: { $0.name == assetName }) else {
+                throw CatalogError.notListed(store)
+            }
+            return StoreRelease(
+                version: release.tagName.trimmingCharacters(in: CharacterSet(charactersIn: "v")),
+                buildVersion: nil, date: release.publishedAt,
+                downloadURL: asset.browserDownloadURL, size: asset.size, minOSVersion: nil,
+                notes: release.body, iconURL: store.defaultIconURL)
+
+        case .releases(let api, let prefix):
+            let data = try await fetch(api, store)
+            let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
+            guard let asset = release.assets.first(where: { $0.name.hasPrefix(prefix) && $0.name.hasSuffix(".ipa") }) else {
                 throw CatalogError.notListed(store)
             }
             return StoreRelease(
