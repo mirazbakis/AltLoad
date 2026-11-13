@@ -119,6 +119,9 @@ pub struct AltLoadInstallResult {
     pub team_id: *mut c_char,
     /// Provisioning profile expiry as a Unix timestamp, or 0 if unknown.
     pub expiration_unix: i64,
+    /// The profile's developer certificates, DER in hex, separated by commas.
+    /// The app checks them for revocation.
+    pub certificates: *mut c_char,
 }
 
 impl AltLoadInstallResult {
@@ -131,6 +134,7 @@ impl AltLoadInstallResult {
             udid: ptr::null_mut(),
             team_id: ptr::null_mut(),
             expiration_unix: 0,
+            certificates: ptr::null_mut(),
         }
     }
 }
@@ -258,6 +262,7 @@ struct Installed {
     udid: String,
     team_id: String,
     expiration_unix: i64,
+    certificates: String,
 }
 
 static INIT: Once = Once::new();
@@ -342,6 +347,7 @@ pub unsafe extern "C" fn altload_install_session_run(
             (*out).udid = cstr(done.udid);
             (*out).team_id = cstr(done.team_id);
             (*out).expiration_unix = done.expiration_unix;
+            (*out).certificates = cstr(done.certificates);
             0
         }
         Err(e) => {
@@ -398,6 +404,7 @@ pub unsafe extern "C" fn altload_install_result_free(r: *mut AltLoadInstallResul
         (*r).app_version,
         (*r).udid,
         (*r).team_id,
+        (*r).certificates,
     ] {
         if !p.is_null() {
             drop(CString::from_raw(p));

@@ -4,6 +4,7 @@ import SwiftUI
 struct AltLoadApp: App {
     init() {
         PairingController.shared.registerBackgroundTask()
+        AutoRefresh.shared.registerBackgroundTask()
         // Be ready as soon as AltStore looks for an AltServer.
         AltServerHost.shared.startIfEnabled()
     }
@@ -87,6 +88,7 @@ struct RootView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 AltServerHost.shared.refresh()
+                AutoRefresh.shared.checkIfDue()
                 Task { await updates.check() }
             }
         }

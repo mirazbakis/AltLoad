@@ -100,6 +100,12 @@ Afterwards AltLoad reads `CFBundleIdentifier`, the version, `TeamIdentifier` and
 
 A free-account profile lasts 7 days. AltStore's built-in refresh expects to find AltServer on the network, which doesn't exist in this setup. Tapping **Refresh AltStore** in AltLoad runs the same pipeline with the cached IPA. Because the bundle ID and team are the same, iOS treats it as an update, and AltStore's data and the apps it manages are kept.
 
+### Automatic refresh
+
+`ios/App/Core/Install/AutoRefresh.swift` refreshes apps without the install screen (`InstallController.refreshQuietly`): ones that expire within two days, and ones whose signing certificate is gone. It runs when AltLoad comes to the front (at most every six hours, unless something expires within a day) and in a `BGProcessingTask` (`<bundle id>.autorefresh`) that iOS starts when it sees fit, usually overnight. Each refresh uses the Apple ID that signed the app and needs its password saved and LocalDevVPN on. A prompt (two-factor, or a full set of certificates) is declined rather than shown, and the user gets a notification saying what to do; so do a closed VPN and a missing password, once per app until it's refreshed.
+
+A refresh is also how a revoked certificate is replaced: `sign_app` looks for the account's certificate (`CertificateIdentity::retrieve`), requests a new one when it's gone, and always downloads a new provisioning profile. To notice a revocation, AltLoad keeps the developer certificates from each app's profile (`DeveloperCertificates`, returned by the core as `certificates`) and, once a day per Apple ID, lists the account's active certificates through the developer services AltLoad signs with (`CertificateCheck.swift`, the core's `overview`). An app whose profile names a certificate that's no longer active is signed again. It doesn't use Apple's OCSP servers, which DNS profiles often block. The new profile only lists active certificates, so this happens once.
+
 ## Update notice
 
 `UpdateChecker` asks GitHub for AltLoad's latest release when the app opens or returns to the foreground, at most every 6 hours. If it's newer than the running version, an alert links to the install site. **Later** hides that version until a newer one is out.
@@ -197,10 +203,10 @@ The request protocol and the script functions are the ones the [StikDebug](https
 
 ## Installing AltLoad with an Apple ID
 
-The install page's **Apple ID Install** route signs AltLoad with the user's own Apple ID, on the iPhone, before AltLoad is there to do it. It runs on AltPair, two tools written for AltLoad:
+The install page's **Apple ID Install** route signs AltLoad with the user's own Apple ID, on the iPhone, before AltLoad is there to do it. It runs on altpair, two tools written for AltLoad:
 
-- **`altpair.wasm`** (`AltPair/pair/`, built as `altpair.wasm`) runs in the rootshell app and pairs the iPhone with itself. It is written against the WASM socket interface documented in rootshell's MIT repository. It adds a **Pair with AltLoad** row to Settings › Privacy & Security › Developer Mode.
-- **`altpair`** (`AltPair/installer/`) runs in the Open Minis app. It signs AltLoad with the user's Apple ID and installs it over the LocalDevVPN tunnel, using AltLoad's own Rust core (`core/`).
+- **`altpair.wasm`** (`altpair/pair/`, built as `altpair.wasm`) runs in the rootshell app and pairs the iPhone with itself. It is written against the WASM socket interface documented in rootshell's MIT repository. It adds a **Pair with AltLoad** row to Settings › Privacy & Security › Developer Mode.
+- **`altpair`** (`altpair/installer/`) runs in the Open Minis app. It signs AltLoad with the user's Apple ID and installs it over the LocalDevVPN tunnel, using AltLoad's own Rust core (`core/`).
 
 The steps:
 
@@ -212,7 +218,7 @@ The steps:
 `.github/workflows/altpair.yml` builds both tools and attaches them to each AltLoad release.
 
 > [!WARNING]
-> AltPair has **not been tested on a device yet**.
+> altpair has **not been tested on a device yet**.
 
 ## Entitlements
 

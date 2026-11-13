@@ -1,8 +1,8 @@
-name: Build AltPair
+name: Build altpair
 
-# Builds altpair (AltPair/installer), the static Linux installer that runs in Open Minis
-# on the iPhone, and altpair.wasm (AltPair/pair). Runs by hand
-# (Actions › Build AltPair › Run workflow) and when a release is published; on a
+# Builds altpair (altpair/installer), the static Linux installer that runs in Open Minis
+# on the iPhone, and altpair.wasm (altpair/pair). Runs by hand
+# (Actions › Build altpair › Run workflow) and when a release is published; on a
 # release the four files are attached to it, so install.sh finds them under
 # releases/latest/download.
 #
@@ -48,14 +48,14 @@ jobs:
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: AltPair/installer
+          workspaces: altpair/installer
 
       - name: Test
-        working-directory: AltPair/installer
+        working-directory: altpair/installer
         run: cargo test --locked
 
       - name: Build
-        working-directory: AltPair/installer
+        working-directory: altpair/installer
         env:
           RUSTFLAGS: -C target-feature=+crt-static
           CC_aarch64_unknown_linux_musl: musl-gcc
@@ -64,7 +64,7 @@ jobs:
       - name: Check and package
         run: |
           set -euo pipefail
-          BIN=AltPair/installer/target/aarch64-unknown-linux-musl/release/altpair
+          BIN=altpair/installer/target/aarch64-unknown-linux-musl/release/altpair
           INFO="$(file -b "$BIN")"
           echo "$INFO"
           case "$INFO" in
@@ -109,17 +109,17 @@ jobs:
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: AltPair/pair
+          workspaces: altpair/pair
 
       - name: Build
-        run: bash AltPair/pair/build.sh
+        run: bash altpair/pair/build.sh
 
       # Takes altpair.wasm from wherever build.sh left it (its own folder or
       # cargo's release output).
       - name: Package
         run: |
           set -euo pipefail
-          WASM="$(find AltPair/pair -name 'altpair.wasm' | grep -v '/deps/' | head -n 1)"
+          WASM="$(find altpair/pair -name 'altpair.wasm' | grep -v '/deps/' | head -n 1)"
           if [[ -z "$WASM" ]]; then
             echo "::error::build.sh did not produce altpair.wasm"; exit 1
           fi

@@ -7,7 +7,7 @@
 
 mod install;
 
-// The install API, for Rust callers that link this crate as an rlib (AltPair/installer).
+// The install API, for Rust callers that link this crate as an rlib (altpair/installer).
 pub use install::{
     altload_install_result_free, altload_install_session_cancel, altload_install_session_free,
     altload_install_session_new, altload_install_session_respond, altload_install_session_run,

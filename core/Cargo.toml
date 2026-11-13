@@ -6,7 +6,7 @@ description = "C FFI for AltLoad: iOS 27 wireless pairing (idevice) + on-device 
 
 [lib]
 name = "altload_ffi"
-# staticlib for the iOS app; rlib so Rust tools (AltPair/installer) can depend on it by path.
+# staticlib for the iOS app; rlib so Rust tools (altpair/installer) can depend on it by path.
 crate-type = ["staticlib", "rlib"]
 
 [dependencies]

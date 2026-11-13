@@ -9,6 +9,7 @@ struct InstallView: View {
     @StateObject private var controller = InstallController.shared
     @StateObject private var pairings = PairingStore.shared
     @ObservedObject private var entitlements = EntitlementSettings.shared
+    @ObservedObject private var autoRefresh = AutoRefresh.shared
     @AppStorage(StoreApp.defaultsKey) private var selectedRaw = StoreApp.altstore.rawValue
     @State private var showImporter = false
     @State private var importError: String?
@@ -338,7 +339,7 @@ struct InstallView: View {
         AppBannerRow(
             name: app.name,
             detail: appDetail(app),
-            detailColor: app.isExpired ? Aurora.danger : Aurora.secondaryText,
+            detailColor: app.isExpired || autoRefresh.revoked.contains(app.bundleID) ? Aurora.danger : Aurora.secondaryText,
             iconURL: app.store.flatMap { controller.releases[$0]?.iconURL },
             symbol: app.store?.fallbackSymbol ?? "app.fill"
         ) {
@@ -361,6 +362,9 @@ struct InstallView: View {
     }
 
     private func appDetail(_ app: InstalledApp) -> String {
+        if autoRefresh.revoked.contains(app.bundleID) {
+            return String(localized: "Version \(app.version) · Certificate revoked, needs signing again")
+        }
         if app.store == nil && app.refreshTarget == nil {
             return String(localized: "Version \(app.version) · Pick the IPA again to refresh")
         }

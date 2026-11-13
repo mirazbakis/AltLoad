@@ -81,6 +81,7 @@ typedef struct {
     char *udid;
     char *team_id;
     int64_t expiration_unix;
+    char *certificates; /* the profile's developer certificates: DER in hex, comma-separated */
 } AltLoadInstallResult;
 
 typedef struct AltLoadInstallSession AltLoadInstallSession;

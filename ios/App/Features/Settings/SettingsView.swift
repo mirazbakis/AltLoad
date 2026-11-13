@@ -7,6 +7,7 @@ struct SettingsView: View {
     @StateObject private var install = InstallController.shared
     @StateObject private var anisette = AnisetteServers.shared
     @StateObject private var account = CertificatesController.shared
+    @StateObject private var autoRefresh = AutoRefresh.shared
     @State private var anisetteChoice = ""
     private static let customTag = "custom"
     @State private var appleID = AppleIDStore.email
@@ -24,6 +25,7 @@ struct SettingsView: View {
         NavigationStack {
             AuroraScreen {
                 appleIDCard
+                autoRefreshCard
                 anisetteCard
                 vpnCard
                 sourcesCard
@@ -282,6 +284,29 @@ struct SettingsView: View {
             }
             .buttonStyle(AltLoadButtonStyle(prominent: false))
             footnote(String(localized: "AltLoad installs the newest build each source lists. If SideStore's source or repository is down, it falls back to a mirror, its GitHub releases and then a known-good build."))
+        }
+    }
+
+    private var autoRefreshCard: some View {
+        CardSection(title: "Automatic Refresh", symbol: "arrow.triangle.2.circlepath") {
+            Toggle(String(localized: "Refresh apps automatically"), systemImage: "arrow.clockwise", isOn: $autoRefresh.enabled)
+                .frame(minHeight: 44)
+            if autoRefresh.enabled {
+                HStack(spacing: 10) {
+                    Text(autoRefresh.running
+                         ? String(localized: "Checking…")
+                         : autoRefresh.lastRun.map { String(localized: "Last checked \($0.formatted(.relative(presentation: .named)))") } ?? String(localized: "Not checked yet"))
+                        .font(.footnote)
+                        .foregroundStyle(Aurora.secondaryText)
+                    Spacer()
+                    Button(String(localized: "Check Now")) {
+                        Task { await autoRefresh.run() }
+                    }
+                    .font(.footnote.weight(.semibold))
+                    .disabled(autoRefresh.running || install.isBusy)
+                }
+            }
+            footnote(String(localized: "AltLoad refreshes apps that expire within two days, and signs again any app whose certificate was revoked, with a new certificate and provisioning profile. It finds revoked certificates by asking your Apple ID's developer account once a day, so nothing depends on Apple's certificate status servers. It checks when you open AltLoad and in the background when iOS allows, and needs LocalDevVPN on and the password saved for the app's Apple ID. If Apple asks for a two-factor code, AltLoad tells you instead."))
         }
     }
 

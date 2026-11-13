@@ -141,6 +141,41 @@
         }
       }
     },
+    "%@ Open AltLoad and refresh it there.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Öffne AltLoad und aktualisiere es dort."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Ouvrez AltLoad et actualisez-la là."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Apri AltLoad e aggiornala da lì."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Откройте AltLoad и обновите его там."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 请打开 AltLoad 并在那里刷新。"
+          }
+        }
+      }
+    },
     "%@ closed. Open it with JIT again next time.": {
       "extractionState": "manual",
       "localizations": {
@@ -456,6 +491,41 @@
         }
       }
     },
+    "%@ needs a refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ muss aktualisiert werden"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ doit être actualisée"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ va aggiornata"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ нужно обновить"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 需要刷新"
+          }
+        }
+      }
+    },
     "%@ now has the pairing file. Reopen the app so it picks the file up.": {
       "extractionState": "manual",
       "localizations": {
@@ -487,6 +557,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 现在已有配对文件。请重新打开该 App 以读取文件。"
+          }
+        }
+      }
+    },
+    "%@ was refreshed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ wurde aktualisiert"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a été actualisée"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ è stata aggiornata"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ обновлён"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 已刷新"
+          }
+        }
+      }
+    },
+    "%@ was signed again": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ wurde neu signiert"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a été signée à nouveau"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ è stata firmata di nuovo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ подписан заново"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 已重新签名"
           }
         }
       }
@@ -1891,6 +2031,41 @@
         }
       }
     },
+    "AltLoad can refresh it by itself once the password for its Apple ID is saved. Open AltLoad and refresh it once with Remember password on.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad kann es selbst aktualisieren, sobald das Passwort seiner Apple-ID gespeichert ist. Öffne AltLoad und aktualisiere es einmal mit „Passwort merken“."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad peut l'actualiser seul dès que le mot de passe de son identifiant Apple est enregistré. Ouvrez AltLoad et actualisez-la une fois avec « Mémoriser le mot de passe » activé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad può aggiornarla da solo quando la password del suo ID Apple è salvata. Apri AltLoad e aggiornala una volta con «Ricorda password» attivo."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad сможет обновлять его сам, когда пароль его Apple ID будет сохранён. Откройте AltLoad и обновите его один раз с включённым «Запомнить пароль»."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存其 Apple ID 的密码后，AltLoad 就能自行刷新。打开 AltLoad，在开启“记住密码”的情况下刷新一次。"
+          }
+        }
+      }
+    },
     "AltLoad can't enable JIT. Use StikDebug for that.": {
       "extractionState": "manual",
       "localizations": {
@@ -2241,6 +2416,41 @@
         }
       }
     },
+    "AltLoad refreshes apps that expire within two days, and signs again any app whose certificate was revoked, with a new certificate and provisioning profile. It finds revoked certificates by asking your Apple ID's developer account once a day, so nothing depends on Apple's certificate status servers. It checks when you open AltLoad and in the background when iOS allows, and needs LocalDevVPN on and the password saved for the app's Apple ID. If Apple asks for a two-factor code, AltLoad tells you instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad aktualisiert Apps, die innerhalb von zwei Tagen ablaufen, und signiert jede App neu, deren Zertifikat widerrufen wurde, mit neuem Zertifikat und Bereitstellungsprofil. Widerrufene Zertifikate findet es einmal täglich über das Entwicklerkonto deiner Apple-ID, unabhängig von Apples Zertifikatsstatus-Servern. Es prüft beim Öffnen von AltLoad und im Hintergrund, wenn iOS es erlaubt, und braucht eingeschaltetes LocalDevVPN und das gespeicherte Passwort der Apple-ID der App. Verlangt Apple einen Bestätigungscode, sagt AltLoad dir Bescheid."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad actualise les apps qui expirent dans les deux jours, et signe à nouveau toute app dont le certificat a été révoqué, avec un nouveau certificat et un nouveau profil. Il repère les certificats révoqués une fois par jour via le compte développeur de votre identifiant Apple, sans dépendre des serveurs de statut de certificats d'Apple. Il vérifie à l'ouverture d'AltLoad et en arrière-plan quand iOS le permet, et a besoin de LocalDevVPN activé et du mot de passe enregistré de l'identifiant Apple de l'app. Si Apple demande un code de validation, AltLoad vous prévient."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad aggiorna le app che scadono entro due giorni e firma di nuovo ogni app il cui certificato è stato revocato, con un nuovo certificato e profilo. Trova i certificati revocati una volta al giorno tramite l'account sviluppatore del tuo ID Apple, senza dipendere dai server di stato dei certificati di Apple. Controlla quando apri AltLoad e in background quando iOS lo consente, e ha bisogno di LocalDevVPN attivo e della password salvata dell'ID Apple dell'app. Se Apple chiede un codice di verifica, AltLoad te lo segnala."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad обновляет приложения, срок которых истекает в течение двух дней, и заново подписывает любое приложение с отозванным сертификатом, получая новый сертификат и профиль. Отозванные сертификаты он находит раз в день через аккаунт разработчика вашего Apple ID, не завися от серверов статуса сертификатов Apple. Проверка идёт при открытии AltLoad и в фоне, когда позволяет iOS; нужны включённый LocalDevVPN и сохранённый пароль Apple ID приложения. Если Apple запросит код подтверждения, AltLoad сообщит вам."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad 会刷新两天内过期的 App，并为证书被吊销的 App 用新证书和描述文件重新签名。它每天通过你的 Apple ID 开发者账户查找被吊销的证书，不依赖 Apple 的证书状态服务器。打开 AltLoad 时以及 iOS 允许时在后台检查，需要开启 LocalDevVPN 并保存该 App 所用 Apple ID 的密码。如果 Apple 要求输入验证码，AltLoad 会通知你。"
+          }
+        }
+      }
+    },
     "AltLoad signs %@ with your Apple ID and installs it straight onto this iPhone. With a free Apple ID it lasts 7 days, and AltLoad reminds you the day before.": {
       "extractionState": "manual",
       "localizations": {
@@ -2307,6 +2517,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "AltLoad 已尝试源、镜像和 GitHub。请稍后再试，或选择你已有的 %@ IPA。"
+          }
+        }
+      }
+    },
+    "AltLoad will try to refresh it by itself. If it can't, open AltLoad and tap Refresh.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad versucht, es selbst zu aktualisieren. Klappt das nicht, öffne AltLoad und tippe auf „Aktualisieren“."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad essaiera de l'actualiser seul. Sinon, ouvrez AltLoad et touchez Actualiser."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad proverà ad aggiornarla da solo. Se non ci riesce, apri AltLoad e tocca Aggiorna."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad попробует обновить его сам. Если не получится, откройте AltLoad и нажмите «Обновить»."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad 会尝试自行刷新。如果失败，请打开 AltLoad 并轻点“刷新”。"
           }
         }
       }
@@ -3116,6 +3361,41 @@
         }
       }
     },
+    "Apple asked for a two-factor code.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple hat einen Bestätigungscode verlangt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple a demandé un code de validation."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple ha chiesto un codice di verifica."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple запросил код подтверждения."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 要求输入双重认证验证码。"
+          }
+        }
+      }
+    },
     "Apple doesn't let free Apple IDs delete App IDs. They free up on their own 7 days after they were made. To use fewer, set App Extensions to Keep, Use Main Profile or Remove Extensions when you install.": {
       "extractionState": "manual",
       "localizations": {
@@ -3357,6 +3637,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "自动"
+          }
+        }
+      }
+    },
+    "Automatic Refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatische Aktualisierung"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualisation automatique"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiornamento automatico"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автообновление"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动刷新"
           }
         }
       }
@@ -3606,6 +3921,41 @@
         }
       }
     },
+    "Check Now": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jetzt prüfen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifier"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Controlla ora"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверить"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即检查"
+          }
+        }
+      }
+    },
     "Check for Updates": {
       "extractionState": "manual",
       "localizations": {
@@ -3707,6 +4057,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在检查此 iPhone…"
+          }
+        }
+      }
+    },
+    "Checking…": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird geprüft…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Controllo…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверка…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在检查…"
           }
         }
       }
@@ -4547,6 +4932,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法读取 App"
+          }
+        }
+      }
+    },
+    "Couldn't refresh %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ konnte nicht aktualisiert werden"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d'actualiser %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile aggiornare %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось обновить %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法刷新 %@"
           }
         }
       }
@@ -7736,6 +8156,41 @@
         }
       }
     },
+    "It works until %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es funktioniert bis %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elle fonctionne jusqu'au %@."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funziona fino al %@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Работает до %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用至 %@。"
+          }
+        }
+      }
+    },
     "It's On, Continue": {
       "extractionState": "manual",
       "localizations": {
@@ -8187,6 +8642,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "LC Nightly"
+          }
+        }
+      }
+    },
+    "Last checked %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zuletzt geprüft %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière vérification %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ultimo controllo %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последняя проверка %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次检查 %@"
           }
         }
       }
@@ -9517,6 +10007,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有可吊销的证书"
+          }
+        }
+      }
+    },
+    "Not checked yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch nicht geprüft"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore vérifié"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non ancora controllato"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ещё не проверялось"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未检查"
           }
         }
       }
@@ -12037,6 +12562,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "刷新 %@"
+          }
+        }
+      }
+    },
+    "Refresh apps automatically": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps automatisch aktualisieren"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualiser les apps automatiquement"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiorna le app automaticamente"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновлять приложения автоматически"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动刷新 App"
           }
         }
       }
@@ -15611,6 +16171,41 @@
         }
       }
     },
+    "The certificate it was signed with was revoked, so AltLoad signed it with a new one. It works until %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Zertifikat, mit dem es signiert war, wurde widerrufen, daher hat AltLoad es mit einem neuen signiert. Es funktioniert bis %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le certificat qui la signait a été révoqué, AltLoad l'a donc signée avec un nouveau. Elle fonctionne jusqu'au %@."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il certificato con cui era firmata è stato revocato, quindi AltLoad l'ha firmata con uno nuovo. Funziona fino al %@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сертификат, которым он был подписан, отозван, поэтому AltLoad подписал его новым. Он работает до %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "签名所用的证书已被吊销，因此 AltLoad 用新证书重新签名。可用至 %@。"
+          }
+        }
+      }
+    },
     "The checked Apple ID is used by default. Each app remembers the Apple ID that signed it, so a refresh uses the same one. Signing in here checks the checked Apple ID with Apple straight away, without installing anything.": {
       "extractionState": "manual",
       "localizations": {
@@ -15786,6 +16381,41 @@
         }
       }
     },
+    "The refresh stopped.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Aktualisierung wurde abgebrochen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'actualisation s'est arrêtée."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'aggiornamento si è interrotto."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновление остановлено."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新已停止。"
+          }
+        }
+      }
+    },
     "The script %@ finished for %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -15957,6 +16587,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "第三方声明"
+          }
+        }
+      }
+    },
+    "This Apple ID has no free certificate slot, so one has to be revoked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Apple-ID hat keinen freien Zertifikatsplatz, eines muss widerrufen werden."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cet identifiant Apple n'a plus de place pour un certificat, il faut en révoquer un."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo ID Apple non ha posti liberi per i certificati, quindi uno va revocato."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У этого Apple ID нет свободного места для сертификата, один нужно отозвать."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此 Apple ID 没有空余的证书名额，需要吊销一个。"
           }
         }
       }
@@ -16342,6 +17007,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "开启 LocalDevVPN"
+          }
+        }
+      }
+    },
+    "Turn on LocalDevVPN, then open AltLoad, and it refreshes by itself.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalte LocalDevVPN ein und öffne AltLoad, dann aktualisiert es sich selbst."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activez LocalDevVPN puis ouvrez AltLoad, et l'actualisation se fera seule."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attiva LocalDevVPN e apri AltLoad: si aggiornerà da solo."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включите LocalDevVPN и откройте AltLoad — обновление пройдёт само."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开 LocalDevVPN，再打开 AltLoad，它会自行刷新。"
           }
         }
       }
@@ -17112,6 +17812,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "版本 %@ · %@"
+          }
+        }
+      }
+    },
+    "Version %@ · Certificate revoked, needs signing again": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version %@ · Zertifikat widerrufen, muss neu signiert werden"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version %@ · Certificat révoqué, à signer à nouveau"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versione %@ · Certificato revocato, va firmata di nuovo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Версия %@ · Сертификат отозван, нужно подписать заново"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本 %@ · 证书已吊销，需要重新签名"
           }
         }
       }

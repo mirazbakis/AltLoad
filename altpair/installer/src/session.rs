@@ -193,6 +193,7 @@ fn run_blocking(
         udid: ptr::null_mut(),
         team_id: ptr::null_mut(),
         expiration_unix: 0,
+        certificates: ptr::null_mut(),
     };
     let rc = unsafe {
         altload_install_session_run(

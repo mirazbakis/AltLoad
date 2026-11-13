@@ -1,8 +1,8 @@
-# AltPair
+# altpair
 
-AltPair installs AltLoad on an iPhone with no computer, no shared certificate and no DNS profile. It is signed on the iPhone with your own Apple ID.
+altpair installs AltLoad on an iPhone with no computer, no shared certificate and no DNS profile. It is signed on the iPhone with your own Apple ID.
 
-I wrote AltPair from scratch as a pair of small tools for AltLoad:
+I wrote altpair from scratch as a pair of small tools for AltLoad:
 
 - `pair/` builds `altpair.wasm`. It pairs the iPhone with itself.
 - `installer/` builds `altpair`. It signs AltLoad and installs it.
@@ -182,7 +182,7 @@ The tool writes `rp_pairing_file.plist` in its working directory. If that file a
 The pairing tool:
 
 ```sh
-cd AltPair/pair
+cd altpair/pair
 rustup target add wasm32-wasip1
 cargo build --release --target wasm32-wasip1
 # output: target/wasm32-wasip1/release/altpair.wasm
@@ -191,7 +191,7 @@ cargo build --release --target wasm32-wasip1
 The installer:
 
 ```sh
-cd AltPair/installer
+cd altpair/installer
 rustup target add aarch64-unknown-linux-musl
 cargo build --release --target aarch64-unknown-linux-musl
 # output: target/aarch64-unknown-linux-musl/release/altpair
@@ -219,4 +219,4 @@ I haven't run this on an iPhone yet. I have not verified:
 - Open Minis, for the Linux shell.
 - [LocalDevVPN](https://github.com/jkcoxson/LocalDevVPN), for the route back to the iPhone.
 
-AltPair contains no code from rootshell or Open Minis. I wrote it myself.
+altpair contains no code from rootshell or Open Minis. I wrote it myself.

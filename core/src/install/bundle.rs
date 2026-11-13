@@ -251,7 +251,7 @@ pub(super) fn read_installed(app: &Path) -> Installed {
         if d.is_empty() { s("CFBundleName") } else { d }
     };
 
-    let (expiration_unix, team_id) = read_profile(&app.join("embedded.mobileprovision"));
+    let (expiration_unix, team_id, certificates) = read_profile(&app.join("embedded.mobileprovision"));
     Installed {
         bundle_id: s("CFBundleIdentifier"),
         app_name: name,
@@ -259,20 +259,23 @@ pub(super) fn read_installed(app: &Path) -> Installed {
         udid: String::new(),
         team_id,
         expiration_unix,
+        certificates,
     }
 }
 
 /// Pulls ExpirationDate and TeamIdentifier out of the CMS-wrapped profile plist.
-pub(super) fn read_profile(path: &Path) -> (i64, String) {
+/// Expiry, team and developer certificates (DER in hex, comma-separated) of a
+/// provisioning profile.
+pub(super) fn read_profile(path: &Path) -> (i64, String, String) {
     let Ok(bytes) = std::fs::read(path) else {
-        return (0, String::new());
+        return (0, String::new(), String::new());
     };
     let find = |needle: &[u8]| bytes.windows(needle.len()).position(|w| w == needle);
     let (Some(start), Some(end)) = (find(b"<?xml"), find(b"</plist>")) else {
-        return (0, String::new());
+        return (0, String::new(), String::new());
     };
     let Ok(dict) = plist::from_bytes::<plist::Dictionary>(&bytes[start..end + b"</plist>".len()]) else {
-        return (0, String::new());
+        return (0, String::new(), String::new());
     };
     let expiration = dict
         .get("ExpirationDate")
@@ -287,7 +290,19 @@ pub(super) fn read_profile(path: &Path) -> (i64, String) {
         .and_then(|v| v.as_string())
         .unwrap_or_default()
         .to_string();
-    (expiration, team)
+    let certificates = dict
+        .get("DeveloperCertificates")
+        .and_then(|v| v.as_array())
+        .map(|certs| {
+            certs
+                .iter()
+                .filter_map(|c| c.as_data())
+                .map(|der| der.iter().map(|b| format!("{b:02x}")).collect::<String>())
+                .collect::<Vec<_>>()
+                .join(",")
+        })
+        .unwrap_or_default();
+    (expiration, team, certificates)
 }
 
 #[cfg(test)]

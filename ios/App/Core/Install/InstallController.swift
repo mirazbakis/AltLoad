@@ -104,6 +104,8 @@ struct InstalledApp: Codable, Equatable, Identifiable {
     var ipaFile: String? = nil
     /// The Apple ID that signed it, so a refresh uses the same one.
     var appleID: String? = nil
+    /// The developer certificates in its provisioning profile, checked for revocation.
+    var certificates: [Data]? = nil
     /// The store it was installed as, so a nightly refreshes as a nightly.
     var channel: String? = nil
 
@@ -475,6 +477,38 @@ final class InstallController: ObservableObject {
         Task { await run(pending.credentials, target: pending.target, ipaOverride: pending.ipa, skipVPNCheck: skipCheck) }
     }
 
+    /// Set while a refresh runs with nobody watching (AutoRefresh): prompts are
+    /// declined instead of shown, and the reason kept here.
+    private var quiet = false
+    private var quietStop: String?
+
+    /// Refreshes `app` without the install screen. Two-factor or certificate
+    /// prompts end it, since nobody is there to answer. Returns the refreshed app,
+    /// or why it couldn't.
+    func refreshQuietly(_ app: InstalledApp, credentials: AppleIDCredentials) async -> Result<InstalledApp, QuietRefreshError> {
+        guard !isBusy, flow == nil, let target = app.refreshTarget else { return .failure(.busy) }
+        quiet = true
+        quietStop = nil
+        defer {
+            quiet = false
+            pending = nil
+            phase = .idle
+        }
+        await run(credentials, target: target)
+        switch phase {
+        case .success(let refreshed): return .success(refreshed)
+        case .needsVPN: return .failure(.vpnOff)
+        case .failed(let message): return .failure(.failed(quietStop ?? message))
+        default: return .failure(.failed(quietStop ?? String(localized: "The refresh stopped.")))
+        }
+    }
+
+    enum QuietRefreshError: Error {
+        case busy
+        case vpnOff
+        case failed(String)
+    }
+
     func respond(_ response: String) {
         twoFactor = nil
         revoke = nil
@@ -661,13 +695,17 @@ final class InstallController: ObservableObject {
                     let expiry = result.expiration_unix > 0
                         ? Date(timeIntervalSince1970: TimeInterval(result.expiration_unix))
                         : Calendar.current.date(byAdding: .day, value: 7, to: .now)
-                    outcome = .installed(InstalledApp(
+                    var app = InstalledApp(
                         bundleID: string(result.bundle_id),
                         name: string(result.app_name).isEmpty ? fallbackName : string(result.app_name),
                         version: string(result.app_version),
                         teamID: string(result.team_id),
                         expiration: expiry,
-                        installedAt: .now))
+                        installedAt: .now)
+                    app.certificates = string(result.certificates)
+                        .split(separator: ",")
+                        .compactMap { Data(hex: String($0)) }
+                    outcome = .installed(app)
                 } else {
                     let message = string(result.error)
                     outcome = .failed(message.isEmpty ? String(localized: "Install failed (code \(rc)).") : message)
@@ -726,6 +764,13 @@ final class InstallController: ObservableObject {
     }
 
     fileprivate func presentPrompt(kind: Int32, json: Data) {
+        if quiet {
+            quietStop = kind == 1
+                ? String(localized: "Apple asked for a two-factor code.")
+                : String(localized: "This Apple ID has no free certificate slot, so one has to be revoked.")
+            respond("abort")
+            return
+        }
         switch kind {
         case 1:
             struct Payload: Decodable {
@@ -765,11 +810,14 @@ final class InstallController: ObservableObject {
         guard fireDate > .now else { return }
 
         let identifier = reminderID(app)
+        let refreshesItself = AutoRefresh.shared.enabled
         center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
             guard granted else { return }
             let content = UNMutableNotificationContent()
             content.title = String(localized: "\(app.name) expires tomorrow")
-            content.body = String(localized: "Open AltLoad and tap Refresh to keep it working.")
+            content.body = refreshesItself
+                ? String(localized: "AltLoad will try to refresh it by itself. If it can't, open AltLoad and tap Refresh.")
+                : String(localized: "Open AltLoad and tap Refresh to keep it working.")
             content.sound = .default
             let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
             let request = UNNotificationRequest(
@@ -802,4 +850,21 @@ private let installPromptCallback: AltLoadPromptCb = { ctx, kind, json in
 private func string(_ ptr: UnsafeMutablePointer<CChar>?) -> String {
     guard let ptr else { return "" }
     return String(cString: ptr)
+}
+
+extension Data {
+    /// Bytes from a hex string; nil if it isn't hex.
+    init?(hex: String) {
+        guard hex.count % 2 == 0 else { return nil }
+        var bytes = [UInt8]()
+        bytes.reserveCapacity(hex.count / 2)
+        var index = hex.startIndex
+        while index < hex.endIndex {
+            let next = hex.index(index, offsetBy: 2)
+            guard let byte = UInt8(hex[index..<next], radix: 16) else { return nil }
+            bytes.append(byte)
+            index = next
+        }
+        self.init(bytes)
+    }
 }

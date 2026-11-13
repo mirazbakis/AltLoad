@@ -74,6 +74,7 @@ You also need [Developer Mode](https://developer.apple.com/documentation/xcode/e
 | **App extensions** | Keep them, share the main app's profile to use one App ID, or remove them |
 | **Fast installs** | The IPA unpacks while you sign in, and the success screen shows how long the install took |
 | **Careful sign-in** | Pauses after repeated failures, forgets a password Apple rejects, and checks which anisette servers respond |
+| **Automatic refresh** | Refreshes apps before they expire, and signs again any app whose certificate was revoked, in the background. Needs LocalDevVPN on and the Apple ID's password saved |
 | **Stays current** | Reminders before a signature expires, update notices, and fallbacks when a store's source is down |
 | **Languages** | English, French, German, Italian, Chinese and Russian |
 
@@ -81,7 +82,7 @@ You also need [Developer Mode](https://developer.apple.com/documentation/xcode/e
 
 **1. Get AltLoad.** I offer four routes. Pick one:
 
-- **AltPair (Apple ID Install).** Pick this if you want AltLoad signed with your own Apple ID and have no computer. You install three free App Store apps and follow the steps on the [official website](https://mirazbakis.github.io/AltLoad/). No DNS profile, no shared certificate. See [AltPair/README.md](AltPair/README.md).
+- **altpair (Apple ID Install).** Pick this if you want AltLoad signed with your own Apple ID and have no computer. You install three free App Store apps and follow the steps on the [official website](https://mirazbakis.github.io/AltLoad/). No DNS profile, no shared certificate. See [altpair/README.md](altpair/README.md).
 - **Direct Install with the DNS profile.** Pick this if you want the fastest route and accept a shared certificate. Open the [official website](https://mirazbakis.github.io/AltLoad/) in Safari, accept the Terms, add the DNS profile and tap a signed install.
 - **Add the source to AltStore or SideStore.** Pick this if you already run one of them and want updates there. [Add the source with AltDirect](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json).
 - **Download the IPA.** Pick this if you have your own signer. Get `AltLoad.ipa` from [Releases](https://github.com/mirazbakis/AltLoad/releases).
@@ -133,7 +134,7 @@ If a store's sources are all down, get its IPA another way and use **Install IPA
 | :-- | :-- |
 | `ios/` | The SwiftUI app, Live Activity extension and translations |
 | `core/` | The Rust core for pairing, the device tunnel, sign-in, signing and installing |
-| `AltPair/` | AltPair: AltLoad's own tools that install it with your Apple ID, no computer. See its [README](AltPair/README.md) |
+| `altpair/` | altpair: AltLoad's own tools that install it with your Apple ID, no computer. See its [README](altpair/README.md) |
 | `site/` | The install page on GitHub Pages, and the web steps for the Apple ID Install route |
 | `signing/` | Scripts and certificate packs for the signed installs |
 | `scripts/` | Build scripts |
