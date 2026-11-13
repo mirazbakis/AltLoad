@@ -139,8 +139,6 @@
     font:700 16px var(--sans);text-decoration:none;cursor:pointer;border:1px solid transparent;transition:filter .15s,transform .15s,border-color .15s,box-shadow .15s}
   .btn svg{width:19px;height:19px}
   .btn:active{transform:scale(.98)}
-  .btn-main{color:var(--btn-ink);background:var(--btn)}
-  .btn-main:hover{opacity:.88}
   .btn-line{color:var(--ink);background:transparent;border-color:var(--edge-hi)}
   .btn-line:hover{border-color:#fff}
   .btn[aria-disabled="true"]{opacity:.35;cursor:not-allowed}
@@ -163,37 +161,52 @@
 
   /* ---- install ---- */
   .install{border-block:1px solid var(--edge)}
-  .install-top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 30px;justify-content:space-between}
-  .agree{display:flex;align-items:center;gap:12px;margin-top:26px;padding:16px 18px;border-radius:16px;cursor:pointer;
+  #apple-id,#direct{scroll-margin-top:76px}
+  .sub-h{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+
+  /* the two routes compared, each with a jump link */
+  .pick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:32px}
+  @media (max-width:720px){.pick{grid-template-columns:1fr}}
+  .pk{display:flex;flex-direction:column;gap:14px;padding:22px 24px;border-radius:22px;border:1px solid var(--edge)}
+  .pk-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
+  .pk h3{font-size:19px;font-weight:720;letter-spacing:-.02em}
+  .pk-t{font-size:13.5px;font-weight:650;color:var(--ink-3)}
+  .pk ul{list-style:none;display:grid;gap:8px;font-size:14.5px;color:var(--ink-2)}
+  .pk li{display:flex;align-items:flex-start;gap:10px}
+  .pk li svg{width:15px;height:15px;flex:none;margin-top:4px;color:var(--ink-3)}
+  .pk li.plus svg{color:var(--mint)}
+  .pk-go{align-self:flex-start;margin-top:auto;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 16px;border-radius:99px;
+    font-size:13.5px;font-weight:700;text-decoration:none;color:var(--ink);border:1px solid var(--edge-hi);transition:border-color .15s}
+  .pk-go:hover{border-color:#fff}
+  .pk-go svg{width:14px;height:14px}
+
+  /* before you start: what to have ready */
+  .pre{margin-top:44px}
+  .pre-list{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;margin-top:18px}
+  @media (max-width:900px){.pre-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:359px){.pre-list{grid-template-columns:1fr;gap:20px}}
+  .pre-list li{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .pre-list svg{width:22px;height:22px;margin-bottom:8px}
+  .pre-list b{font-size:15.5px;font-weight:700;letter-spacing:-.01em}
+  .pre-list span,.pre-list details{font-size:14px;color:var(--ink-2)}
+  .pre-list summary{list-style:none;cursor:pointer;width:max-content;max-width:100%;font-weight:650;color:var(--ink);text-decoration:underline;text-decoration-color:var(--edge-hi);text-underline-offset:3px}
+  .pre-list summary::-webkit-details-marker{display:none}
+  .pre-list details p{margin-top:6px}
+  /* only for desktop visitors: the page is meant to be opened on the iPhone */
+  .desk{display:none}
+  @media (hover:hover) and (min-width:900px){
+    .desk{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:24px;padding-top:20px;border-top:1px solid var(--edge);font-size:14.5px;color:var(--ink-2)}
+  }
+  .desk code{font:500 13.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink);user-select:all;-webkit-user-select:all}
+
+  .agree{display:flex;align-items:center;gap:12px;margin-top:32px;padding:16px 20px;border-radius:20px;cursor:pointer;
     border:1px solid var(--edge);font-weight:600;transition:border-color .2s,box-shadow .2s}
   .agree input{width:22px;height:22px;accent-color:#86ead8;flex:none}
   .agree a{color:var(--ink);font-weight:700;text-underline-offset:3px}
   .agree.nudge{border-color:var(--mint);box-shadow:0 0 0 4px rgba(134,234,216,.14)}
 
-  .step-row{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
-  @media (max-width:820px){.step-row{grid-template-columns:1fr}}
-  .box{padding:22px;border-radius:18px;background:var(--card);border:1px solid var(--edge)}
-  .box h3{font-size:18px;font-weight:720;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
-  .box h3 i{font-style:normal;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:750;
-    color:var(--mint);border:1px solid var(--edge-hi);border-radius:50%}
-  .box p{color:var(--ink-2);font-size:14.5px;margin-top:8px}
-  .box ol{color:var(--ink-2);font-size:14px;margin:12px 0 0 18px}
-  .box ol li{padding:2px 0}
-  .box b{color:var(--ink)}
-  .box .btn{width:100%;margin-top:16px}
-  .src-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-  @media (max-width:520px){.src-row{grid-template-columns:1fr}}
-  .box .src-row .btn{margin-top:0}
-  .box p.src-url{font-size:13px;color:var(--ink-3);overflow-wrap:anywhere}
-  .src-url code{color:var(--ink-2);user-select:all}
-
-  .copies-head{display:flex;align-items:center;gap:10px}
-  .copies-head .count{margin-left:auto;font-size:13px;font-weight:700;color:var(--ink-3)}
-  .notice{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:11px 14px;border-radius:14px;font-size:13.5px;color:var(--ink-2);
-    background:rgba(255,255,255,.04);border:1px solid var(--edge)}
-  .notice svg{width:17px;height:17px;flex:none;color:var(--ink);margin-top:1px}
-  .copies{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:12px;margin-top:16px}
-  .copy{display:flex;flex-direction:column;gap:16px;padding:18px;border-radius:16px;background:var(--card-hi);border:1px solid var(--edge);transition:border-color .15s}
+  .copies{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:12px}
+  .copy{display:flex;flex-direction:column;gap:16px;padding:18px;border-radius:20px;background:var(--card-hi);border:1px solid var(--edge);transition:border-color .15s}
   .copy:hover{border-color:var(--edge-hi)}
   .copy .head{display:flex;align-items:flex-start;gap:14px}
   .copy img{width:56px;height:56px;border-radius:14px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
@@ -209,62 +222,107 @@
   .get:active{transform:scale(.98)}
   .get[aria-disabled="true"]{opacity:.3;cursor:not-allowed}
   .copy.empty{grid-column:1/-1;align-items:center;color:var(--ink-2);padding:28px}
-  @media (max-width:420px){
-    .box{padding:18px 14px}
-    .copy{padding:16px}
-  }
+  .notice{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;font-size:14px;color:var(--ink-2);
+    background:rgba(255,255,255,.04);border:1px solid var(--edge)}
+  .notice svg{width:17px;height:17px;flex:none;color:var(--ink);margin-top:2px}
+  @media (max-width:420px){.copy{padding:16px}}
 
   /* ---- install methods ---- */
-  .method{margin-top:22px;border-radius:24px;padding:28px;border:1px solid var(--edge)}
-  .method + .method{margin-top:18px}
+  .method{margin-top:24px;border-radius:24px;padding:32px;border:1px solid var(--edge)}
   .method-head{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px 16px}
   .method-head .mh{flex:1 1 320px;min-width:0}
   .method-head h3{font-size:clamp(21px,3vw,26px);font-weight:760;letter-spacing:-.03em;line-height:1.15}
   .method-head h3 small{font-size:.62em;font-weight:700;letter-spacing:0;color:var(--ink-3);white-space:nowrap}
-  .method-head p{color:var(--ink-2);font-size:15.5px;margin-top:6px;max-width:600px}
+  .method-head p{color:var(--ink-2);font-size:15.5px;margin-top:8px;max-width:600px}
   .tag{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:99px;font-size:12.5px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
   .tag svg{width:13px;height:13px}
   .tag-new{color:var(--mint);border:1px solid rgba(134,234,216,.45)}
-  .tag-dns{color:var(--ink-2);border:1px solid var(--edge-hi)}
-  .tag-alt{color:var(--ink-2);border:1px solid var(--edge-hi)}
+  .tag-dns,.tag-alt{color:var(--ink-2);border:1px solid var(--edge-hi)}
   /* The recommended route is the only card with an accent edge. */
   .method.prime{border-color:rgba(134,234,216,.4)}
-  .needs{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;list-style:none}
-  .needs li{display:flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-radius:99px;font-size:13px;font-weight:600;color:var(--ink-2);border:1px solid var(--edge)}
-  .needs svg{width:14px;height:14px;color:var(--mint)}
 
-  /* checklist: one card per app, ticked off as you go */
-  .prog{display:flex;align-items:center;gap:12px;margin-top:24px;font-size:13px;font-weight:650;color:var(--ink-3)}
+  /* steps: Apple ID Install is a checklist (.stp, ticked off as you go); Direct Install
+     uses the same layout with a plain number (.dstp) */
+  .prog{display:flex;align-items:center;gap:12px;margin-top:26px;font-size:13px;font-weight:650;color:var(--ink-3)}
   .prog-bar{flex:1;height:3px;border-radius:3px;background:var(--edge);overflow:hidden}
   .prog-bar i{display:block;height:100%;width:0;border-radius:3px;background:var(--mint);transition:width .3s}
-  .steps{list-style:none;margin-top:14px;display:grid;gap:10px}
-  .stp{border:1px solid var(--edge);border-radius:18px;background:var(--card);transition:border-color .2s,background .2s}
-  .stp-top{display:flex;align-items:center;gap:14px;padding:16px 18px}
-  .tick{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:transparent;background:transparent;border:1.5px solid var(--edge-hi);transition:background .15s,border-color .15s,color .15s}
+  .steps,.dsteps{list-style:none;margin-top:16px;display:grid;gap:12px}
+  .dsteps{margin-top:24px}
+  .stp,.dstp{border:1px solid var(--edge);border-radius:20px;background:var(--card);transition:border-color .2s,background .2s}
+  .stp-top{display:flex;align-items:flex-start;gap:14px;padding:18px 20px}
+  .tick,.num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--edge-hi)}
+  .tick{cursor:pointer;color:transparent;background:transparent;transition:background .15s,border-color .15s,color .15s}
   .tick svg{width:14px;height:14px}
   .tick:hover{border-color:#fff}
-  .stp-h{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+  .num{font-size:13px;font-weight:750;color:var(--mint)}
+  .stp-h{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;padding-top:1px}
   .idx{font:600 12.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--mint)}
-  .stp h4{font-size:17.5px;font-weight:720;letter-spacing:-.02em}
+  .stp-h h4{font-size:17.5px;font-weight:720;letter-spacing:-.02em}
   .where{font-size:13.5px;color:var(--ink-3)}
+  .why{flex-basis:100%;font-size:14px;color:var(--ink-3);margin-top:2px}
   .getapp{flex:none;height:32px;padding:0 14px;border-radius:99px;display:grid;place-items:center;font-size:13px;font-weight:700;text-decoration:none;color:#000;background:#fff;white-space:nowrap}
   .getapp:hover{opacity:.88}
-  .stp-body{padding:0 18px 18px 60px;display:grid;gap:12px}
-  .stp-body p{color:var(--ink-2);font-size:15px}
+  .getapp[aria-disabled="true"]{opacity:.35;cursor:not-allowed}
+  .count{flex:none;margin-top:5px;font-size:13px;font-weight:700;color:var(--ink-3);white-space:nowrap}
+  .stp-body{padding:0 20px 20px 62px;display:grid;gap:16px}
+  .stp-main{display:grid;gap:14px;min-width:0;align-content:start}
+  .stp-body p,.stp-body li{color:var(--ink-2);font-size:15px}
   .stp-body b{color:var(--ink);font-weight:650}
-  .stp-body .term{margin-top:0}
+  .flow{margin-left:18px;display:grid;gap:4px}
+  .credit{font-size:12.5px !important;color:var(--ink-3) !important}
   .stp.done{background:transparent}
   .stp.done .tick{color:#000;background:var(--mint);border-color:var(--mint)}
-  .stp.done .stp-body,.stp.done .getapp{display:none}
+  .stp.done .stp-body,.stp.done .getapp,.stp.done .why{display:none}
   .stp.done h4{color:var(--ink-3);text-decoration:line-through;text-decoration-thickness:1px}
+  /* text on the left, "What you'll see" on the right; the fixes run underneath both */
+  @media (min-width:900px){
+    .stp-body.duo{grid-template-columns:minmax(0,1fr) 220px;column-gap:32px;row-gap:18px}
+    .duo .trouble{grid-column:1/-1}
+  }
   @media (max-width:560px){
-    .stp-top{flex-wrap:wrap;padding:14px}
-    .getapp{margin-left:42px}
-    .stp-body{padding:0 14px 16px}
+    .stp-top{flex-wrap:wrap;padding:16px}
+    .stp-h{flex-basis:calc(100% - 42px)}
+    .getapp,.count{margin:4px 0 0 42px}
+    .stp-body{padding:0 16px 18px}
   }
 
+  /* "What you'll see": simplified drawings of the iOS screen for each step */
+  .shot{width:220px;max-width:100%;display:grid;gap:8px;align-content:start}
+  .shot-cap{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+  .scr{padding:14px 12px;border-radius:22px;background:#0c0c0e;border:1px solid var(--edge);font-size:12px;line-height:1.35;overflow-wrap:anywhere}
+  .scr-back{font-size:11px;color:var(--ink-3)}
+  .scr-t{font-size:16px;font-weight:750;letter-spacing:-.02em;margin:3px 2px 10px}
+  .grp-h{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:12px 4px 5px}
+  .grp{border-radius:12px;background:#1b1b1d;overflow:hidden}
+  .grp + .grp{margin-top:10px}
+  .row{display:flex;align-items:center;gap:8px;min-height:34px;padding:7px 10px}
+  .row + .row{border-top:1px solid rgba(255,255,255,.07)}
+  .row small{display:block;font-size:10.5px;color:var(--ink-3)}
+  .row.hi{border-radius:12px;box-shadow:inset 0 0 0 1px rgba(134,234,216,.55)}
+  .dot{flex:none;width:7px;height:7px;border-radius:50%;background:var(--mint)}
+  .chev{margin-left:auto;color:var(--ink-3)}
+  .tog{position:relative;flex:none;margin-left:auto;width:30px;height:18px;border-radius:99px;background:var(--mint)}
+  .tog::after{content:"";position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:#fff}
+  .trust{flex:none;margin-left:auto;padding:3px 10px;border-radius:99px;background:#fff;color:#000;font-size:11px;font-weight:700}
+  .tile{display:grid;gap:2px;padding:12px 14px;border-radius:18px;background:#060606;border:1px solid var(--edge);
+    font:500 11.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#e6e6e6;overflow-wrap:anywhere}
+  .tile b{font-size:24px;font-weight:600;letter-spacing:.06em;line-height:1.2;color:#fff}
+  .tile small{font:600 10.5px var(--sans);color:var(--ink-3)}
+  .tile .ok{color:var(--mint)}
+
+  /* "If this doesn't work": a few concrete fixes per step */
+  .trouble{border-top:1px solid var(--edge);padding-top:14px}
+  .trouble summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:650;color:var(--ink-2)}
+  .trouble summary::-webkit-details-marker{display:none}
+  .trouble summary::before{content:"+";width:12px;color:var(--ink-3);font-size:17px;line-height:1}
+  .trouble[open] summary::before{content:"–"}
+  .trouble summary:hover{color:var(--ink)}
+  .trouble ul{list-style:none;display:grid;gap:12px;margin-top:14px}
+  .trouble li{font-size:14px !important;padding-left:14px;border-left:1px solid var(--edge-hi)}
+  .trouble li b{display:block}
+
   /* a terminal line with its own Copy */
-  .term{margin-top:10px;border-radius:14px;background:#060606;border:1px solid var(--edge);overflow:hidden}
+  .term{border-radius:14px;background:#060606;border:1px solid var(--edge);overflow:hidden}
   .cmd{display:flex;align-items:flex-start;gap:10px;padding:11px 10px 11px 14px}
   .cmd + .cmd{border-top:1px solid rgba(255,255,255,.06)}
   .cmd code{flex:1;min-width:0;font:500 13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#f2f2f2;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all}
@@ -277,14 +335,27 @@
   .cp[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
   .fine{font-size:13px;color:var(--ink-3);margin-top:20px}
   .fine a{color:var(--ink-2)}
-  .method .step-row{margin-top:20px}
-  @media (max-width:560px){
-    .method{padding:20px 16px;border-radius:20px}
+
+  /* already sideloading: two plain columns split by a hairline */
+  .alts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin-top:24px}
+  .alt{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0}
+  .alt + .alt{padding-left:28px;border-left:1px solid var(--edge)}
+  .alt h4{font-size:17.5px;font-weight:720;letter-spacing:-.02em}
+  .alt p{color:var(--ink-2);font-size:15px}
+  .alt .src-url{font-size:13px;color:var(--ink-3);overflow-wrap:anywhere}
+  .src-url code{color:var(--ink-2);user-select:all}
+  .src-row{align-self:stretch;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+  @media (max-width:760px){
+    .alts{grid-template-columns:1fr}
+    .alt + .alt{padding:28px 0 0;border-left:0;border-top:1px solid var(--edge)}
   }
+  @media (max-width:520px){.src-row{grid-template-columns:1fr}}
+  @media (max-width:560px){.method{padding:22px 16px;border-radius:20px}}
   @media (max-width:420px){
     .cmd{flex-direction:column;gap:8px}
     .cp{align-self:flex-end}
   }
+  @media (prefers-reduced-motion:reduce){.pk-go,.dstp{transition:none}}
 
   /* ---- features ---- */
   .feats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:30px}
@@ -381,12 +452,47 @@
 
   <section class="install" id="install">
     <div class="wrap">
-      <div class="install-top">
-        <div>
-          <div class="eyebrow">Install</div>
-          <h2>Get AltLoad.</h2>
-          <p class="lede">Open this page in Safari on the iPhone or iPad you're setting up, then pick a way in.</p>
+      <div class="eyebrow">Install</div>
+      <h2>Get AltLoad.</h2>
+      <p class="lede">Open this page in Safari on the iPhone or iPad you're setting up, then pick a way in.</p>
+
+      <!-- The two routes side by side, each linking to its steps. -->
+      <div class="pick">
+        <div class="pk">
+          <div class="pk-h"><h3>Apple ID Install</h3><span class="pk-t">About 10 minutes</span></div>
+          <ul>
+            <li class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Signed by you, with any Apple ID</li>
+            <li class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Can't be revoked by anyone else</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>Re-sign every 7 days with a free Apple ID (AltLoad reminds you)</li>
+          </ul>
+          <a class="pk-go" href="#apple-id">Go<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
         </div>
+        <div class="pk">
+          <div class="pk-h"><h3>Direct Install</h3><span class="pk-t">About 2 minutes</span></div>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>Shared certificate</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>May stop working without notice</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>Needs a DNS profile</li>
+          </ul>
+          <a class="pk-go" href="#direct">Go<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
+        </div>
+      </div>
+
+      <!-- What to have ready before either route. -->
+      <div class="pre">
+        <h3 class="sub-h">Before you start</h3>
+        <ul class="pre-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>
+            <b>iOS 27 or later</b><span>On the iPhone or iPad you're setting up.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg>
+            <b>Developer Mode on</b>
+            <details><summary>How to turn it on</summary><p>Settings › Privacy &amp; Security › Developer Mode › On, then restart and confirm.</p></details></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19.5h.01"/></svg>
+            <b>Wi-Fi</b><span>Pairing runs over your local network.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <b>About 10 minutes</b><span>Direct Install takes about 2.</span></li>
+        </ul>
+        <p class="desk"><span>Setting up an iPhone? Open <code>mirazbakis.github.io/AltLoad</code> on it in Safari.</span><button type="button" class="cp" aria-label="Copy link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></p>
       </div>
 
       <label class="agree" id="tosRow">
@@ -399,66 +505,135 @@
         <div class="method-head">
           <div class="mh">
             <h3>Apple ID Install <small>(No DNS)</small></h3>
-            <p>AltLoad signed by you, on the iPhone, with three free App Store apps. Nothing shared, so nothing to be revoked. Tick each step as you go; this page keeps your place.</p>
+            <p>Signed by you, on the iPhone, with three free App Store apps. Tick each step as you go; this page keeps your place.</p>
           </div>
           <span class="tag tag-new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Recommended</span>
         </div>
-        <ul class="needs">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>iOS 27 or later</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Wi-Fi</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Developer Mode on</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Any Apple ID, free works</li>
-        </ul>
 
         <div class="prog" aria-live="polite"><span class="prog-bar"><i id="progFill"></i></span><span id="progText">0 of 4 done</span></div>
         <ol class="steps" id="steps">
           <li class="stp" data-step="1">
             <div class="stp-top">
               <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 1 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
-              <div class="stp-h"><span class="idx">01</span><h4>Pair the iPhone with itself</h4><span class="where">rootshell</span></div>
+              <div class="stp-h"><span class="idx">01</span><h4>Pair the iPhone with itself</h4><span class="where">rootshell</span>
+                <p class="why">This lets AltLoad's installer talk to your iPhone. You only do it once.</p></div>
               <a class="getapp" href="https://apps.apple.com/app/rootshell-local-terminal-ssh/id6755794662" target="_blank" rel="noopener">Get rootshell</a>
             </div>
-            <div class="stp-body">
-              <p>First, in rootshell's settings, switch <b>Location Diary Mode</b> to <b>Session Only</b> so iOS doesn't pause it while you're in Settings. Then enter these two lines, one by one:</p>
-              <div class="term">
-                <div class="cmd"><code>curl -fsSLO https://github.com/mirazbakis/AltLoad/releases/latest/download/altpair.wasm</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
-                <div class="cmd"><code>ifconfig en0 | ./altpair.wasm</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
+            <div class="stp-body duo">
+              <div class="stp-main">
+                <p>In rootshell's settings, switch <b>Location Diary Mode</b> to <b>Session Only</b> so iOS doesn't pause it while you're in Settings. Then enter these two lines, one at a time:</p>
+                <div class="term">
+                  <div class="cmd"><code>curl -fsSLO https://github.com/mirazbakis/AltLoad/releases/latest/download/altpair.wasm</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
+                  <div class="cmd"><code>ifconfig en0 | ./altpair.wasm</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
+                </div>
+                <p>rootshell shows a 6-digit PIN. Open Settings › Privacy &amp; Security › <b>Developer Mode</b> and tap the new row at the very bottom, <b>Pair with AltLoad</b>. Enter your passcode, then the PIN. Leave rootshell open.</p>
               </div>
-              <p>A new row, <b>Pair with AltLoad</b>, appears at the very bottom of Settings › Privacy &amp; Security › <b>Developer Mode</b>. Tap it, enter your passcode and the 6 digits from rootshell. Don't close rootshell.</p>
+              <div class="shot" aria-hidden="true">
+                <div class="shot-cap">What you'll see</div>
+                <div class="scr">
+                  <div class="scr-back">‹ Privacy &amp; Security</div>
+                  <div class="scr-t">Developer Mode</div>
+                  <div class="grp"><div class="row">Developer Mode<span class="tog"></span></div></div>
+                  <div class="grp"><div class="row hi"><i class="dot"></i>Pair with AltLoad<span class="chev">›</span></div></div>
+                </div>
+                <div class="tile"><small>rootshell shows this</small><b>482 017</b></div>
+              </div>
+              <details class="trouble"><summary>If this doesn't work</summary>
+                <ul>
+                  <li><b>Pair with AltLoad doesn't appear.</b>Check Developer Mode is on and the iPhone is on Wi-Fi, then run the two lines again and reopen Settings.</li>
+                  <li><b>The PIN was rejected.</b>Run <code>./altpair.wasm</code> again for a new PIN; each one works once.</li>
+                  <li><b>rootshell stopped.</b>Set Location Diary Mode to Session Only and allow Local Network access, then start again.</li>
+                </ul>
+              </details>
             </div>
           </li>
           <li class="stp" data-step="2">
             <div class="stp-top">
               <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 2 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
-              <div class="stp-h"><span class="idx">02</span><h4>Open the tunnel</h4><span class="where">LocalDevVPN</span></div>
+              <div class="stp-h"><span class="idx">02</span><h4>Open the tunnel</h4><span class="where">LocalDevVPN</span>
+                <p class="why">The installer reaches your iPhone through this local tunnel.</p></div>
               <a class="getapp" href="https://apps.apple.com/app/id6755608044" target="_blank" rel="noopener">Get LocalDevVPN</a>
             </div>
-            <div class="stp-body">
-              <p>Open LocalDevVPN and tap <b>Connect</b>. It only links the iPhone to itself; your internet traffic doesn't go through it.</p>
+            <div class="stp-body duo">
+              <div class="stp-main">
+                <p>Open LocalDevVPN, tap <b>Connect</b> and allow the VPN configuration if iOS asks. It only links the iPhone to itself; your internet traffic doesn't go through it.</p>
+              </div>
+              <div class="shot" aria-hidden="true">
+                <div class="shot-cap">What you'll see</div>
+                <div class="scr">
+                  <div class="scr-t">LocalDevVPN</div>
+                  <div class="grp">
+                    <div class="row"><span>LocalDevVPN<small>Local tunnel</small></span><span class="tog"></span></div>
+                    <div class="row"><i class="dot"></i>Connected</div>
+                  </div>
+                </div>
+              </div>
+              <details class="trouble"><summary>If this doesn't work</summary>
+                <ul>
+                  <li><b>LocalDevVPN won't connect.</b>Open it, remove the VPN configuration, add it again and tap Connect.</li>
+                  <li><b>Another VPN is on.</b>Turn it off; iOS runs one VPN at a time.</li>
+                </ul>
+              </details>
             </div>
           </li>
           <li class="stp" data-step="3">
             <div class="stp-top">
               <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 3 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
-              <div class="stp-h"><span class="idx">03</span><h4>Sign and install</h4><span class="where">Open Minis</span></div>
+              <div class="stp-h"><span class="idx">03</span><h4>Sign and install</h4><span class="where">Open Minis</span>
+                <p class="why">This signs AltLoad with your Apple ID and installs it, so no shared certificate is involved.</p></div>
               <a class="getapp" href="https://apps.apple.com/app/id6759188481" target="_blank" rel="noopener">Get Open Minis</a>
             </div>
-            <div class="stp-body">
-              <p>In Minis's terminal, enter:</p>
-              <div class="term">
-                <div class="cmd"><code>wget -qO- https://mirazbakis.github.io/AltLoad/install.sh | sh</code><button type="button" class="cp gated" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
+            <div class="stp-body duo">
+              <div class="stp-main">
+                <p>In Minis's terminal, enter:</p>
+                <div class="term">
+                  <div class="cmd"><code>wget -qO- https://mirazbakis.github.io/AltLoad/install.sh | sh</code><button type="button" class="cp gated" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
+                </div>
+                <p>Type the <b>transfer code</b> rootshell shows, then your <b>Apple ID</b> and password. Stay in Minis until it says <b>Done</b>; iOS pauses it in the background.</p>
               </div>
-              <p>It asks for the transfer code from rootshell, then your Apple ID. Stay in Minis until it finishes; iOS pauses it in the background.</p>
+              <div class="shot" aria-hidden="true">
+                <div class="shot-cap">What you'll see</div>
+                <div class="tile">
+                  <span>Transfer code: ______</span>
+                  <span>Apple ID: you@icloud.com</span>
+                  <span>Installing AltLoad… 100%</span>
+                  <span class="ok">Done</span>
+                </div>
+              </div>
+              <details class="trouble"><summary>If this doesn't work</summary>
+                <ul>
+                  <li><b>It can't find the pairing file.</b>Keep rootshell open in the background and type the transfer code it shows.</li>
+                  <li><b>Sign-in fails.</b>Check the Apple ID and password. Two-factor codes go to your other devices.</li>
+                  <li><b>It stops partway.</b>Check LocalDevVPN is still connected, then run the line again.</li>
+                </ul>
+              </details>
             </div>
           </li>
           <li class="stp" data-step="4">
             <div class="stp-top">
               <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 4 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
-              <div class="stp-h"><span class="idx">04</span><h4>Trust it</h4><span class="where">Settings</span></div>
-              
+              <div class="stp-h"><span class="idx">04</span><h4>Trust it</h4><span class="where">Settings</span>
+                <p class="why">iOS won't open an app from a new developer until you trust it.</p></div>
             </div>
-            <div class="stp-body">
-              <p>Settings › General › VPN &amp; Device Management › your Apple ID › <b>Trust</b>. AltLoad is on your Home Screen, signed by you.</p>
+            <div class="stp-body duo">
+              <div class="stp-main">
+                <p>Settings › General › <b>VPN &amp; Device Management</b> › your Apple ID › <b>Trust</b>. AltLoad is on your Home Screen, signed by you.</p>
+              </div>
+              <div class="shot" aria-hidden="true">
+                <div class="shot-cap">What you'll see</div>
+                <div class="scr">
+                  <div class="scr-back">‹ General</div>
+                  <div class="scr-t">VPN &amp; Device Management</div>
+                  <div class="grp-h">Developer App</div>
+                  <div class="grp"><div class="row"><span>Apple Development:<small>you@icloud.com</small></span><span class="trust">Trust</span></div></div>
+                </div>
+              </div>
+              <details class="trouble"><summary>If this doesn't work</summary>
+                <ul>
+                  <li><b>AltLoad closes right away.</b>Trust it first. If it still closes, delete it and run step 3 again.</li>
+                  <li><b>Your Apple ID isn't listed.</b>Step 3 didn't finish. Run it again and stay in Minis until Done.</li>
+                </ul>
+              </details>
             </div>
           </li>
         </ol>
@@ -470,33 +645,53 @@
         <div class="method-head">
           <div class="mh">
             <h3>Direct Install <small>(DNS Required)</small></h3>
-            <p>One tap, already signed. These use shared certificates, so any of them can stop working without notice.</p>
+            <p>Already signed, so it's quick. The certificates are shared, so any of them can stop working without notice.</p>
           </div>
           <span class="tag tag-dns">DNS profile</span>
         </div>
-        <div class="step-row">
-        <div class="box">
-          <h3><i>1</i>DNS profile</h3>
-          <p>Needed for the installs on this page.</p>
-          <ol>
-            <li>Tap <b>Get Profile</b>, then <b>Allow</b>.</li>
-            <li>Settings › <b>Profile Downloaded</b> › <b>Install</b>.</li>
-            <li>General › VPN &amp; Device Management › <b>DNS</b> › <b>AltLoad</b>.</li>
-          </ol>
-          <a class="btn btn-main gated" href="AltLoadDNS.mobileconfig" aria-disabled="true">Get Profile</a>
-          <p style="font-size:12.5px;margin-top:10px;opacity:.7">DNS thanks to madNS by WSF Team.</p>
-        </div>
-
-        <div class="box">
-          <div class="copies-head"><h3><i>2</i>Pick a signed install</h3><span class="count" id="count"></span></div>
-          <div class="notice">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg>
-            <span>Each signed install uses a different certificate. If one won't install or open, its certificate may have been revoked. Try another.</span>
-          </div>
-          <ul class="copies" id="copies"><li class="copy empty">Loading…</li></ul>
-        </div>
-        </div>
-        <p class="fine">Once AltLoad is on your Home Screen, trust it in Settings › General › VPN &amp; Device Management. You can remove the DNS profile afterwards.</p>
+        <ol class="dsteps">
+          <li class="dstp">
+            <div class="stp-top">
+              <span class="num">1</span>
+              <div class="stp-h"><h4>Add the DNS profile</h4><span class="where">Safari, Settings</span>
+                <p class="why">The profile stops your iPhone from checking whether these shared certificates were revoked, so they keep working longer.</p></div>
+              <a class="getapp gated" href="AltLoadDNS.mobileconfig" aria-disabled="true">Get Profile</a>
+            </div>
+            <div class="stp-body">
+              <ol class="flow">
+                <li>Tap <b>Get Profile</b>, then <b>Allow</b>.</li>
+                <li>Settings › <b>Profile Downloaded</b> › <b>Install</b>.</li>
+                <li>General › VPN &amp; Device Management › <b>DNS</b> › <b>AltLoad</b>.</li>
+              </ol>
+              <p class="credit">DNS thanks to madNS by WSF Team.</p>
+            </div>
+          </li>
+          <li class="dstp">
+            <div class="stp-top">
+              <span class="num">2</span>
+              <div class="stp-h"><h4>Pick a signed install</h4><span class="where">This page</span>
+                <p class="why">Each one is AltLoad signed with a different certificate.</p></div>
+              <span class="count" id="count"></span>
+            </div>
+            <div class="stp-body">
+              <div class="notice">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg>
+                <span>If one won't install or open, its certificate was revoked. Try another.</span>
+              </div>
+              <ul class="copies" id="copies"><li class="copy empty">Loading…</li></ul>
+            </div>
+          </li>
+          <li class="dstp">
+            <div class="stp-top">
+              <span class="num">3</span>
+              <div class="stp-h"><h4>Trust and clean up</h4><span class="where">Settings</span>
+                <p class="why">iOS won't open AltLoad until you trust its developer.</p></div>
+            </div>
+            <div class="stp-body">
+              <p>Settings › General › <b>VPN &amp; Device Management</b> › the developer › <b>Trust</b>. Once AltLoad opens, you can remove the DNS profile in the same place.</p>
+            </div>
+          </li>
+        </ol>
       </div>
 
       <!-- Route 3: for people who already sideload. -->
@@ -504,27 +699,26 @@
         <div class="method-head">
           <div class="mh">
             <h3>Already sideloading?</h3>
-            <p>Add AltLoad to the store you have, or sign the IPA yourself.</p>
+            <p>Skip the steps: add AltLoad to your store, or sign the IPA yourself.</p>
           </div>
           <span class="tag tag-alt">Other ways</span>
         </div>
-        <div class="step-row">
-        <div class="box">
-          <h3>Add the source</h3>
-          <p>Already use AltStore or SideStore? Add the AltLoad source to get it and its updates there.</p>
-          <div class="src-row">
-            <a class="btn btn-line gated" href="altstore://source?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json" aria-disabled="true">Add to AltStore</a>
-            <a class="btn btn-line gated" href="sidestore://source?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json" aria-disabled="true">Add to SideStore</a>
+        <div class="alts">
+          <div class="alt">
+            <h4>Add the source</h4>
+            <p>Get AltLoad and its updates in AltStore or SideStore.</p>
+            <div class="src-row">
+              <a class="btn btn-line gated" href="altstore://source?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json" aria-disabled="true">Add to AltStore</a>
+              <a class="btn btn-line gated" href="sidestore://source?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json" aria-disabled="true">Add to SideStore</a>
+            </div>
+            <p class="src-url">Source URL: <code>https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json</code></p>
           </div>
-          <p class="src-url">Source URL: <code>https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json</code></p>
-        </div>
-
-        <div class="box">
-          <h3>Download the IPA</h3>
-          <p>Prefer your own signer? Get the unsigned build from the latest release and sign it yourself.</p>
-          <a class="btn btn-line gated" id="dlBtn" href="https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa" aria-disabled="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>Download IPA</a>
-        </div>
+          <div class="alt">
+            <h4>Download the IPA</h4>
+            <p>The unsigned build from the latest release, for your own signer.</p>
+            <a class="btn btn-line gated" id="dlBtn" href="https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa" aria-disabled="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>Download IPA</a>
+          </div>
         </div>
       </div>
     </div>
@@ -563,14 +757,14 @@
     <div class="wrap faq">
       <div class="eyebrow">Troubleshoot</div>
       <h2>Questions</h2>
-      <details><summary>Which install should I pick?</summary><p>Apple ID Install. It signs AltLoad with your own account, so there is no shared certificate to be revoked. Direct Install is quicker when one of its certificates is still valid.</p></details>
+      <details><summary>Which install should I pick?</summary><p>Apple ID Install. It takes about 10 minutes and signs AltLoad with your own account, so there is no shared certificate for anyone else to revoke. Direct Install takes about 2 minutes and needs a DNS profile, but it only works while one of its shared certificates is still valid.</p></details>
+      <details><summary>Do I have to do this every week?</summary><p>No. With a free Apple ID, signed apps last 7 days. Once AltLoad is installed, it refreshes itself and the stores it installed, and reminds you the day before anything expires. AltLoad itself is refreshed from inside the app.</p></details>
+      <details><summary>Is my Apple ID safe?</summary><p>Your password goes from your iPhone to Apple only, typed into AltLoad's own open-source installer. Nothing is stored on a server, and AltLoad never sees it; a remembered one stays in your iPhone's Keychain.</p></details>
       <details><summary>Tapping Install does nothing.</summary><p>That's Direct Install: open this page in Safari, accept the Terms and add the DNS profile first. If a signed install still won't install, its certificate may be revoked. Pick another one, or use Apple ID Install.</p></details>
       <details><summary>"Pair with AltLoad" isn't in Settings.</summary><p>Developer Mode has to be on, rootshell needs Local Network access, and both must be on Wi-Fi. Run the two rootshell lines again, then reopen Settings › Privacy &amp; Security › Developer Mode.</p></details>
       <details><summary>It installed but won't open.</summary><p>Trust it in Settings › General › VPN &amp; Device Management. If it still closes right away, that install's certificate was revoked. Delete it and pick another signed install.</p></details>
       <details><summary>Sign-in fails inside AltLoad.</summary><p>Keep Settings › Anisette on Automatic. If it keeps failing, tap Reset Anisette Data and try again a few minutes later.</p></details>
-      <details><summary>"Not enough available App IDs".</summary><p>A free Apple ID gets 10 a week. Set App Extensions to Keep, Use Main Profile or Remove Extensions before installing, and check Tools › App IDs to see when the next one frees up.</p></details>
-      <details><summary>Does AltLoad see my password?</summary><p>No. It goes only to Apple, and a remembered one stays in your iPhone's Keychain.</p></details>
-    </div>
+      <details><summary>"Not enough available App IDs".</summary><p>A free Apple ID gets 10 a week. Set App Extensions to Keep, Use Main Profile or Remove Extensions before installing, and check Tools › App IDs to see when the next one frees up.</p></details>    </div>
   </section>
 </main>
 
@@ -615,7 +809,7 @@
     setTimeout(function(){ tosRow.classList.remove('nudge'); }, 900);
   });
 
-  // Copy buttons on the terminal lines.
+  // Copy buttons: each copies the <code> beside it (terminal lines and the page link).
   function copyOldWay(t){
     return new Promise(function(ok, no){
       var a = document.createElement('textarea'); a.value = t; a.setAttribute('readonly','');

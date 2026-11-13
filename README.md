@@ -29,7 +29,7 @@
 - No computer at any step on iOS 27. On iOS 18 to 26 you make one pairing file on a computer, once.
 - Signed with your own Apple ID, so no shared certificate exists that someone can revoke.
 - Installs AltStore, SideStore, LiveContainer, Husk, UTM, MeloNX and Madeira, or any IPA from Files.
-- Runs AltServer on the phone, so AltStore can refresh itself without a computer on the network.
+- Sets AltStore up to refresh itself: AltLoad hands it this iPhone's pairing file for Remote AltServer, and runs AltServer on the phone until then.
 - JIT for emulators is built in. I haven't tested it on a device yet.
 - Free and open source. Nothing leaves the phone except the sign-in to Apple.
 
@@ -44,7 +44,7 @@ I built AltLoad to do the computer's job on the iPhone. It pairs the phone with 
 | Needs a computer | Yes, for install and every refresh | Usually only to set up | No on iOS 27. One pairing file from a computer on iOS 18 to 26 |
 | Can be revoked without notice | No | Yes, by Apple or the certificate's owner | No. The certificate is yours |
 | Your Apple ID stays on your device | Yes | Not needed, because the certificate isn't yours | Yes |
-| Weekly refresh | Computer on the same network | Not tied to your Apple ID's 7-day limit | On the iPhone, through the built-in AltServer while AltLoad is open or kept awake |
+| Weekly refresh | Computer on the same network | Not tied to your Apple ID's 7-day limit | On the iPhone: AltStore does it itself once Remote AltServer is set up, or through AltLoad's built-in AltServer |
 | JIT | Needs a computer-side tool | Not part of the certificate | Built in. I haven't tested the new request handling on a device yet |
 | Cost | Free Apple ID works | Set by whoever runs the certificate | Free and open source |
 
@@ -66,8 +66,10 @@ You also need [Developer Mode](https://developer.apple.com/documentation/xcode/e
 | **On-device AltServer** | AltStore finds AltLoad the way it finds a computer, and it can stay running in the background |
 | **Stores** | AltStore Classic and Beta, SideStore and SideStore + LiveContainer, stable or nightly |
 | **Your own apps** | Sign and install any IPA from Files. Husk, UTM, MeloNX and Madeira are also in the store list |
-| **JIT for emulators** | **Open with JIT** after installing UTM or MeloNX. AltLoad stays attached and answers the app's JIT requests. Not tested on a device yet |
-| **Pairing files** | Place this iPhone's pairing file in SideStore, StikDebug and other sideloaded apps. AltStore gets it sealed into its bundle for Remote AltServer |
+| **JIT for emulators** | **Open with JIT** from Tools or right after installing. AltLoad stays with the app while it asks for JIT memory, runs scripts (its own, the app's, or ones you import), and takes requests from links and Shortcuts. Not tested on a device yet |
+| **AltStore without AltServer** | AltLoad leaves this iPhone's pairing file where AltStore 2.3.1 and later look for it. Set up Remote AltServer in AltStore once and it refreshes apps by itself |
+| **Several Apple IDs** | Save more than one and switch when you sign in. Each app remembers the Apple ID that signed it |
+| **Pairing files** | Place this iPhone's pairing file in SideStore, StikDebug and other sideloaded apps |
 | **Developer tools** | JIT, location simulation, entitlements, certificates and App IDs |
 | **App extensions** | Keep them, share the main app's profile to use one App ID, or remove them |
 | **Fast installs** | The IPA unpacks while you sign in, and the success screen shows how long the install took |

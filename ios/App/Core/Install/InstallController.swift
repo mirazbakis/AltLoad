@@ -102,6 +102,8 @@ struct InstalledApp: Codable, Equatable, Identifiable {
     let installedAt: Date
     /// For IPAs from Files: the file in the IPA cache, used to refresh it later.
     var ipaFile: String? = nil
+    /// The Apple ID that signed it, so a refresh uses the same one.
+    var appleID: String? = nil
     /// The store it was installed as, so a nightly refreshes as a nightly.
     var channel: String? = nil
 
@@ -385,9 +387,14 @@ final class InstallController: ObservableObject {
 
     // MARK: - Flow
 
+    /// The Apple ID the open flow starts with: the one that signed the app being
+    /// refreshed, else the default.
+    @Published private(set) var flowAppleID: String?
+
     /// Opens the full-screen install flow for `target`.
     func begin(_ target: InstallTarget) {
         guard !isBusy else { return }
+        flowAppleID = apps.first { $0.refreshTarget == target }?.appleID
         pending = nil
         phase = .idle
         pairingNote = nil
@@ -552,6 +559,7 @@ final class InstallController: ObservableObject {
         case .installed(var app):
             if case .ipa(let url) = target { app.ipaFile = url.lastPathComponent }
             if case .store(let store) = target { app.channel = store.rawValue }
+            app.appleID = credentials.email
             // SideStore-family apps, LiveContainer's built-in SideStore included, and
             // Husk need this iPhone's pairing file in their Documents.
             // An app with its own JIT helper is told apart by the store that was

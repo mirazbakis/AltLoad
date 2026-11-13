@@ -8,8 +8,8 @@
 //     juggling for the 3-active-apps limit.
 //   * Copying a pairing file into an installed app's container (house_arrest).
 //   * Tools › JIT and Location: mounting the Developer Disk Image (cryptexd),
-//     launching an app under debugserver, answering its JIT requests and
-//     detaching so it keeps JIT, and simulating a location through DVT.
+//     launching an app suspended for a JIT session (jit.rs), and simulating a
+//     location through DVT.
 //
 // One op per call; each call opens its own tunnel. `simulate_location` keeps its
 // tunnel open until `altload_location_stop`, so Swift runs it on its own thread.
@@ -24,7 +24,6 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use idevice::afc::opcode::AfcFopenMode;
 use idevice::afc::AfcClient;
 use idevice::cryptexd::{install_ddi, installed_ddi, Cryptex1Assets};
-use idevice::debug_proxy::{DebugProxyClient, DebugserverCommand};
 use idevice::dvt::location_simulation::LocationSimulationClient;
 use idevice::dvt::process_control::ProcessControlClient;
 use idevice::dvt::remote_server::RemoteServerClient;
@@ -52,9 +51,6 @@ use super::{
 ///   {"op":"remove_app","bundleId":"com.x"}
 ///   {"op":"ddi_status"} → {"mounted":bool}
 ///   {"op":"mount_ddi","dir":"/…/DDI"} (BuildManifest.plist + the cryptex files)
-///   {"op":"enable_jit","bundleId":"com.x","ddiDir":"/…/DDI","dialect":"universal"|"legacy"}
-///   → {"pid":n,"requests":n,"ended":"app"|"quiet"|"exited"}: blocks while the app
-///   is making JIT requests (see jit.rs)
 ///   {"op":"simulate_location","lat":f,"lon":f,"ddiDir":"/…/DDI"}: blocks, re-sending
 ///   the location every few seconds, until `altload_location_stop`. Move it with
 ///   `altload_location_update`.
@@ -84,27 +80,10 @@ pub unsafe extern "C" fn altload_device_run(
         1
     };
 
-    let c = &*config;
-    let pairing = match req(c.pairing_file_path, "pairing file") {
+    let (pairing, host_name, endpoints) = match device_target(&*config) {
         Ok(v) => v,
         Err(e) => return fail(e),
     };
-    let host_name = opt(c.host_name, "AltLoad");
-    let mut endpoints = Vec::new();
-    if !c.endpoints.is_null() {
-        for i in 0..c.endpoint_count {
-            let e = &*c.endpoints.add(i);
-            match req(e.host, "endpoint host") {
-                Ok(host) => endpoints.push(Endpoint {
-                    host,
-                    port: e.port,
-                    identifier: opt(e.identifier, ""),
-                    auth_tag: opt(e.auth_tag, ""),
-                }),
-                Err(e) => return fail(e),
-            }
-        }
-    }
     let request: serde_json::Value =
         match serde_json::from_str(&opt(request_json, "{}")) {
             Ok(v) => v,
@@ -124,6 +103,25 @@ pub unsafe extern "C" fn altload_device_run(
         }
         Err(e) => fail(e),
     }
+}
+
+/// The pairing file, host name and addresses a device op connects with.
+pub(super) unsafe fn device_target(c: &AltLoadInstallConfig) -> Result<(String, String, Vec<Endpoint>), String> {
+    let pairing = req(c.pairing_file_path, "pairing file")?;
+    let host_name = opt(c.host_name, "AltLoad");
+    let mut endpoints = Vec::new();
+    if !c.endpoints.is_null() {
+        for i in 0..c.endpoint_count {
+            let e = &*c.endpoints.add(i);
+            endpoints.push(Endpoint {
+                host: req(e.host, "endpoint host")?,
+                port: e.port,
+                identifier: opt(e.identifier, ""),
+                auth_tag: opt(e.auth_tag, ""),
+            });
+        }
+    }
+    Ok((pairing, host_name, endpoints))
 }
 
 async fn run(
@@ -209,14 +207,6 @@ async fn run(
             let dir = string_field(&request, "dir")?;
             ensure_ddi(&mut adapter, &mut handshake, &dir, cbs).await?;
             Ok(serde_json::json!({ "mounted": true }))
-        }
-        "enable_jit" => {
-            let bundle_id = string_field(&request, "bundleId")?;
-            let dir = string_field(&request, "ddiDir")?;
-            ensure_ddi(&mut adapter, &mut handshake, &dir, cbs).await?;
-            let dialect = super::jit::Dialect::named(request.get("dialect").and_then(|v| v.as_str()).unwrap_or_default());
-            let (pid, served) = enable_jit(&mut adapter, &mut handshake, &bundle_id, dialect, cbs).await?;
-            Ok(serde_json::json!({ "pid": pid, "requests": served.requests, "ended": served.ended }))
         }
         "simulate_location" => {
             let lat = request.get("lat").and_then(|v| v.as_f64()).ok_or("Missing latitude.")?;
@@ -662,7 +652,7 @@ fn string_set(v: &serde_json::Value, key: &str) -> Option<HashSet<String>> {
 
 /// Mounts the cryptex Developer Disk Image (iOS 17+ needs it for DVT and
 /// debugserver) unless it's already there. Personalised for this device via TSS.
-async fn ensure_ddi(
+pub(super) async fn ensure_ddi(
     adapter: &mut AdapterHandle,
     handshake: &mut RsdHandshake,
     dir: &str,
@@ -685,17 +675,15 @@ async fn ensure_ddi(
     Ok(())
 }
 
-/// Launches `bundle_id` suspended and attaches debugserver. The attach marks the
-/// process as debugged, which is what lets it map executable memory (JIT) for the
-/// rest of its life. The debugger then stays for as long as the app keeps asking
-/// it to prepare JIT memory, and detaches when the app says so or goes quiet.
-async fn enable_jit(
+/// Launches `bundle_id` suspended through DVT process control, so a debugger
+/// can attach before it runs. The returned client keeps the launch open; iOS may
+/// end a suspended launch once its connection goes away.
+pub(super) async fn launch_suspended(
     adapter: &mut AdapterHandle,
     handshake: &mut RsdHandshake,
     bundle_id: &str,
-    dialect: super::jit::Dialect,
     cbs: Callbacks,
-) -> Result<(u64, super::jit::Served), String> {
+) -> Result<(u64, RemoteServerClient<Box<dyn idevice::ReadWrite>>), String> {
     cbs.progress("Launching the app…", -1.0);
     let mut server = RemoteServerClient::connect_rsd(adapter, handshake)
         .await
@@ -713,24 +701,7 @@ async fn enable_jit(
             .await
             .map_err(|e| err("Couldn't launch the app", e))?
     };
-
-    cbs.progress("Attaching the debugger…", -1.0);
-    let mut debug = DebugProxyClient::connect_rsd(adapter, handshake)
-        .await
-        .map_err(|e| err("Couldn't open debugserver", e))?;
-    let attach = DebugserverCommand::new(format!("vAttach;{pid:x}"), Vec::new());
-    let reply = debug
-        .send_command(attach)
-        .await
-        .map_err(|e| err("Couldn't attach to the app", e))?;
-    if let Some(reply) = reply.as_deref() {
-        if reply.starts_with('E') {
-            return Err(format!("debugserver refused to attach ({reply}). The app has to be signed for development."));
-        }
-    }
-    cbs.progress("Waiting for the app's JIT requests…", -1.0);
-    let served = super::jit::serve(&mut debug, dialect, cbs).await?;
-    Ok((pid, served))
+    Ok((pid, server))
 }
 
 static LOCATION_RUNNING: AtomicBool = AtomicBool::new(false);

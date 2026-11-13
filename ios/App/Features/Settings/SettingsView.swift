@@ -10,6 +10,8 @@ struct SettingsView: View {
     @State private var anisetteChoice = ""
     private static let customTag = "custom"
     @State private var appleID = AppleIDStore.email
+    @State private var accounts = AppleIDStore.accounts
+    @State private var addingAccount = false
     @State private var targetIP = LocalDevVPN.targetIP
     @State private var vpnActive = LocalDevVPN.isActive
     @State private var showSignIn = false
@@ -41,12 +43,12 @@ struct SettingsView: View {
             }
             .onAppear {
                 syncAnisetteChoice()
-                appleID = AppleIDStore.email
+                syncAccounts()
                 vpnActive = LocalDevVPN.isActive
             }
-            .onChange(of: account.phase) { _, _ in appleID = AppleIDStore.email }
+            .onChange(of: account.phase) { _, _ in syncAccounts() }
             .fullScreenCover(isPresented: $showSignIn) {
-                SignInSheet(anisetteURL: install.anisetteURL) { credentials, remember in
+                SignInSheet(anisetteURL: install.anisetteURL, email: addingAccount ? "" : AppleIDStore.email) { credentials, remember in
                     account.load(with: credentials, remember: remember)
                 }
                 .auroraTheme()
@@ -61,12 +63,18 @@ struct SettingsView: View {
     // MARK: - Apple ID
 
     private var appleIDCard: some View {
-        CardSection(title: "Apple ID", symbol: "person.fill") {
-            InfoRow(title: "Account", value: appleID.isEmpty ? "Not signed in" : appleID)
+        CardSection(title: "Apple IDs", symbol: "person.fill") {
+            if accounts.isEmpty {
+                InfoRow(title: "Account", value: String(localized: "Not signed in"))
+            }
+            ForEach(accounts, id: \.self) { saved in
+                accountRow(saved)
+            }
             accountStatus
 
             HStack(spacing: 10) {
                 Button {
+                    addingAccount = false
                     if let saved = account.savedCredentials {
                         account.load(with: saved)
                     } else {
@@ -78,19 +86,63 @@ struct SettingsView: View {
                 .buttonStyle(AltLoadButtonStyle())
                 .disabled(account.isBusy)
 
-                Button(role: .destructive) {
-                    AppleIDStore.forgetAll()
-                    account.signOut()
-                    appleID = ""
+                Button {
+                    addingAccount = true
+                    showSignIn = true
                 } label: {
-                    Image(systemName: "trash")
+                    Image(systemName: "person.badge.plus")
                 }
-                .buttonStyle(AltLoadButtonStyle(prominent: false, tint: Aurora.danger))
-                .disabled(appleID.isEmpty)
-                .accessibilityLabel(String(localized: "Forget Apple ID and password"))
+                .buttonStyle(AltLoadButtonStyle(prominent: false))
+                .disabled(account.isBusy)
+                .accessibilityLabel(String(localized: "Add Apple ID"))
             }
-            footnote(String(localized: "Signing in here checks your Apple ID with Apple straight away, including two-factor, without installing anything."))
+            footnote(String(localized: "The checked Apple ID is used by default. Each app remembers the Apple ID that signed it, so a refresh uses the same one. Signing in here checks the checked Apple ID with Apple straight away, without installing anything."))
         }
+    }
+
+    /// One saved Apple ID: tap to make it the default, or forget it.
+    private func accountRow(_ saved: String) -> some View {
+        let isDefault = saved.caseInsensitiveCompare(appleID) == .orderedSame
+        return HStack(spacing: 12) {
+            Button {
+                guard !isDefault else { return }
+                AppleIDStore.email = saved
+                account.signOut()
+                syncAccounts()
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: isDefault ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(isDefault ? Aurora.accent : Aurora.secondaryText)
+                    Text(saved)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .foregroundStyle(.primary)
+                    Spacer(minLength: 0)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(account.isBusy)
+            .accessibilityLabel(isDefault ? String(localized: "\(saved), default") : String(localized: "Use \(saved) by default"))
+
+            Button(role: .destructive) {
+                AppleIDStore.remove(saved)
+                if isDefault { account.signOut() }
+                syncAccounts()
+            } label: {
+                Image(systemName: "trash")
+            }
+            .buttonStyle(.borderless)
+            .tint(Aurora.danger)
+            .disabled(account.isBusy)
+            .accessibilityLabel(String(localized: "Forget \(saved)"))
+        }
+        .frame(minHeight: 36)
+    }
+
+    private func syncAccounts() {
+        appleID = AppleIDStore.email
+        accounts = AppleIDStore.accounts
     }
 
     private var signInTitle: String {

@@ -104,18 +104,6 @@ enum DeviceOps {
         }
     }
 
-    /// Launches `bundleID` under debugserver, answers its JIT requests and detaches,
-    /// which leaves it able to JIT. Returns once the app has what it asked for.
-    /// Mounts the Developer Disk Image first if needed. Returns the app's pid.
-    @discardableResult
-    static func enableJIT(_ bundleID: String,
-                          progress: @escaping @MainActor (String, Double?) -> Void = { _, _ in }) async throws -> Int {
-        let dir = try await DeveloperDiskImage.ensureDownloaded(progress: progress)
-        let result = try await run(["op": "enable_jit", "bundleId": bundleID, "ddiDir": dir.path,
-                                    "dialect": StoreApp.jitDialect(forBundleID: bundleID)], progress: progress)
-        return (result as? [String: Any])?["pid"] as? Int ?? 0
-    }
-
     /// Copies a local file into an installed app's container at `name`
     /// (e.g. "Documents/PairingFile_RemoteRP.plist").
     static func placeFile(_ source: URL, in bundleID: String, as name: String,
@@ -159,8 +147,18 @@ enum PairingDestination {
         return id == "com.husk.app" || id.hasPrefix("com.husk.app.")
     }
 
+    /// AltStore and AltStore Beta, under whatever bundle ID signing gave them.
+    private static func isAltStore(_ bundleID: String) -> Bool {
+        let store = StoreApp.matching(bundleID: bundleID)
+        return store == .altstore || store == .altstoreBeta
+    }
+
+    /// AltStore 2.3.1 and later import this file when the user sets up Remote
+    /// AltServer, and from then on install and refresh apps without an AltServer.
+    static let altStorePath = "Documents/ALTPairingFile.plist"
+
     static func placesAutomatically(_ bundleID: String) -> Bool {
-        sideStoreHome(for: bundleID) != nil || isHusk(bundleID)
+        sideStoreHome(for: bundleID) != nil || isHusk(bundleID) || isAltStore(bundleID)
     }
 
     /// Gives an app the pairing file, with the UDID in it, so it doesn't ask on launch.
@@ -179,6 +177,14 @@ enum PairingDestination {
             let file = folder.appendingPathComponent(UUID().uuidString)
             try xml(record).write(to: file)
             try await DeviceOps.placeFile(file, in: bundleID, as: path)
+        }
+
+        if isAltStore(bundleID) {
+            // AltStore connects with a Remote Pairing record (identifier and keys) and
+            // treats a file that also has lockdown keys differently, so it gets only those.
+            let remote = record.filter { remoteKeys.contains($0.key) }
+            try await put(remote["private_key"] != nil ? remote : record, as: altStorePath)
+            return
         }
 
         guard let home = sideStoreHome(for: bundleID) else {

@@ -141,6 +141,41 @@
         }
       }
     },
+    "%@ closed. Open it with JIT again next time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ wurde geschlossen. Öffne es nächstes Mal wieder mit JIT."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ s'est fermée. Rouvrez-la avec JIT la prochaine fois."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ si è chiusa. La prossima volta riaprila con JIT."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ закрыт. В следующий раз снова откройте его с JIT."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 已关闭。下次请再用 JIT 打开。"
+          }
+        }
+      }
+    },
     "%@ didn't return anisette data AltStore can use. Pick another anisette server in AltLoad's Settings.": {
       "extractionState": "manual",
       "localizations": {
@@ -207,6 +242,111 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 明天到期"
+          }
+        }
+      }
+    },
+    "%@ has JIT until you close it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hat JIT, bis du es schließt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a le JIT jusqu'à ce que vous la fermiez."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ha il JIT finché non la chiudi."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У %@ есть JIT, пока вы его не закроете."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 在你关闭它之前都有 JIT。"
+          }
+        }
+      }
+    },
+    "%@ has JIT. AltLoad let go when it was done.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hat JIT. AltLoad hat sich gelöst, als es fertig war."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a le JIT. AltLoad l'a laissée quand elle a eu fini."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ha il JIT. AltLoad l'ha lasciata quando ha finito."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У %@ есть JIT. AltLoad отключился, когда приложение закончило."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 已获得 JIT。完成后 AltLoad 已断开。"
+          }
+        }
+      }
+    },
+    "%@ has JIT. AltLoad prepared its JIT memory %lld times, then let go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hat JIT. AltLoad hat seinen JIT-Speicher %lld-mal vorbereitet und sich dann gelöst."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a le JIT. AltLoad a préparé sa mémoire JIT %lld fois, puis l'a laissée."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ha il JIT. AltLoad ha preparato la sua memoria JIT %lld volte, poi l'ha lasciata."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У %@ есть JIT. AltLoad подготовил его память JIT %lld раз и отключился."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 已获得 JIT。AltLoad 为它准备了 %lld 次 JIT 内存，然后断开。"
           }
         }
       }
@@ -417,6 +557,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 的仓库目前无法访问，AltLoad 也没有保存副本。请稍后再试，或在其他地方下载 IPA，然后通过“从文件安装 IPA”选择。"
+          }
+        }
+      }
+    },
+    "%@, default": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, Standard"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, par défaut"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, predefinito"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, по умолчанию"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@，默认"
           }
         }
       }
@@ -1051,6 +1226,76 @@
         }
       }
     },
+    "A link asks AltLoad to open %@ with JIT and run a script it carries in AltLoad's debugger. Only allow this from apps you trust.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Link bittet AltLoad, %@ mit JIT zu öffnen und ein mitgeliefertes Skript im Debugger von AltLoad auszuführen. Erlaube das nur bei Apps, denen du vertraust."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un lien demande à AltLoad d'ouvrir %@ avec JIT et d'exécuter dans son débogueur un script qu'il contient. N'autorisez cela que pour des apps de confiance."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un link chiede ad AltLoad di aprire %@ con JIT ed eseguire nel suo debugger uno script che contiene. Consentilo solo per app di cui ti fidi."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ссылка просит AltLoad открыть %@ с JIT и запустить в отладчике AltLoad скрипт, который она содержит. Разрешайте это только для приложений, которым доверяете."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一个链接请求 AltLoad 用 JIT 打开 %@，并在 AltLoad 的调试器中运行它附带的脚本。只对你信任的 App 允许此操作。"
+          }
+        }
+      }
+    },
+    "A link asks AltLoad to open %@ with JIT.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Link bittet AltLoad, %@ mit JIT zu öffnen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un lien demande à AltLoad d'ouvrir %@ avec JIT."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un link chiede ad AltLoad di aprire %@ con JIT."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ссылка просит AltLoad открыть %@ с JIT."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一个链接请求 AltLoad 用 JIT 打开 %@。"
+          }
+        }
+      }
+    },
     "A path inside the app's container, for example Documents/pairingFile.plist.": {
       "extractionState": "manual",
       "localizations": {
@@ -1082,6 +1327,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "App 容器内的路径，例如 Documents/pairingFile.plist。"
+          }
+        }
+      }
+    },
+    "A script decides how AltLoad answers an app while it's attached. AltLoad's own handles the usual JIT requests, and apps can send it more. Import a .js file to give an app its own; scripts can call send_command, continue_for, prepare_memory_region, get_pid, get_bundle_id and log.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Skript legt fest, wie AltLoad einer App antwortet, solange es verbunden ist. Das eigene Skript von AltLoad erledigt die üblichen JIT-Anfragen, und Apps können weitere senden. Importiere eine .js-Datei, um einer App ein eigenes zu geben; Skripte können send_command, continue_for, prepare_memory_region, get_pid, get_bundle_id und log aufrufen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un script décide comment AltLoad répond à une app tant qu'il y est attaché. Celui d'AltLoad gère les demandes JIT habituelles, et les apps peuvent en envoyer d'autres. Importez un fichier .js pour donner à une app le sien ; les scripts peuvent appeler send_command, continue_for, prepare_memory_region, get_pid, get_bundle_id et log."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uno script decide come AltLoad risponde a un'app mentre è collegato. Quello di AltLoad gestisce le solite richieste JIT, e le app possono inviarne altre. Importa un file .js per dare a un'app il suo; gli script possono chiamare send_command, continue_for, prepare_memory_region, get_pid, get_bundle_id e log."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрипт определяет, как AltLoad отвечает приложению, пока подключён к нему. Скрипт AltLoad обрабатывает обычные запросы JIT, а приложения могут прислать свои. Импортируйте файл .js, чтобы дать приложению собственный; скрипты могут вызывать send_command, continue_for, prepare_memory_region, get_pid, get_bundle_id и log."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "脚本决定 AltLoad 在连接期间如何回应 App。AltLoad 自带的脚本处理常见的 JIT 请求，App 也可以发送更多脚本。导入 .js 文件即可为某个 App 指定脚本；脚本可调用 send_command、continue_for、prepare_memory_region、get_pid、get_bundle_id 和 log。"
           }
         }
       }
@@ -1222,6 +1502,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "活动"
+          }
+        }
+      }
+    },
+    "Add &script-name= to pick an imported script, or &script-data= with a script in Base64.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Füge &script-name= hinzu, um ein importiertes Skript zu wählen, oder &script-data= mit einem Skript in Base64."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajoutez &script-name= pour choisir un script importé, ou &script-data= avec un script en Base64."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi &script-name= per scegliere uno script importato, oppure &script-data= con uno script in Base64."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте &script-name=, чтобы выбрать импортированный скрипт, или &script-data= со скриптом в Base64."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加 &script-name= 选择已导入的脚本，或用 &script-data= 附带 Base64 编码的脚本。"
+          }
+        }
+      }
+    },
+    "Add Apple ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple-ID hinzufügen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter un identifiant Apple"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi ID Apple"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить Apple ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加 Apple ID"
           }
         }
       }
@@ -1646,6 +1996,41 @@
         }
       }
     },
+    "AltLoad is still with %@. Stop that session in Tools › JIT first.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad ist noch bei %@. Beende diese Sitzung zuerst unter Tools › JIT."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad est encore avec %@. Arrêtez d'abord cette session dans Outils › JIT."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad è ancora con %@. Interrompi prima quella sessione in Strumenti › JIT."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad ещё работает с %@. Сначала остановите этот сеанс в «Инструменты › JIT»."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad 仍在服务 %@。请先在“工具 › JIT”中停止该会话。"
+          }
+        }
+      }
+    },
     "AltLoad isn't affiliated with AltStore, SideStore, LiveContainer, Husk, Riley Testut or Apple. Apple, iPhone and iOS are trademarks of Apple Inc.": {
       "extractionState": "manual",
       "localizations": {
@@ -1677,6 +2062,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "AltLoad 与 AltStore、SideStore、LiveContainer、Husk、Riley Testut 或 Apple 无关联。Apple、iPhone 和 iOS 是 Apple Inc. 的商标。"
+          }
+        }
+      }
+    },
+    "AltLoad let go of %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad hat sich von %@ gelöst."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad a laissé %@."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad ha lasciato %@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad отключился от %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad 已断开 %@。"
           }
         }
       }
@@ -2661,6 +3081,41 @@
         }
       }
     },
+    "Apple IDs": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple-IDs"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Identifiants Apple"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ID Apple"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple ID"
+          }
+        }
+      }
+    },
     "Apple doesn't let free Apple IDs delete App IDs. They free up on their own 7 days after they were made. To use fewer, set App Extensions to Keep, Use Main Profile or Remove Extensions when you install.": {
       "extractionState": "manual",
       "localizations": {
@@ -2972,6 +3427,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "在设备连接前后台时间已用完。请轻点“配对”重试。"
+          }
+        }
+      }
+    },
+    "Built in": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Integriert"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intégré"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Integrato"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Встроенный"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内置"
           }
         }
       }
@@ -3641,6 +4131,41 @@
         }
       }
     },
+    "Copy JIT Link": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT-Link kopieren"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copier le lien JIT"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia link JIT"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопировать ссылку JIT"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷贝 JIT 链接"
+          }
+        }
+      }
+    },
     "Couldn't download %@ (HTTP %lld).": {
       "extractionState": "manual",
       "localizations": {
@@ -3777,6 +4302,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法导入 IPA"
+          }
+        }
+      }
+    },
+    "Couldn't import the script": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skript konnte nicht importiert werden"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d'importer le script"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile importare lo script"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось импортировать скрипт"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法导入脚本"
           }
         }
       }
@@ -4057,6 +4617,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法启动安装会话。"
+          }
+        }
+      }
+    },
+    "Couldn't start the JIT session (code %d).": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die JIT-Sitzung konnte nicht gestartet werden (Code %d)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de démarrer la session JIT (code %d)."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile avviare la sessione JIT (codice %d)."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось начать сеанс JIT (код %d)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法开始 JIT 会话（代码 %d）。"
           }
         }
       }
@@ -4792,6 +5387,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "启用 JIT"
+          }
+        }
+      }
+    },
+    "Enable JIT?": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT aktivieren?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activer le JIT ?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attivare il JIT?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включить JIT?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用 JIT？"
+          }
+        }
+      }
+    },
+    "Enable and Run Script": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktivieren und Skript ausführen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activer et exécuter le script"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attiva ed esegui lo script"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включить и запустить скрипт"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用并运行脚本"
           }
         }
       }
@@ -5636,6 +6301,41 @@
         }
       }
     },
+    "Forget %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vergessen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oublier %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dimentica %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Забыть %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忘记 %@"
+          }
+        }
+      }
+    },
     "Forget Apple ID and password": {
       "extractionState": "manual",
       "localizations": {
@@ -5807,6 +6507,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "释放时间"
+          }
+        }
+      }
+    },
+    "From other apps and Shortcuts": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus anderen Apps und Kurzbefehlen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis d'autres apps et Raccourcis"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Da altre app e Comandi Rapidi"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Из других приложений и Команд"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "来自其他 App 和快捷指令"
           }
         }
       }
@@ -6122,6 +6857,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "如果未显示 **Pair with AltLoad**，请关闭 App 后重试。"
+          }
+        }
+      }
+    },
+    "Import": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importieren"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importer"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importa"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Импорт"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入"
           }
         }
       }
@@ -7071,6 +7841,146 @@
         }
       }
     },
+    "JIT for %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT für %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT pour %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT per %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT для %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的 JIT"
+          }
+        }
+      }
+    },
+    "JIT is already running": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT läuft bereits"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT est déjà en cours"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT è già attivo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT уже работает"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT 已在运行"
+          }
+        }
+      }
+    },
+    "JIT session ended": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT-Sitzung beendet"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session JIT terminée"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessione JIT terminata"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сеанс JIT завершён"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT 会话已结束"
+          }
+        }
+      }
+    },
+    "JIT stopped": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT beendet"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT arrêté"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT interrotto"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT остановлен"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JIT 已停止"
+          }
+        }
+      }
+    },
     "Keep AltLoad open until this finishes.": {
       "extractionState": "manual",
       "localizations": {
@@ -7771,6 +8681,41 @@
         }
       }
     },
+    "Long-press an app to pick the script it uses.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Halte eine App gedrückt, um ihr Skript zu wählen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appuyez longuement sur une app pour choisir son script."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tieni premuta un'app per scegliere il suo script."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите и удерживайте приложение, чтобы выбрать его скрипт."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "长按 App 以选择它使用的脚本。"
+          }
+        }
+      }
+    },
     "Long-press an app to stop AltLoad tracking it. Delete it from the Home Screen to uninstall.": {
       "extractionState": "manual",
       "localizations": {
@@ -8047,6 +8992,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "读取 NFC 标签"
+          }
+        }
+      }
+    },
+    "Name an app to open with JIT.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gib eine App an, die mit JIT geöffnet werden soll."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indiquez une app à ouvrir avec JIT."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indica un'app da aprire con JIT."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Укажите приложение, которое нужно открыть с JIT."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请指定要用 JIT 打开的 App。"
           }
         }
       }
@@ -8716,6 +9696,41 @@
         }
       }
     },
+    "Not used by any app": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Von keiner App verwendet"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilisé par aucune app"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non usato da nessuna app"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не используется ни одним приложением"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有 App 使用"
+          }
+        }
+      }
+    },
     "Nothing matches \"%@\".": {
       "extractionState": "manual",
       "localizations": {
@@ -8782,6 +9797,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "暂无内容。请打开 AltStore 并刷新一个 App。"
+          }
+        }
+      }
+    },
+    "OK": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ОК"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好"
           }
         }
       }
@@ -9346,6 +10396,41 @@
         }
       }
     },
+    "Opens the app with AltLoad's debugger attached. AltLoad stays with it while it asks for JIT memory, which emulators need on newer iPhones, then lets go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnet die App mit dem Debugger von AltLoad. AltLoad bleibt dabei, solange sie JIT-Speicher anfordert, was Emulatoren auf neueren iPhones brauchen, und löst sich dann."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre l'app avec le débogueur d'AltLoad. AltLoad reste avec elle tant qu'elle demande de la mémoire JIT, ce dont les émulateurs ont besoin sur les iPhone récents, puis la laisse."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apre l'app con il debugger di AltLoad. AltLoad resta con lei finché chiede memoria JIT, che agli emulatori serve sugli iPhone più recenti, poi la lascia."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открывает приложение с отладчиком AltLoad. AltLoad остаётся с ним, пока оно запрашивает память JIT (это нужно эмуляторам на новых iPhone), а затем отключается."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用 AltLoad 的调试器打开 App。在它请求 JIT 内存期间（新款 iPhone 上的模拟器需要这样做）AltLoad 会一直陪着它，然后断开。"
+          }
+        }
+      }
+    },
     "Opens the app with a debugger attached for a moment, which lets emulators and other JIT apps run at full speed until you close them.": {
       "extractionState": "manual",
       "localizations": {
@@ -9412,6 +10497,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "其他文件名…"
+          }
+        }
+      }
+    },
+    "Other apps can ask for JIT with a link, and Shortcuts has an Enable JIT action. AltLoad asks you before it follows a link.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere Apps können JIT per Link anfordern, und Kurzbefehle hat eine Aktion „Enable JIT“. AltLoad fragt dich, bevor es einem Link folgt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "D'autres apps peuvent demander le JIT par un lien, et Raccourcis propose une action Enable JIT. AltLoad vous demande avant de suivre un lien."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Altre app possono chiedere il JIT con un link, e Comandi Rapidi ha un'azione Enable JIT. AltLoad ti chiede conferma prima di seguire un link."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Другие приложения могут запросить JIT ссылкой, а в Командах есть действие Enable JIT. AltLoad спрашивает вас, прежде чем перейти по ссылке."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他 App 可以通过链接请求 JIT，快捷指令中也有“Enable JIT”操作。AltLoad 在打开链接前会先询问你。"
           }
         }
       }
@@ -11761,6 +12881,146 @@
         }
       }
     },
+    "Script": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skript"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Script"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Script"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрипт"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "脚本"
+          }
+        }
+      }
+    },
+    "Script from link": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skript aus Link"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Script du lien"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Script dal link"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрипт из ссылки"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "链接中的脚本"
+          }
+        }
+      }
+    },
+    "Script: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skript: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Script : %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Script: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрипт: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "脚本：%@"
+          }
+        }
+      }
+    },
+    "Scripts": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skripte"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scripts"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Script"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрипты"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "脚本"
+          }
+        }
+      }
+    },
     "Scroll down and tap **Pair with AltLoad**": {
       "extractionState": "manual",
       "localizations": {
@@ -12107,6 +13367,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "服务器"
+          }
+        }
+      }
+    },
+    "Serving JIT requests": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beantwortet JIT-Anfragen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Répond aux demandes JIT"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Risponde alle richieste JIT"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отвечает на запросы JIT"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在响应 JIT 请求"
           }
         }
       }
@@ -13581,6 +14876,41 @@
         }
       }
     },
+    "Starting…": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird gestartet…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Démarrage…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avvio…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запуск…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在开始…"
+          }
+        }
+      }
+    },
     "Status": {
       "extractionState": "manual",
       "localizations": {
@@ -13756,6 +15086,41 @@
         }
       }
     },
+    "Stopped before AltLoad reached %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beendet, bevor AltLoad %@ erreicht hat."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrêté avant qu'AltLoad n'atteigne %@."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interrotto prima che AltLoad raggiungesse %@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Остановлено до того, как AltLoad подключился к %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 AltLoad 连接 %@ 之前已停止。"
+          }
+        }
+      }
+    },
     "Store": {
       "extractionState": "manual",
       "localizations": {
@@ -13857,6 +15222,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "Switch"
+          }
+        }
+      }
+    },
+    "Switch Apple ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple-ID wechseln"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changer d'identifiant Apple"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambia ID Apple"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сменить Apple ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换 Apple ID"
           }
         }
       }
@@ -14071,6 +15471,41 @@
         }
       }
     },
+    "That file couldn't be read as text.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Datei konnte nicht als Text gelesen werden."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce fichier n'a pas pu être lu comme du texte."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile leggere il file come testo."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось прочитать файл как текст."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法以文本方式读取该文件。"
+          }
+        }
+      }
+    },
     "That file isn't an .ipa.": {
       "extractionState": "manual",
       "localizations": {
@@ -14102,6 +15537,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "该文件不是 .ipa。"
+          }
+        }
+      }
+    },
+    "That script is empty.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieses Skript ist leer."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce script est vide."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo script è vuoto."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрипт пуст."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该脚本为空。"
           }
         }
       }
@@ -14141,6 +15611,41 @@
         }
       }
     },
+    "The checked Apple ID is used by default. Each app remembers the Apple ID that signed it, so a refresh uses the same one. Signing in here checks the checked Apple ID with Apple straight away, without installing anything.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die markierte Apple-ID wird standardmäßig verwendet. Jede App merkt sich die Apple-ID, mit der sie signiert wurde, damit eine Aktualisierung dieselbe nutzt. Die Anmeldung hier prüft die markierte Apple-ID sofort bei Apple, ohne etwas zu installieren."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'identifiant coché est utilisé par défaut. Chaque app retient l'identifiant Apple qui l'a signée, pour qu'une actualisation utilise le même. Se connecter ici vérifie l'identifiant coché auprès d'Apple tout de suite, sans rien installer."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'ID Apple selezionato viene usato in modo predefinito. Ogni app ricorda l'ID Apple che l'ha firmata, così un aggiornamento usa lo stesso. Accedere qui verifica subito l'ID selezionato con Apple, senza installare nulla."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отмеченный Apple ID используется по умолчанию. Каждое приложение помнит Apple ID, которым оно подписано, поэтому обновление использует тот же. Вход здесь сразу проверяет отмеченный Apple ID у Apple, ничего не устанавливая."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认使用勾选的 Apple ID。每个 App 会记住签名它的 Apple ID，刷新时使用同一个。在这里登录会立即向 Apple 验证勾选的 Apple ID，不会安装任何内容。"
+          }
+        }
+      }
+    },
     "The device operation failed (code %d).": {
       "extractionState": "manual",
       "localizations": {
@@ -14172,6 +15677,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "设备操作失败（代码 %d）。"
+          }
+        }
+      }
+    },
+    "The link asks for the script \"%@\", which isn't in AltLoad. Import it in Tools › JIT › Scripts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Link verlangt das Skript „%@“, das nicht in AltLoad ist. Importiere es unter Tools › JIT › Skripte."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le lien demande le script « %@ », qui n'est pas dans AltLoad. Importez-le dans Outils › JIT › Scripts."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il link chiede lo script \"%@\", che non è in AltLoad. Importalo in Strumenti › JIT › Script."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ссылка запрашивает скрипт «%@», которого нет в AltLoad. Импортируйте его в «Инструменты › JIT › Скрипты»."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该链接需要脚本“%@”，但 AltLoad 中没有。请在“工具 › JIT › 脚本”中导入。"
           }
         }
       }
@@ -14242,6 +15782,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法导入配对文件：%@"
+          }
+        }
+      }
+    },
+    "The script %@ finished for %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Skript %1$@ ist für %2$@ fertig."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le script %1$@ a fini pour %2$@."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo script %1$@ ha finito per %2$@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрипт %1$@ завершился для %2$@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "脚本 %1$@ 已为 %2$@ 运行完毕。"
           }
         }
       }
@@ -14522,6 +16097,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "此 iPhone：%@"
+          }
+        }
+      }
+    },
+    "To let AltStore refresh apps by itself, open AltStore › Settings › Set up Remote AltServer. AltLoad already gave it this iPhone's pairing file, so it skips pairing. Until then, AltLoad works as its AltServer.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Damit AltStore Apps selbst aktualisiert, öffne AltStore › Einstellungen › Set up Remote AltServer. AltLoad hat ihm die Kopplungsdatei dieses iPhones schon gegeben, daher überspringt es die Kopplung. Bis dahin arbeitet AltLoad als sein AltServer."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour qu'AltStore actualise les apps lui-même, ouvrez AltStore › Réglages › Set up Remote AltServer. AltLoad lui a déjà donné le fichier de jumelage de cet iPhone, il saute donc le jumelage. D'ici là, AltLoad sert d'AltServer."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perché AltStore aggiorni le app da solo, apri AltStore › Impostazioni › Set up Remote AltServer. AltLoad gli ha già dato il file di abbinamento di questo iPhone, quindi salta l'abbinamento. Fino ad allora, AltLoad fa da suo AltServer."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтобы AltStore обновлял приложения сам, откройте AltStore › Настройки › Set up Remote AltServer. AltLoad уже передал ему файл сопряжения этого iPhone, поэтому сопряжение пропускается. До этого AltLoad работает как его AltServer."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要让 AltStore 自行刷新 App，请打开 AltStore › 设置 › Set up Remote AltServer。AltLoad 已把这台 iPhone 的配对文件交给它，所以会跳过配对。在此之前，AltLoad 充当它的 AltServer。"
           }
         }
       }
@@ -15121,6 +16731,76 @@
         }
       }
     },
+    "Use %@ by default": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ standardmäßig verwenden"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utiliser %@ par défaut"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa %@ come predefinito"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Использовать %@ по умолчанию"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认使用 %@"
+          }
+        }
+      }
+    },
+    "Use Another Apple ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere Apple-ID verwenden"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utiliser un autre identifiant Apple"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa un altro ID Apple"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Другой Apple ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用其他 Apple ID"
+          }
+        }
+      }
+    },
     "Use Official Sources": {
       "extractionState": "manual",
       "localizations": {
@@ -15222,6 +16902,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "用于在此 iPhone 上安装"
+          }
+        }
+      }
+    },
+    "Used by %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwendet von %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilisé par %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usato da %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Используется: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "被 %@ 使用"
           }
         }
       }
@@ -16622,6 +18337,41 @@
           "stringUnit": {
             "state": "translated",
             "value": "设备本机连接"
+          }
+        }
+      }
+    },
+    "process %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prozess %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "processus %lld"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "processo %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "процесс %lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "进程 %lld"
           }
         }
       }

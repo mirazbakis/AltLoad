@@ -144,43 +144,56 @@ void    altload_install_session_cancel(session);
 | SideStore | `Documents/ALTPairingFile.mobiledevicepairing`, `Documents/PairingFile_RemoteRP.plist`, plus `Documents/PairingFile_Lockdown.plist` when the file has a complete lockdown record |
 | SideStore + LiveContainer | The same files under `Documents/SideStore/Documents/` |
 | Husk, Madeira | `Documents/StikJIT/pairingFile.plist` |
+| AltStore, AltStore Beta | `Documents/ALTPairingFile.plist`, with only the Remote Pairing keys (`identifier`, `public_key`, `private_key`, `alt_irk`) |
 | StikDebug and other idevice apps | `Documents/rp_pairing_file.plist` |
 
 Newer SideStore builds also need `isPairingReset = false` and `activePairingProtocol` in their preferences, so `merge_plist` sets them in `Library/Preferences/<bundle id>.plist`, or `Documents/SideStore/Library/Preferences/com.SideStore.SideStore.plist` inside LiveContainer. iOS caches an app's settings once it has run, so these take effect after a reinstall or restart.
 
-After installing SideStore, SideStore + LiveContainer, Husk or Madeira, AltLoad does this automatically. Madeira is recognised by the store that was picked, not by its bundle ID, because it has its own JIT helper that reads the same path as Husk's.
+After installing SideStore, SideStore + LiveContainer, Husk, Madeira, AltStore or AltStore Beta, AltLoad does this automatically. Madeira is recognised by the store that was picked, not by its bundle ID, because it has its own JIT helper that reads the same path as Husk's.
 
-UTM and MeloNX get no pairing file. They need a debugger's help to run, so the success screen offers **Open with JIT** (see below). AltStore and AltStore Beta get theirs inside the bundle instead, as `ALTPairingFile.dat` (see step 5).
+UTM and MeloNX get no pairing file. They need a debugger's help to run, so the success screen offers **Open with JIT** (see below).
+
+### AltStore without AltServer
+
+AltStore 2.3.1 and later can install and refresh apps by themselves ("Remote AltServer"). They need this iPhone's pairing file for that, and look for it at `Documents/ALTPairingFile.plist` in their own container, where AltServer leaves it after an install (altstoreio/AltStore 5811912). When the user opens AltStore › Settings › Set up Remote AltServer, AltStore moves the file into its Keychain, skips its own pairing step, and from then on doesn't need AltServer or AltLoad running. AltLoad writes the same file after every AltStore install or refresh. AltStore 2.3.0 read it from its bundle instead, sealed as `ALTPairingFile.dat` (see step 5), so AltLoad writes that too. Until the user runs the setup, AltLoad keeps working as AltStore's AltServer.
 
 
 ## JIT and location
 
 Both need the Developer Disk Image, which iOS 27 takes as a personalised cryptex. `ios/App/Core/Device/DeveloperDiskImage.swift` downloads it once (from [doronz88/DeveloperDiskImage](https://github.com/doronz88/DeveloperDiskImage)); `ensure_ddi` in `core/src/install/device.rs` asks cryptexd whether it's installed and, if not, personalises it through TSS and installs it.
 
-- **JIT** (`enable_jit`): DVT process control launches the app suspended and debugserver attaches with `vAttach;<pid>`. The attach marks the process as debugged, so it can map executable memory until it exits. Only development-signed apps (`get-task-allow`) can be attached. AltLoad then stays attached and answers the app's JIT requests (`core/src/install/jit.rs`, below) before detaching with `D`.
+- **JIT** (a JIT session, `core/src/install/jit.rs` and `ios/App/Core/JIT/`): DVT process control launches the app suspended (or the session takes a running process by pid), and a script attaches debugserver with `vAttach;<pid>`. The attach marks the process as debugged, so it can map executable memory until it exits. Only development-signed apps (`get-task-allow`) can be attached.
 - **Location** (`simulate_location`): DVT location simulation. The device keeps a simulated location only while the connection is open, so the op holds the tunnel and re-sends the coordinate every few seconds until `altload_location_stop`. It runs on its own queue so AltServer's device ops aren't blocked.
 
-### JIT requests
+### JIT sessions and scripts
 
-Being attached once is enough for most apps. Where iOS checks each executable page it isn't, so emulators ask the attached debugger for help by stopping on a `brk` instruction with the request in their registers. `serve` in `jit.rs` lets the app run, reads each stop, and answers:
+Being attached once is enough for most apps. Where iOS checks each executable page it isn't, so emulators ask the attached debugger for help by stopping on a `brk` instruction with the request in their registers. What to answer is up to a JavaScript script, run with JavaScriptCore on a thread of its own (`JITSession.swift`), against a session the Rust core holds open:
 
-| Request | Registers | What AltLoad does |
+| Function | Rust (`jit.rs`) | What it does |
+|---|---|---|
+| `send_command(packet)` | `altload_debug_send` | One GDB remote packet, returns the reply |
+| `continue_for(resume, ms)` | `altload_debug_continue` | Resumes with `resume` (`c`, or `vCont;S…` to hand back a signal), returns the stop reply, or `""` when the app stayed quiet that long; it is then paused |
+| `prepare_memory_region(address, length)` | `altload_debug_prepare` | Writes one byte into each 16 KiB page through debugserver, in batches of 128 packets. Over 16 GiB is refused |
+| `get_pid()`, `get_bundle_id()`, `log(text)` | | The session's process and app, and a line for the JIT screen |
+
+AltLoad's own script (`ios/App/Resources/JIT/altload-jit.js`) answers:
+
+| Request | Registers | What it does |
 |---|---|---|
 | `brk #0xf00d` | `x16 = 0` | Detaches: the app is done asking |
-| `brk #0xf00d` | `x16 = 1`, `x0` = address, `x1` = length | Prepares the region for JIT. With address 0, it allocates the region first and returns the address in `x0` |
-| `brk #0x69` | `x0` = address, `x1` = length | The older form of the same request, used by UTM, DolphiniOS and Flycast: prepares the region once, then detaches |
-| `brk #0xf00d` with `x16 = 2`, or `brk #0x68` | | Script requests. **Not supported**: the app continues past the `brk` with its registers unchanged |
+| `brk #0xf00d` | `x16 = 1`, `x0` = address, `x1` = length | Prepares the region. With address 0 it allocates the region first (`_M<len>,rx`) and returns the address in `x0` |
+| `brk #0xf00d` | `x16 = 2`, `x0` = text, `x1` = length | Runs the script the app sent, in the same context, so it can add handlers to `commands` (by `x16`) or `legacyCommands` (by `brk` immediate) |
+| `brk #0x68` | as `x16 = 2` | The older form of the same |
+| `brk #0x69` | `x0` = address, `x1` = length | The older form of a JIT request, used by UTM and others: prepares the region once, then detaches |
 
-A region is prepared by writing one byte into each 16 KiB page through debugserver, in batches of 128 packets. A region over 16 GiB is refused. Any other stop is not a request, and the app gets its signal back as it would without a debugger.
+Any other stop is not a request: the app gets its signal back as it would without a debugger, and an unknown `brk` isn't stepped over. The script detaches when the app asks, when it exits, or when it goes quiet: 8 seconds with no first request (the app only needed the attach), or 5 minutes without another one. `scripts/test-jit-script.js` runs it against a fake debugserver (`node scripts/test-jit-script.js`).
 
-The app is matched to a form by bundle ID (`StoreApp.jitDialect`): UTM, DolphiniOS and Flycast use the older form, everything else the `0xf00d` form. An app written for the older form that is run without it gets an error value in `x0`.
+Users can import their own `.js` scripts and pick one per app (Tools › JIT › Scripts, `JITScripts.swift`). Sessions also start from links, `altload://enable-jit?bundle-id=…` (with `pid=`, `script-name=` or `script-data=` in Base64), which AltLoad always confirms first, and from the Shortcuts action Enable JIT (`EnableJITIntent.swift`). One session runs at a time. While it runs, AltLoad keeps itself awake in the background with silent audio, since the app it serves is in front.
 
-AltLoad detaches when the app asks, when the app exits, or when it goes quiet: 8 seconds with no first request (the app only needed the attach), or 5 minutes without another one. `enable_jit` blocks until then and returns the pid, the number of requests answered and how the session ended.
-
-The request protocol is the one the [StikDebug](https://github.com/StikDebug/StikDebug) project's scripts speak. AltLoad's debugger side is an independent implementation; no StikDebug code is used.
+The request protocol and the script functions are the ones the [StikDebug](https://github.com/StikDebug/StikDebug) project uses, so scripts written for it run here. AltLoad's script and its debugger side are independent implementations; no StikDebug code is used.
 
 > [!WARNING]
-> The JIT request handling has unit tests for its parsing and decisions, but it has **not been tested on a device yet**.
+> AltLoad's JIT script is tested against a fake debugserver, but JIT sessions have **not been tested on a device yet**.
 
 ## Installing AltLoad with an Apple ID
 

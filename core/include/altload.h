@@ -129,6 +129,34 @@ int32_t altload_device_run(const AltLoadInstallConfig *config,
                            void *ctx,
                            char **out_json);
 
+/* ---- JIT sessions (core/src/install/jit.rs) ---- */
+
+/* A launched (or running) app held by debugserver, driven one packet at a time.
+   Every call but altload_debug_stop blocks; use one thread per session. */
+typedef struct AltLoadDebugSession AltLoadDebugSession;
+
+/* request_json: {"ddiDir":"/…/DDI","bundleId":"com.x"} to launch the app
+   suspended, or {"ddiDir":…,"pid":n} for a running process. Returns 0 with the
+   session and {"pid":n} in *out_json, or 1 with an error in *out_json. */
+int32_t altload_debug_open(const AltLoadInstallConfig *config,
+                           const char *request_json,
+                           AltLoadProgressCb progress_cb,
+                           void *ctx,
+                           AltLoadDebugSession **out_session,
+                           char **out_json);
+uint64_t altload_debug_pid(const AltLoadDebugSession *session);
+/* One GDB remote packet ("vAttach;1a2b", "c", "m1000,4", "D", …); 0 with the reply, 1 with an error. */
+int32_t altload_debug_send(const AltLoadDebugSession *session, const char *command, char **out_reply);
+/* Resumes with `resume` (NULL or "" for "c") for at most timeout_ms; 0 with the
+   stop reply, or an empty reply when it timed out (the app is then paused). */
+int32_t altload_debug_continue(const AltLoadDebugSession *session, const char *resume, uint64_t timeout_ms, char **out_reply);
+/* Makes [address, address + length) usable for JIT; 0 with "OK", 1 with an error. */
+int32_t altload_debug_prepare(const AltLoadDebugSession *session, uint64_t address, uint64_t length, char **out_reply);
+/* Ends the call in progress and every later one. Safe from any thread. */
+void altload_debug_stop(const AltLoadDebugSession *session);
+/* Detaches if still attached, closes the tunnel and frees the session. */
+void altload_debug_close(AltLoadDebugSession *session);
+
 /* Move / end a running {"op":"simulate_location"} (which blocks until stopped). */
 void altload_location_update(double latitude, double longitude);
 void altload_location_stop(void);

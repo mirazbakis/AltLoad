@@ -8,9 +8,16 @@ struct SignInSheet: View {
     let onContinue: (AppleIDCredentials, Bool) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var email = AppleIDStore.email
+    @State private var email: String
     @State private var password = ""
     @State private var remember = true
+
+    /// `email` starts the form with that Apple ID; empty to add another one.
+    init(anisetteURL: String, email: String = AppleIDStore.email, onContinue: @escaping (AppleIDCredentials, Bool) -> Void) {
+        self.anisetteURL = anisetteURL
+        self.onContinue = onContinue
+        _email = State(initialValue: email)
+    }
 
     var body: some View {
         NavigationStack {

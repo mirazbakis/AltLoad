@@ -102,15 +102,6 @@ enum StoreApp: String, CaseIterable, Identifiable, Codable {
     /// Has its own JIT helper, which reads a pairing file from Documents/StikJIT.
     var hasBuiltInJIT: Bool { self == .husk || self == .madeira }
 
-    /// How an app asks the debugger for JIT memory (see jit.rs). Older emulators
-    /// make one request and expect the debugger to leave.
-    static func jitDialect(forBundleID bundleID: String) -> String {
-        let legacy = ["com.utmapp.UTM", "me.oatmealdome.dolphinios", "com.flyinghead.Flycast"]
-        let id = bundleID.lowercased()
-        return legacy.contains { id == $0.lowercased() || id.hasPrefix($0.lowercased() + ".") || id.hasPrefix($0.lowercased() + "-") }
-            ? "legacy" : "universal"
-    }
-
     /// The release feed of an app that publishes no AltStore source.
     var releaseFeed: StoreFeed? {
         switch self {

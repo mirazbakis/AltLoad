@@ -24,6 +24,7 @@ struct RootView: View {
     @State private var tab: AppTab = .install
     @StateObject private var install = InstallController.shared
     @StateObject private var updates = UpdateChecker.shared
+    @StateObject private var jit = JITCenter.shared
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
 
@@ -47,9 +48,41 @@ struct RootView: View {
                 .auroraTheme()
         }
         .onOpenURL { url in
-            // LocalDevVPN returns here via altload:// after switching the VPN on.
             guard url.scheme == "altload" else { return }
+            // altload://enable-jit asks for a JIT session; AltLoad confirms first.
+            if jit.handle(url: url) { return }
+            // LocalDevVPN returns here via altload:// after switching the VPN on.
             install.resumeWhenVPNReady()
+        }
+        // Each alert sits on its own view so they don't replace one another.
+        .background {
+            Color.clear
+                .alert(String(localized: "Enable JIT?"), isPresented: Binding(
+                    get: { jit.linkRequest != nil && install.flow == nil },
+                    set: { if !$0 { jit.linkRequest = nil } }
+                ), presenting: jit.linkRequest) { request in
+                    Button(request.scriptSource == nil ? String(localized: "Enable JIT") : String(localized: "Enable and Run Script")) {
+                        jit.allow(request)
+                    }
+                    Button(String(localized: "Cancel"), role: .cancel) { jit.linkRequest = nil }
+                } message: { request in
+                    if request.scriptSource != nil {
+                        Text("A link asks AltLoad to open \(request.target) with JIT and run a script it carries in AltLoad's debugger. Only allow this from apps you trust.")
+                    } else {
+                        Text("A link asks AltLoad to open \(request.target) with JIT.")
+                    }
+                }
+        }
+        .background {
+            Color.clear
+                .alert(jit.finished?.title ?? "", isPresented: Binding(
+                    get: { jit.finished != nil && install.flow == nil },
+                    set: { if !$0 { jit.finished = nil } }
+                )) {
+                    Button("OK", role: .cancel) { jit.finished = nil }
+                } message: {
+                    Text(jit.finished?.message ?? "")
+                }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {

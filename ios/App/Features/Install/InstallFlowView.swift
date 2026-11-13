@@ -11,11 +11,10 @@ struct InstallFlowView: View {
     @ObservedObject private var pairings = PairingStore.shared
     @Environment(\.scenePhase) private var scenePhase
 
-    @State private var email = AppleIDStore.email
+    @State private var email = InstallController.shared.flowAppleID ?? AppleIDStore.email
     @State private var password = ""
     @State private var remember = true
-    @State private var openingWithJIT = false
-    @State private var jitError: String?
+    @ObservedObject private var jit = JITCenter.shared
     @AppStorage(ExtensionsMode.defaultsKey) private var extensionsRaw = ExtensionsMode.keep.rawValue
     @FocusState private var focus: Field?
 
@@ -206,7 +205,7 @@ struct InstallFlowView: View {
                                 .foregroundStyle(Aurora.secondaryText)
                         }
                         if app.store == .altstore || app.store == .altstoreBeta {
-                            Label(String(localized: "AltStore uses AltLoad as its AltServer. Keep AltLoad open while AltStore installs or refreshes, or turn on background mode in Tools › AltServer."), systemImage: "server.rack")
+                            Label(String(localized: "To let AltStore refresh apps by itself, open AltStore › Settings › Set up Remote AltServer. AltLoad already gave it this iPhone's pairing file, so it skips pairing. Until then, AltLoad works as its AltServer."), systemImage: "server.rack")
                                 .font(.footnote)
                                 .foregroundStyle(Aurora.mist)
                         }
@@ -330,9 +329,45 @@ struct InstallFlowView: View {
 
     // MARK: - Sign in
 
+    /// Switches between saved Apple IDs, or clears the form for another one.
+    @ViewBuilder
+    private var accountMenu: some View {
+        let saved = AppleIDStore.accounts
+        if !saved.isEmpty {
+            Menu {
+                ForEach(saved, id: \.self) { account in
+                    Button {
+                        email = account
+                        password = AppleIDStore.password(for: account) ?? ""
+                    } label: {
+                        if account.caseInsensitiveCompare(email) == .orderedSame {
+                            Label(account, systemImage: "checkmark")
+                        } else {
+                            Text(account)
+                        }
+                    }
+                }
+                Divider()
+                Button(String(localized: "Use Another Apple ID"), systemImage: "person.badge.plus") {
+                    email = ""
+                    password = ""
+                    focus = .email
+                }
+            } label: {
+                Label(String(localized: "Switch"), systemImage: "person.2.fill")
+                    .font(.footnote.weight(.semibold))
+            }
+            .accessibilityLabel(String(localized: "Switch Apple ID"))
+        }
+    }
+
     private var signInForm: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionLabel(title: "Apple ID")
+            HStack {
+                SectionLabel(title: "Apple ID")
+                Spacer()
+                accountMenu
+            }
             VStack(spacing: 0) {
                 TextField(String(localized: "Apple ID email"), text: $email)
                     .textContentType(.username)
@@ -442,19 +477,6 @@ struct InstallFlowView: View {
             remember: remember)
     }
 
-    /// Opens a freshly installed emulator under the debugger, so it starts with JIT.
-    private func openWithJIT(_ app: InstalledApp) {
-        openingWithJIT = true
-        Task {
-            defer { openingWithJIT = false }
-            do {
-                try await DeviceOps.enableJIT(app.bundleID)
-            } catch {
-                jitError = error.localizedDescription
-            }
-        }
-    }
-
     // MARK: - Bottom actions
 
     @ViewBuilder
@@ -493,19 +515,19 @@ struct InstallFlowView: View {
             VStack(spacing: 12) {
                 if app.store?.needsJIT == true {
                     GlassActionButton(title: "Open with JIT", systemImage: "bolt.fill", prominent: true) {
-                        openWithJIT(app)
+                        jit.start(bundleID: app.bundleID, appName: app.name)
                     }
-                    .disabled(openingWithJIT)
-                    .opacity(openingWithJIT ? 0.55 : 1)
+                    .disabled(jit.isRunning)
+                    .opacity(jit.isRunning ? 0.55 : 1)
                 }
                 GlassActionButton(title: "Done", systemImage: "checkmark", prominent: app.store?.needsJIT != true, tint: Aurora.success) {
                     controller.finish()
                 }
             }
-            .alert("Couldn't enable JIT", isPresented: Binding(get: { jitError != nil }, set: { if !$0 { jitError = nil } })) {
-                Button("OK", role: .cancel) {}
+            .alert(jit.finished?.title ?? "", isPresented: Binding(get: { jit.finished != nil }, set: { if !$0 { jit.finished = nil } })) {
+                Button("OK", role: .cancel) { jit.finished = nil }
             } message: {
-                Text(jitError ?? "")
+                Text(jit.finished?.message ?? "")
             }
 
         case .failed:
