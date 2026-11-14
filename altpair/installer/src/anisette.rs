@@ -31,7 +31,8 @@ const MAX_PICKED: usize = 4;
 /// The servers to health-check, best first, with a pinned one moved to the front.
 pub fn candidates(pinned: Option<&str>) -> Vec<String> {
     let mut order: Vec<String> = BUILT_IN.iter().map(|s| s.to_string()).collect();
-    if let Some(p) = pinned.filter(|p| !p.is_empty()) {
+    if let Some(p) = pinned.map(normalize).filter(|p| !p.is_empty()) {
+        let p = p.as_str();
         order.retain(|a| a != p);
         order.insert(0, p.to_string());
     }
@@ -40,6 +41,19 @@ pub fn candidates(pinned: Option<&str>) -> Vec<String> {
 }
 
 /// Chooses from the candidates given which ones answered (`alive[i]` for `candidates[i]`).
+/// "https://Ani.Example/" and "https://ani.example" are the same server.
+fn normalize(url: &str) -> String {
+    let url = url.trim().trim_end_matches('/');
+    match url.split_once("://") {
+        Some((scheme, rest)) => {
+            let (host, path) = rest.split_once('/').map_or((rest, ""), |(h, p)| (h, p));
+            let path = if path.is_empty() { String::new() } else { format!("/{path}") };
+            format!("{}://{}{path}", scheme.to_ascii_lowercase(), host.to_ascii_lowercase())
+        }
+        None => url.to_string(),
+    }
+}
+
 pub fn pick(candidates: &[String], alive: &[bool], pinned: Option<&str>) -> Vec<String> {
     let mut picked: Vec<String> = candidates
         .iter()
@@ -47,9 +61,9 @@ pub fn pick(candidates: &[String], alive: &[bool], pinned: Option<&str>) -> Vec<
         .filter(|(_, ok)| **ok)
         .map(|(a, _)| a.clone())
         .collect();
-    if let Some(p) = pinned.filter(|p| !p.is_empty()) {
-        if !picked.iter().any(|a| a == p) {
-            picked.insert(0, p.to_string());
+    if let Some(p) = pinned.map(normalize).filter(|p| !p.is_empty()) {
+        if !picked.iter().any(|a| *a == p) {
+            picked.insert(0, p);
         }
     }
     if picked.is_empty() {
@@ -120,5 +134,13 @@ mod tests {
         let c = candidates(Some(BUILT_IN[5]));
         assert_eq!(c[0], BUILT_IN[5]);
         assert_eq!(c.iter().filter(|a| *a == BUILT_IN[5]).count(), 1);
+        // A trailing slash or capitals don't make a built-in one appear twice.
+        let typed = "https://ANI.sidestore.io/";
+        let c = candidates(Some(typed));
+        assert_eq!(c[0], "https://ani.sidestore.io");
+        assert_eq!(c.iter().filter(|a| *a == "https://ani.sidestore.io").count(), 1);
+        let mut alive = [false; 8];
+        alive[0] = true;
+        assert_eq!(pick(&c, &alive, Some(typed)), vec!["https://ani.sidestore.io".to_string()]);
     }
 }

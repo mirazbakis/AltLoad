@@ -543,6 +543,7 @@
                   <li><b>Pair with AltLoad doesn't appear.</b>Check Developer Mode is on and the iPhone is on Wi-Fi, then run the two lines again and reopen Settings.</li>
                   <li><b>The PIN was rejected.</b>Run <code>./altpair.wasm</code> again for a new PIN; each one works once.</li>
                   <li><b>rootshell stopped.</b>Set Location Diary Mode to Session Only and allow Local Network access, then start again.</li>
+                  <li><b>It says <code>wasm: command not found</code>.</b>This copy of rootshell can't run <code>.wasm</code> programs. Update rootshell from the App Store, then run the two lines again.</li>
                 </ul>
               </details>
             </div>
@@ -603,7 +604,7 @@
               <details class="trouble"><summary>If this doesn't work</summary>
                 <ul>
                   <li><b>It can't find the pairing file.</b>Keep rootshell open in the background and type the transfer code it shows.</li>
-                  <li><b>Sign-in fails.</b>Check the Apple ID and password. Two-factor codes go to your other devices.</li>
+                  <li><b>Sign-in fails.</b>Check the Apple ID and password. Two-factor codes go to your other devices. If none arrives, type <code>r</code> to resend it or <code>s</code> to get it by text.</li>
                   <li><b>It stops partway.</b>Check LocalDevVPN is still connected, then run the line again.</li>
                 </ul>
               </details>

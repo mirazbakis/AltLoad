@@ -40,6 +40,10 @@ I wrote altpair from scratch as a pair of small tools for AltLoad:
 
 rootshell stops when it goes to the background. Turn on Location Diary Mode › Session Only in rootshell so it keeps running while you are in Settings.
 
+If rootshell answers `wasm: command not found`, that copy of rootshell can't run `.wasm` programs. Update rootshell from the App Store, then run the two lines again. The pairing tool also uses rootshell's newer network features (Bonjour and UDP from any sender, added in rootshell 1.0.16-177), so an older rootshell may start it but never show **Pair with AltLoad**.
+
+If the two-factor code doesn't arrive, type `r` at the code question to send it again, `s` to get it by text message, or `d` to send it to your devices.
+
 ## How it works
 
 There are four stages.

@@ -145,15 +145,23 @@ fn run(opts: Options) -> Result<(), String> {
     }
 }
 
-/// Adds a hint to failures the user can act on from here.
+/// Adds a hint to failures the user can act on from here. The core's messages
+/// are written for the app, so its Settings paths are swapped for altpair's options.
 fn failure_text(e: &str) -> String {
+    let e = e
+        .replace("pick a different server in Settings › Anisette", "pick a different server with --anisette <url>")
+        .replace("Settings › Anisette", "--anisette <url>");
     let lower = e.to_lowercase();
     if lower.contains("pairing file") {
         format!("{e}\n\nRun altpair --repair to fetch a new pairing file.")
+    } else if e.contains("--anisette") {
+        e
     } else if lower.contains("anisette") || e.contains("-80045") || e.contains("-45061") {
         format!("{e}\n\nTry again in a few minutes, or pick a server with --anisette <url>.")
+    } else if lower.contains("cannot submit code without knowing") || lower.contains("cannot resend code without knowing") {
+        format!("{e}\n\nRun altpair again and choose d or s when asked where to get a code.")
     } else {
-        e.to_string()
+        e
     }
 }
 
@@ -270,5 +278,10 @@ mod tests {
         assert!(failure_text("Couldn't read the pairing file: x").contains("--repair"));
         assert!(failure_text("Apple ID sign-in failed: anisette").contains("--anisette"));
         assert_eq!(failure_text("Install failed: x"), "Install failed: x");
+        // The core's wording points at the app's Settings; altpair has --anisette instead.
+        let refused = failure_text("Apple ID sign-in failed: … then pick a different server in Settings › Anisette. Too many …");
+        assert!(refused.contains("with --anisette <url>"));
+        assert!(!refused.contains("Settings"));
+        assert_eq!(refused.matches("--anisette").count(), 1);
     }
 }

@@ -235,20 +235,18 @@ fn answer(kind: i32, json: &str) -> String {
 }
 
 fn ask_two_factor(json: &str) -> String {
-    for note in prompts::two_factor_notes(json) {
+    let tf = prompts::two_factor_from_json(json);
+    for note in prompts::two_factor_notes(&tf) {
         ui::note(&note);
     }
+    let question = if tf.unknown { "      Choose: " } else { "      Two-factor code: " };
     loop {
-        let Ok(Some(line)) = term::read_line("      Two-factor code: ") else {
+        let Ok(Some(line)) = term::read_line(question) else {
             return "abort".into();
         };
-        let line = line.trim();
-        if line.is_empty() {
-            return "abort".into();
-        }
-        match crate::handoff::normalize_code(line) {
-            Some(code) => return format!("code:{code}"),
-            None => println!("      Enter the 6 digits, or return to stop."),
+        match prompts::two_factor_reply(&line, &tf) {
+            Ok(reply) => return reply,
+            Err(e) => ui::note(&e),
         }
     }
 }
