@@ -70,20 +70,9 @@ pub fn main() -> i32 {
     serve(&plist)
 }
 
-/// Finds the Wi-Fi address: `--ip`, then the host's routing, then `ifconfig`
-/// output on stdin.
+/// Finds the Wi-Fi address: `--ip`, then `ifconfig` output on stdin.
 fn wifi_address(opts: &Options) -> Result<Ipv4Addr, Fail> {
     if let Some(ip) = opts.ip {
-        return Ok(ip);
-    }
-    let query = dns::root_ns_query();
-    let routed = host::route_source(MDNS_GROUP, MDNS_PORT, None)
-        .filter(|ip| ifconfig::is_likely_wifi(*ip))
-        .or_else(|| {
-            host::route_source(Ipv4Addr::new(1, 1, 1, 1), 53, Some(&query))
-                .filter(|ip| ifconfig::is_likely_wifi(*ip))
-        });
-    if let Some(ip) = routed {
         return Ok(ip);
     }
 
@@ -91,7 +80,7 @@ fn wifi_address(opts: &Options) -> Result<Ipv4Addr, Fail> {
     let mut text = String::new();
     let _ = std::io::stdin().take(256 * 1024).read_to_string(&mut text);
     ifconfig::parse_inet(&text).ok_or_else(|| {
-        Fail::Usage("Run: ifconfig en0 | ./altpair.wasm".into())
+        Fail::Usage("Run: ifconfig en0 > if.txt\nthen: ./altpair.wasm < if.txt".into())
     })
 }
 

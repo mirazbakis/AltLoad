@@ -9,8 +9,6 @@ pub const SOCK_STREAM: i32 = 1;
 pub const SOCK_DGRAM: i32 = 2;
 pub const SHUT_WR: i32 = 1;
 pub const SOCKADDR_IN_LEN: usize = 16;
-/// Room for the largest address the host may write back (`sockaddr_in6`).
-pub const SOCKADDR_MAX: usize = 28;
 
 /// 16-byte `sockaddr_in`: family, 0, port (big-endian), address, 8 zero bytes.
 pub fn sockaddr_in(ip: Ipv4Addr, port: u16) -> [u8; SOCKADDR_IN_LEN] {
@@ -19,15 +17,6 @@ pub fn sockaddr_in(ip: Ipv4Addr, port: u16) -> [u8; SOCKADDR_IN_LEN] {
     out[2..4].copy_from_slice(&port.to_be_bytes());
     out[4..8].copy_from_slice(&ip.octets());
     out
-}
-
-/// Reads an IPv4 address and port back out of a `sockaddr_in`.
-pub fn parse_sockaddr_in(buf: &[u8]) -> Option<(Ipv4Addr, u16)> {
-    if buf.len() < 8 || buf[0] != AF_INET as u8 {
-        return None;
-    }
-    let port = u16::from_be_bytes([buf[2], buf[3]]);
-    Some((Ipv4Addr::new(buf[4], buf[5], buf[6], buf[7]), port))
 }
 
 pub fn errno_name(e: i32) -> &'static str {
@@ -60,9 +49,6 @@ mod tests {
     fn sockaddr_round_trip() {
         let a = sockaddr_in(Ipv4Addr::new(127, 0, 0, 1), 47627);
         assert_eq!(a, [2, 0, 0xba, 0x0b, 127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]);
-        assert_eq!(parse_sockaddr_in(&a), Some((Ipv4Addr::new(127, 0, 0, 1), 47627)));
-        assert_eq!(parse_sockaddr_in(&[30, 0, 0, 0, 0, 0, 0, 0]), None);
-        assert_eq!(parse_sockaddr_in(&[2, 0, 0]), None);
     }
 
     #[test]

@@ -521,10 +521,11 @@
             </div>
             <div class="stp-body duo">
               <div class="stp-main">
-                <p>In rootshell's settings, switch <b>Location Diary Mode</b> to <b>Session Only</b> so iOS doesn't pause it while you're in Settings. Then enter these two lines, one at a time:</p>
+                <p>In rootshell's settings, switch <b>Location Diary Mode</b> to <b>Session Only</b> so iOS doesn't pause it while you're in Settings. Then enter these three lines, one at a time:</p>
                 <div class="term">
                   <div class="cmd"><code>curl -fsSLO https://github.com/mirazbakis/AltLoad/releases/latest/download/altpair.wasm</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
-                  <div class="cmd"><code>ifconfig en0 | ./altpair.wasm</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
+                  <div class="cmd"><code>ifconfig en0 &gt; if.txt</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
+                  <div class="cmd"><code>./altpair.wasm &lt; if.txt</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
                 </div>
                 <p>rootshell shows a 6-digit PIN. Open Settings › Privacy &amp; Security › <b>Developer Mode</b> and tap the new row at the very bottom, <b>Pair with AltLoad</b>. Enter your passcode, then the PIN. Leave rootshell open.</p>
               </div>
@@ -540,10 +541,10 @@
               </div>
               <details class="trouble"><summary>If this doesn't work</summary>
                 <ul>
-                  <li><b>Pair with AltLoad doesn't appear.</b>Check Developer Mode is on and the iPhone is on Wi-Fi, then run the two lines again and reopen Settings.</li>
-                  <li><b>The PIN was rejected.</b>Run <code>./altpair.wasm</code> again for a new PIN; each one works once.</li>
+                  <li><b>Pair with AltLoad doesn't appear.</b>Check Developer Mode is on and the iPhone is on Wi-Fi, then run the last two lines again and reopen Settings.</li>
+                  <li><b>The PIN was rejected.</b>Run <code>./altpair.wasm &lt; if.txt</code> again for a new PIN; each one works once.</li>
                   <li><b>rootshell stopped.</b>Set Location Diary Mode to Session Only and allow Local Network access, then start again.</li>
-                  <li><b>It says <code>wasm: command not found</code>.</b>This copy of rootshell can't run <code>.wasm</code> programs. Update rootshell from the App Store, then run the two lines again.</li>
+                  <li><b>It says <code>wasm: command not found</code>.</b>rootshell can't pipe into a <code>.wasm</code> program. Use the three lines above (save to <code>if.txt</code>, then read it with <code>&lt;</code>), not <code>ifconfig en0 | ./altpair.wasm</code>.</li>
                 </ul>
               </details>
             </div>

@@ -24,7 +24,8 @@ I wrote altpair from scratch as a pair of small tools for AltLoad:
 
    ```sh
    curl -fsSLO https://github.com/mirazbakis/AltLoad/releases/latest/download/altpair.wasm
-   ifconfig en0 | ./altpair.wasm
+   ifconfig en0 > if.txt
+   ./altpair.wasm < if.txt
    ```
 
 3. The tool prints a Wi-Fi address and waits. Open Settings › Privacy & Security › Developer Mode. Tap **Pair with AltLoad** at the bottom.
@@ -40,7 +41,7 @@ I wrote altpair from scratch as a pair of small tools for AltLoad:
 
 rootshell stops when it goes to the background. Turn on Location Diary Mode › Session Only in rootshell so it keeps running while you are in Settings.
 
-If rootshell answers `wasm: command not found`, that copy of rootshell can't run `.wasm` programs. Update rootshell from the App Store, then run the two lines again. The pairing tool also uses rootshell's newer network features (Bonjour and UDP from any sender, added in rootshell 1.0.16-177), so an older rootshell may start it but never show **Pair with AltLoad**.
+If rootshell answers `wasm: command not found`, you piped into the tool (`ifconfig en0 | ./altpair.wasm`). rootshell can't pipe into a `.wasm` program, so save the output to `if.txt` and read it with `<` as shown above. The pairing tool also uses rootshell's newer network features (Bonjour and UDP from any sender, added in rootshell 1.0.16-177), so an older rootshell may start it but never show **Pair with AltLoad**.
 
 If the two-factor code doesn't arrive, type `r` at the code question to send it again, `s` to get it by text message, or `d` to send it to your devices.
 
@@ -95,7 +96,7 @@ sequenceDiagram
     participant VPN as LocalDevVPN tunnel
     participant Apple
 
-    User->>RS: ifconfig en0 | ./altpair.wasm
+    User->>RS: ifconfig en0 > if.txt; ./altpair.wasm < if.txt
     RS->>Set: mDNS: "AltLoad" pairable host
     User->>Set: tap Pair with AltLoad
     Set->>RS: connect, start pairing
@@ -172,7 +173,7 @@ The state directory is `~/.altload` inside Open Minis. It keeps the saved pairin
 
 | Flag | Meaning |
 | --- | --- |
-| `--ip A.B.C.D` | Wi-Fi address to use. Without it the tool asks the host, then reads `ifconfig` from stdin |
+| `--ip A.B.C.D` | Wi-Fi address to use. Without it the tool reads `ifconfig` output from stdin |
 | `--port N` | Pairing port. Default 49207 |
 | `--repair` | Pair again even if `rp_pairing_file.plist` exists |
 | `-h`, `--help` | Show help |

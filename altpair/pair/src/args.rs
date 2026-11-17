@@ -10,7 +10,8 @@ itself, then pass the pairing file to
 the installer.
 
 usage:
-  ifconfig en0 | ./altpair.wasm
+  ifconfig en0 > if.txt
+  ./altpair.wasm < if.txt
   ./altpair.wasm --ip 192.168.1.5
 
 options:

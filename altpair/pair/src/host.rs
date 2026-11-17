@@ -9,7 +9,7 @@ use std::task::{Context, Poll};
 
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
-use crate::abi::{self, errno_text, AF_INET, SHUT_WR, SOCKADDR_MAX};
+use crate::abi::{self, errno_text, AF_INET, SHUT_WR};
 
 #[link(wasm_import_module = "rootshell_socket")]
 extern "C" {
@@ -17,7 +17,6 @@ extern "C" {
     fn rootshell_socket_bind(fd: i32, addr: *const u8, addrlen: i32) -> i32;
     fn rootshell_socket_listen(fd: i32, backlog: i32) -> i32;
     fn rootshell_socket_accept(fd: i32, fd_out: *mut i32) -> i32;
-    fn rootshell_socket_connect(fd: i32, addr: *const u8, addrlen: i32) -> i32;
     fn rootshell_socket_send(fd: i32, buf: *const u8, len: i32, sent_out: *mut u32) -> i32;
     fn rootshell_socket_recv(fd: i32, buf: *mut u8, len: i32, recv_out: *mut u32) -> i32;
     fn rootshell_socket_sendto(
@@ -30,7 +29,6 @@ extern "C" {
     ) -> i32;
     fn rootshell_socket_shutdown(fd: i32, how: i32) -> i32;
     fn rootshell_socket_close(fd: i32) -> i32;
-    fn rootshell_socket_getsockname(fd: i32, addr_out: *mut u8, addrlen_io: *mut i32) -> i32;
 }
 
 #[link(wasm_import_module = "rootshell_terminal")]
@@ -83,11 +81,6 @@ impl Socket {
         Ok(Socket(fd))
     }
 
-    pub fn connect(&self, ip: Ipv4Addr, port: u16) -> Result<(), i32> {
-        let a = abi::sockaddr_in(ip, port);
-        check(unsafe { rootshell_socket_connect(self.0, a.as_ptr(), a.len() as i32) })
-    }
-
     pub fn send(&self, buf: &[u8]) -> Result<usize, i32> {
         let mut sent = 0u32;
         let len = buf.len().min(i32::MAX as usize) as i32;
@@ -131,15 +124,6 @@ impl Socket {
 
     pub fn shutdown_write(&self) -> Result<(), i32> {
         check(unsafe { rootshell_socket_shutdown(self.0, SHUT_WR) })
-    }
-
-    /// The local IPv4 address and port, if the host reports one.
-    pub fn local_addr(&self) -> Option<(Ipv4Addr, u16)> {
-        let mut buf = [0u8; SOCKADDR_MAX];
-        let mut len = buf.len() as i32;
-        check(unsafe { rootshell_socket_getsockname(self.0, buf.as_mut_ptr(), &mut len) }).ok()?;
-        let len = (len.max(0) as usize).min(buf.len());
-        abi::parse_sockaddr_in(&buf[..len])
     }
 }
 
@@ -212,21 +196,3 @@ pub fn udp_send_once(payload: &[u8], ip: Ipv4Addr, port: u16) -> Result<(), Stri
     Ok(())
 }
 
-/// Asks the host which local address it would use toward `ip:port`: first by
-/// connecting a UDP socket, then, if that gives nothing and a `probe` is
-/// given, by sending it.
-pub fn route_source(ip: Ipv4Addr, port: u16, probe: Option<&[u8]>) -> Option<Ipv4Addr> {
-    let s = Socket::new(abi::SOCK_DGRAM).ok()?;
-    if s.connect(ip, port).is_ok() {
-        if let Some((local, _)) = s.local_addr() {
-            if !local.is_unspecified() {
-                return Some(local);
-            }
-        }
-    }
-    drop(s);
-    let probe = probe?;
-    let s = Socket::new(abi::SOCK_DGRAM).ok()?;
-    s.send_to(probe, ip, port).ok()?;
-    s.local_addr().map(|(local, _)| local).filter(|l| !l.is_unspecified())
-}

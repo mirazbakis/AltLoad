@@ -11,7 +11,6 @@ pub const SERVICES_META: [&str; 3] = ["_services", "_dns-sd", "_udp"];
 pub const DOMAIN: &str = "local";
 
 pub const TYPE_A: u16 = 1;
-pub const TYPE_NS: u16 = 2;
 pub const TYPE_PTR: u16 = 12;
 pub const TYPE_TXT: u16 = 16;
 pub const TYPE_SRV: u16 = 33;
@@ -138,22 +137,6 @@ pub fn announcement_packet(a: &Announcement) -> Result<Vec<u8>, String> {
     Ok(out)
 }
 
-/// A standard recursive query for the root NS set. Sent to a public resolver
-/// only when needed to make a UDP socket pick its outgoing interface.
-pub fn root_ns_query() -> Vec<u8> {
-    let mut out = Vec::new();
-    push_u16(&mut out, 0x5350); // ID
-    push_u16(&mut out, 0x0100); // RD
-    push_u16(&mut out, 1);
-    push_u16(&mut out, 0);
-    push_u16(&mut out, 0);
-    push_u16(&mut out, 0);
-    out.push(0); // root name
-    push_u16(&mut out, TYPE_NS);
-    push_u16(&mut out, CLASS_IN);
-    out
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -261,13 +244,5 @@ mod tests {
         assert!(encode_name(&mut v, &[&"a".repeat(64)]).is_err());
         // A 36-character UUID instance label is fine.
         assert!(encode_name(&mut v, &["9f0b6d0e-3c1a-3f4e-8a7b-2c9d1e0f3a4b"]).is_ok());
-    }
-
-    #[test]
-    fn root_query_layout() {
-        assert_eq!(
-            root_ns_query(),
-            vec![0x53, 0x50, 0x01, 0x00, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1]
-        );
     }
 }

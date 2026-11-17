@@ -1,5 +1,4 @@
-//! Picks this iPhone's Wi-Fi IPv4 address out of `ifconfig` output, and decides
-//! which addresses are worth announcing.
+//! Picks this iPhone's Wi-Fi IPv4 address out of `ifconfig` output.
 
 use std::net::Ipv4Addr;
 
@@ -7,15 +6,6 @@ use std::net::Ipv4Addr;
 /// Rejects 0.0.0.0, 127.x (loopback) and 169.254.x (link-local).
 pub fn is_lan_candidate(ip: Ipv4Addr) -> bool {
     !(ip.is_unspecified() || ip.is_loopback() || ip.is_link_local())
-}
-
-/// Like [`is_lan_candidate`], but also rejects 100.64.0.0/10, the shared range
-/// used by carrier NAT and by VPNs such as Tailscale. Used for an address the
-/// system picked by routing, which may be a cellular or VPN interface.
-pub fn is_likely_wifi(ip: Ipv4Addr) -> bool {
-    let o = ip.octets();
-    let shared = o[0] == 100 && (o[1] & 0xc0) == 64;
-    is_lan_candidate(ip) && !shared
 }
 
 /// Returns the first `inet A.B.C.D` (or `inet addr:A.B.C.D`) address in the text
@@ -89,14 +79,5 @@ en0: flags=8863<UP>
         assert_eq!(parse_inet("\tinet6 fe80::1%en0 prefixlen 64"), None);
         assert_eq!(parse_inet("\tinet 127.0.0.1 netmask 0xff000000"), None);
         assert_eq!(parse_inet("en0: flags=8822<BROADCAST> mtu 1500\n\tstatus: inactive"), None);
-    }
-
-    #[test]
-    fn wifi_filter() {
-        assert!(is_likely_wifi(Ipv4Addr::new(192, 168, 1, 2)));
-        assert!(!is_likely_wifi(Ipv4Addr::new(100, 101, 2, 3)));
-        assert!(is_likely_wifi(Ipv4Addr::new(100, 128, 0, 1)));
-        assert!(!is_likely_wifi(Ipv4Addr::new(0, 0, 0, 0)));
-        assert!(!is_likely_wifi(Ipv4Addr::new(169, 254, 1, 1)));
     }
 }
