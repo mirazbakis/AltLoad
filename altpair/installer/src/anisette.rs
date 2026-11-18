@@ -11,6 +11,8 @@
 
 use std::time::Duration;
 
+use crate::ui;
+
 pub const BUILT_IN: [&str; 10] = [
     "https://ani.jkcoxson.com",
     "https://mac-ani.jkcoxson.com",
@@ -88,18 +90,36 @@ async fn is_alive(client: reqwest::Client, address: String) -> bool {
 }
 
 /// Checks the candidates in parallel and returns the list the core takes:
-/// server URLs separated by newlines, best first.
+/// server URLs separated by newlines, best first. When none answer, waits a
+/// moment and checks once more before falling back to the first few.
 pub async fn sign_in_list(client: &reqwest::Client, pinned: Option<&str>) -> String {
     let candidates = candidates(pinned);
-    let checks: Vec<_> = candidates
-        .iter()
-        .map(|a| tokio::spawn(is_alive(client.clone(), a.clone())))
-        .collect();
-    let mut alive = Vec::with_capacity(checks.len());
-    for check in checks {
-        alive.push(check.await.unwrap_or(false));
+    let mut alive = vec![false; candidates.len()];
+    for round in 1..=2 {
+        let checks: Vec<_> = candidates
+            .iter()
+            .map(|a| tokio::spawn(is_alive(client.clone(), a.clone())))
+            .collect();
+        alive.clear();
+        for check in checks {
+            alive.push(check.await.unwrap_or(false));
+        }
+        for (a, ok) in candidates.iter().zip(&alive) {
+            ui::debug(&format!("anisette {a}: {}", if *ok { "answers" } else { "no answer" }));
+        }
+        if alive.iter().any(|ok| *ok) {
+            break;
+        }
+        if round == 1 {
+            ui::note("No anisette server answered. Trying again…");
+            tokio::time::sleep(Duration::from_secs(3)).await;
+        }
     }
-    pick(&candidates, &alive, pinned).join("\n")
+    let picked = pick(&candidates, &alive, pinned);
+    if !alive.iter().any(|ok| *ok) {
+        ui::note("Still none. Trying the first ones anyway. Check your connection.");
+    }
+    picked.join("\n")
 }
 
 #[cfg(test)]

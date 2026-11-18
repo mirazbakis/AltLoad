@@ -5,6 +5,7 @@ import SwiftUI
 /// and registered devices on the team, and a small Tools section.
 struct CertificatesView: View {
     @StateObject private var controller = CertificatesController.shared
+    @ObservedObject private var teams = TeamSettings.shared
     @State private var showSignIn = false
     @State private var pendingRevoke: DevCertificate?
 
@@ -61,6 +62,56 @@ struct CertificatesView: View {
             Text("Apps signed with this certificate will stop opening until they're signed again. This can't be undone.")
         }
         .animation(.spring(duration: 0.5, bounce: 0.2), value: controller.phase)
+        .alert(String(localized: "Developer team"), isPresented: Binding(
+            get: { teams.fallbackNote != nil },
+            set: { if !$0 { teams.fallbackNote = nil } }
+        )) {
+            Button("OK", role: .cancel) { teams.fallbackNote = nil }
+        } message: {
+            Text(teams.fallbackNote ?? "")
+        }
+    }
+
+    // MARK: - Team
+
+    /// Which team AltLoad signs with. Automatic is the account's first team.
+    private func teamCard(_ overview: AccountOverview) -> some View {
+        let list = overview.teams ?? [overview.team]
+        let appleID = controller.appleID
+        let selection = Binding<String?>(
+            get: { teams.teamID(for: appleID) },
+            set: { id in
+                teams.select(id, for: appleID)
+                controller.refresh()
+            })
+        return VStack(spacing: 10) {
+            SectionLabel(title: "Developer Team", trailing: list.count > 1 ? "\(list.count)" : nil)
+            GlassCard {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("Sign with").font(.subheadline.weight(.semibold))
+                        Spacer()
+                        Picker(String(localized: "Developer Team"), selection: selection) {
+                            Text(String(localized: "Automatic (\(list.first?.displayName ?? ""))")).tag(String?.none)
+                            ForEach(list) { team in
+                                Text("\(team.displayName) · \(team.kindTitle)").tag(String?.some(team.id))
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .tint(Aurora.sky)
+                        .disabled(controller.isBusy)
+                    }
+                    detail(String(localized: "Team ID"), overview.team.id, mono: true)
+                    detail(String(localized: "Type"), overview.team.kindTitle)
+                    Text(list.count > 1
+                         ? String(localized: "Installs, refreshes and this screen use the team you pick. Automatic uses the first one.")
+                         : String(localized: "This Apple ID has one team, so AltLoad always uses it."))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
     }
 
     // MARK: - Header
@@ -141,6 +192,7 @@ struct CertificatesView: View {
     private func content(_ overview: AccountOverview) -> some View {
         VStack(spacing: 22) {
             usageCard(overview)
+            teamCard(overview)
 
             VStack(spacing: 10) {
                 SectionLabel(title: "Certificates", trailing: "\(overview.certificates.count)")

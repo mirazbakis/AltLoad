@@ -13,6 +13,7 @@ mod args;
 mod bigdigits;
 mod dns;
 mod handoff;
+mod hints;
 mod ifconfig;
 mod plistfix;
 

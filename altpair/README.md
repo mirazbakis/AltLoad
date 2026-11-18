@@ -36,12 +36,14 @@ I wrote altpair from scratch as a pair of small tools for AltLoad:
    wget -qO- https://mirazbakis.github.io/AltLoad/install.sh | sh
    ```
 
-6. Enter the transfer code, your Apple ID and your password when asked.
-7. When it finishes, open Settings › General › VPN & Device Management, trust your Apple ID, and open AltLoad.
+6. Enter the transfer code, your Apple ID and your password when asked. If your Apple ID has more than one developer team, `altpair` lists them (name, ID, type) and you pick by number. Return takes the first.
+7. When it finishes, `altpair` prints a short summary: the app, the team, and when the signing expires (a free team: 7 days). Then trust your Apple ID in Settings › General › VPN & Device Management and open AltLoad.
 
 rootshell stops when it goes to the background. Turn on Location Diary Mode › Session Only in rootshell so it keeps running while you are in Settings.
 
 If rootshell answers `wasm: command not found`, you piped into the tool (`ifconfig en0 | ./altpair.wasm`). rootshell can't pipe into a `.wasm` program, so save the output to `if.txt` and read it with `<` as shown above. The pairing tool also uses rootshell's newer network features (Bonjour and UDP from any sender, added in rootshell 1.0.16-177), so an older rootshell may start it but never show **Pair with AltLoad**.
+
+Both tools print a one-line fix when something goes wrong, for example when LocalDevVPN isn't connected, when rootshell is too old (it needs 1.0.16-177 or later), or when the pairing tool has stopped. Add `--verbose` (`-v`) to either one to see what it is doing. `--version` and `--help` work on both.
 
 If the two-factor code doesn't arrive, type `r` at the code question to send it again, `s` to get it by text message, or `d` to send it to your devices.
 
@@ -72,12 +74,17 @@ Open Minis cannot read rootshell's files. So the pairing tool offers the file on
 
 `altpair` runs in Open Minis, a Linux shell on the iPhone. LocalDevVPN must be connected. It gives the iPhone a route back to itself, so the installer can reach the phone's own device services.
 
-`altpair` then:
+`altpair` first checks that LocalDevVPN routes back to the phone. Then it:
 
 1. fetches the pairing file with the transfer code,
-2. signs in to Apple with your Apple ID,
-3. downloads AltLoad's latest release IPA from GitHub,
-4. signs it and installs it over the tunnel.
+2. asks for your Apple ID,
+3. picks the developer team,
+4. downloads AltLoad's latest release IPA from GitHub,
+5. signs in, signs it and installs it over the tunnel.
+
+The team step signs in once to list your teams, so the first run may ask for a two-factor code twice. The choice is saved in `~/.altload/team` for that Apple ID, so later runs skip the lookup. `--team <ID>` skips it too, and `--choose-team` asks again.
+
+Network steps time out and retry on their own: the anisette check (once more after a pause), the IPA download (3 tries, continuing from what already arrived) and the tunnel (3 rounds, in the core).
 
 All of that is AltLoad's own Rust core (`core/`). It is the same pipeline the app uses to install AltStore, driven from a terminal.
 
@@ -146,7 +153,7 @@ What does not:
 - Your password is not written to disk by the installer.
 - The pairing file stays on the device. It only moves over `127.0.0.1`.
 - The transfer code protects that hand-off. It is random, six digits, and compared in constant time. The tool gives up after 5 wrong tries. The listener accepts connections from this iPhone only, because it is bound to the loopback address.
-- `install.sh` checks the SHA-256 of the `altpair` binary against the `.sha256` file from the same release before it runs it.
+- `install.sh` checks the SHA-256 of the `altpair` binary against the `.sha256` file from the same release before it runs it. It stops early with a plain message when there is no network, the CPU isn't 64-bit ARM, or a download fails, and it leaves no partial file behind. If the download fails but `altpair` is already installed, it runs that one.
 
 The pairing tool also listens on the Wi-Fi port while it waits to be paired. It stops listening once the iPhone has connected. Anyone on the network could try to pair in that window, but they would need the PIN shown on your screen.
 
@@ -159,6 +166,9 @@ The pairing tool also listens on the Wi-Fi port while it waits to be paired. It 
 | `--ipa <url\|path>` | Install this IPA instead of AltLoad's latest release |
 | `--repair` | Fetch a new pairing file even when one is saved |
 | `--anisette <url>` | Anisette server to try first. Must be `https://` |
+| `--team <ID>` | Sign with this developer team and skip the choice |
+| `--choose-team` | Ask which team to use, even if one was saved |
+| `-v`, `--verbose` | Print debug detail |
 | `-h`, `--help` | Show help |
 | `-V`, `--version` | Show the version |
 
@@ -167,7 +177,7 @@ The pairing tool also listens on the Wi-Fi port while it waits to be paired. It 
 | `ALTPAIR_APPLE_ID` | Apple ID email. Skips that question |
 | `ALTPAIR_PASSWORD` | Apple ID password. Skips that question |
 
-The state directory is `~/.altload` inside Open Minis. It keeps the saved pairing file and the signing state from AltLoad's core (certificate key and anisette state), so a second run does not ask for the transfer code again.
+The state directory is `~/.altload` inside Open Minis. It keeps the saved pairing file, the chosen team and the signing state from AltLoad's core (certificate key and anisette state), so a second run does not ask for the transfer code again.
 
 ### `altpair.wasm` (pairing tool)
 
@@ -176,6 +186,8 @@ The state directory is `~/.altload` inside Open Minis. It keeps the saved pairin
 | `--ip A.B.C.D` | Wi-Fi address to use. Without it the tool reads `ifconfig` output from stdin |
 | `--port N` | Pairing port. Default 49207 |
 | `--repair` | Pair again even if `rp_pairing_file.plist` exists |
+| `-v`, `--verbose` | Print debug detail (mDNS sends, retries) |
+| `-V`, `--version` | Show the version |
 | `-h`, `--help` | Show help |
 
 Exit codes: 0 ok, 1 failure, 2 usage.
@@ -214,6 +226,9 @@ I haven't run this on an iPhone yet. I have not verified:
 - That the pairing completes through rootshell's socket interface.
 - That the installer can reach the iPhone through LocalDevVPN from Open Minis.
 - A full Apple ID sign-in, signing and install from Open Minis.
+- The team list and choice on an Apple ID with several teams, and whether the extra sign-in asks for a second two-factor code.
+- That the LocalDevVPN check (10.7.0.1) passes when it is connected.
+- The retries and messages above on a real flaky connection.
 - That `install.sh` and the release workflow work end to end.
 
 ## Credits

@@ -12,8 +12,11 @@ mod anisette;
 mod args;
 mod download;
 mod handoff;
+mod net;
 mod prompts;
 mod session;
+mod summary;
+mod teams;
 mod term;
 mod ui;
 
@@ -28,6 +31,7 @@ use download::IpaSource;
 
 const PAIRING_FILE: &str = "rp_pairing_file.plist";
 const SERVER_ID_FILE: &str = "server_id";
+const TEAM_FILE: &str = "team";
 const PAIRING_TRIES: u32 = 3;
 
 fn main() -> ExitCode {
@@ -48,6 +52,7 @@ fn main() -> ExitCode {
         }
     };
 
+    ui::set_verbose(opts.verbose);
     term::install_signal_handlers();
     // reqwest is built without a default TLS provider; use ring, as the core does.
     let _ = rustls::crypto::ring::default_provider().install_default();
@@ -57,6 +62,9 @@ fn main() -> ExitCode {
         Err(e) => {
             eprintln!();
             ui::eprint_wrapped(&e);
+            if !ui::is_verbose() {
+                eprintln!("(--verbose shows more detail)");
+            }
             ExitCode::from(1)
         }
     }
@@ -64,6 +72,12 @@ fn main() -> ExitCode {
 
 fn run(opts: Options) -> Result<(), String> {
     let state = state_dir()?;
+    ui::debug(&format!("altpair {}, state in {}", env!("CARGO_PKG_VERSION"), state.display()));
+
+    // Before anything slow: is the route back to this iPhone there?
+    println!("Checking LocalDevVPN…");
+    net::check_vpn()?;
+    ui::result("Connected");
 
     // 1. Pairing file.
     ui::step(1, "Pairing file");
@@ -87,13 +101,19 @@ fn run(opts: Options) -> Result<(), String> {
     };
     ui::result(&format!("Using {apple_id}"));
 
-    // 3. The IPA.
-    ui::step(3, "Download AltLoad");
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
         .map_err(|e| format!("Couldn't start: {e}"))?;
     let client = download::client()?;
+    let mut anisette: Option<String> = None;
+
+    // 3. Developer team.
+    ui::step(3, "Developer team");
+    let team = choose_team(&opts, &state, &apple_id, &password, &rt, &client, &mut anisette)?;
+
+    // 4. The IPA.
+    ui::step(4, "Download AltLoad");
     let source = download::ipa_source(opts.ipa.as_deref().unwrap_or(download::LATEST_IPA));
     let ipa = match source {
         IpaSource::Path(path) => {
@@ -104,7 +124,17 @@ fn run(opts: Options) -> Result<(), String> {
         IpaSource::Url(url) => {
             let dest = state.join("downloads").join("AltLoad.ipa");
             let mut progress = ui::Progress::new(term::is_tty(libc::STDOUT_FILENO));
-            let fetched = rt.block_on(download::fetch(&client, &url, &dest, |f| progress.write("Downloading", f)));
+            let fetched = rt.block_on(download::fetch(
+                &client,
+                &url,
+                &dest,
+                |f| progress.write("Downloading", f),
+                |attempt, why| {
+                    println!();
+                    ui::note(&format!("{why}"));
+                    ui::note(&format!("Trying again ({}/{})…", attempt + 1, download::ATTEMPTS));
+                },
+            ));
             progress.close();
             fetched?;
             download::looks_like_zip(&dest)?;
@@ -114,9 +144,12 @@ fn run(opts: Options) -> Result<(), String> {
         }
     };
 
-    // 4. Install.
-    ui::step(4, "Install");
-    let anisette = rt.block_on(anisette::sign_in_list(&client, opts.anisette.as_deref()));
+    // 5. Install.
+    ui::step(5, "Install");
+    let anisette = match anisette {
+        Some(list) => list,
+        None => rt.block_on(anisette::sign_in_list(&client, opts.anisette.as_deref())),
+    };
     drop(rt);
     let req = session::Request {
         apple_id,
@@ -125,17 +158,35 @@ fn run(opts: Options) -> Result<(), String> {
         pairing_file: pairing.to_string_lossy().into_owned(),
         ipa: ipa.to_string_lossy().into_owned(),
         server_id: server_id(&state)?,
+        team: team.clone(),
     };
     match session::run(req) {
         Ok(app) => {
             let name = if app.app_name.is_empty() { "AltLoad".to_string() } else { app.app_name };
+            let shown = if app.app_version.is_empty() { name.clone() } else { format!("{name} {}", app.app_version) };
             ui::result("Done");
             println!();
-            if app.app_version.is_empty() {
-                ui::print_wrapped(&format!("Installed {name}."));
-            } else {
-                ui::print_wrapped(&format!("Installed {name} {}.", app.app_version));
+            ui::print_wrapped(&format!("Installed {name}."));
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs() as i64)
+                .unwrap_or(0);
+            let used = teams::from_details(&app.details);
+            let (label, free) = match &used {
+                Some((t, _)) => (t.label(), Some(t.kind == "free").filter(|_| t.kind != "unknown")),
+                None => (app.team_id.clone(), None),
+            };
+            if let Some((_, Some(note))) = &used {
+                ui::print_wrapped(note);
+            } else if let Some((t, _)) = &used {
+                if !team.is_empty() && !t.id.eq_ignore_ascii_case(&team) {
+                    ui::print_wrapped(&format!("Team {team} wasn't found, so {} was used.", t.id));
+                }
             }
+            for line in summary::lines(&shown, &label, free, app.expiration_unix, now) {
+                ui::print_wrapped(&line);
+            }
+            println!();
             ui::print_wrapped(
                 "Trust your Apple ID in Settings › General › VPN & Device Management, then open AltLoad.",
             );
@@ -143,6 +194,62 @@ fn run(opts: Options) -> Result<(), String> {
         }
         Err(e) => Err(failure_text(&e)),
     }
+}
+
+/// Picks the developer team: `--team`, the saved choice, or a list to choose from
+/// (one extra sign-in). Returns the team ID, or "" for the account's first team.
+fn choose_team(
+    opts: &Options,
+    state: &Path,
+    apple_id: &str,
+    password: &str,
+    rt: &tokio::runtime::Runtime,
+    client: &reqwest::Client,
+    anisette: &mut Option<String>,
+) -> Result<String, String> {
+    let saved_path = state.join(TEAM_FILE);
+    if let Some(id) = &opts.team {
+        ui::result(&format!("Using {id}"));
+        return Ok(id.clone());
+    }
+    if !opts.choose_team {
+        let saved = fs::read_to_string(&saved_path).ok().and_then(|t| teams::parse_saved(&t, apple_id));
+        if let Some(id) = saved {
+            ui::result(&format!("Using {id} (--choose-team to change)"));
+            return Ok(id);
+        }
+    }
+    ui::note("Looking up your teams. You may be asked for a code.");
+    let list = rt.block_on(anisette::sign_in_list(client, opts.anisette.as_deref()));
+    *anisette = Some(list.clone());
+    let json = session::account_overview(apple_id.to_string(), password.to_string(), list, String::new())
+        .map_err(|e| failure_text(&e))?;
+    let found = teams::from_overview(&json);
+    ui::debug(&format!("{} team(s) on this Apple ID", found.len()));
+    let chosen = match found.len() {
+        0 => return Ok(String::new()),
+        1 => &found[0],
+        n => {
+            ui::note(&format!("This Apple ID has {n} teams:"));
+            for (i, t) in found.iter().enumerate() {
+                println!("{}", ui::fit(&format!("      {}. {}", i + 1, t.label()), ui::WIDTH));
+            }
+            ui::note("Number or team ID. Return for 1.");
+            loop {
+                let line = term::read_line("      Team [1]: ")
+                    .map_err(|e| format!("Couldn't read input: {e}"))?
+                    .ok_or("No input. Run altpair in a terminal, or pass --team <ID>.")?;
+                match teams::parse_choice(&line, &found) {
+                    Ok(i) => break &found[i],
+                    Err(e) => ui::note(&e),
+                }
+            }
+        }
+    };
+    ui::result(&format!("Using {}", chosen.label()));
+    // Not fatal: the choice is only a shortcut for next time.
+    let _ = save_private(&saved_path, teams::saved_text(&chosen.id, apple_id).as_bytes());
+    Ok(chosen.id.clone())
 }
 
 /// Adds a hint to failures the user can act on from here. The core's messages
@@ -158,6 +265,12 @@ fn failure_text(e: &str) -> String {
         e
     } else if lower.contains("anisette") || e.contains("-80045") || e.contains("-45061") {
         format!("{e}\n\nTry again in a few minutes, or pick a server with --anisette <url>.")
+    } else if lower.contains("couldn't open a tunnel") || lower.contains("rsd ") {
+        format!("{e}\n\nIs LocalDevVPN connected? Open it, tap Connect, then run altpair again.")
+    } else if lower.contains("developer mode") {
+        format!("{e}\n\nTurn on Developer Mode in Settings › Privacy & Security, then run altpair again.")
+    } else if lower.contains("unreachable") || lower.contains("dns error") || lower.contains("timed out") {
+        format!("{e}\n\nCheck your connection and run altpair again. A saved pairing file is kept.")
     } else if lower.contains("cannot submit code without knowing") || lower.contains("cannot resend code without knowing") {
         format!("{e}\n\nRun altpair again and choose d or s when asked where to get a code.")
     } else {
@@ -202,7 +315,17 @@ fn fetch_pairing(dest: &Path) -> Result<(), String> {
                 None => println!("      The code is 6 digits."),
             }
         };
-        match handoff::fetch(&code)? {
+        let reply = match handoff::fetch(&code) {
+            Ok(r) => r,
+            Err(e) if attempt < PAIRING_TRIES => {
+                ui::note(&e);
+                ui::note("Fix that, then enter the code again.");
+                continue;
+            }
+            Err(e) => return Err(e),
+        };
+        ui::debug("pairing tool answered");
+        match reply {
             handoff::Reply::Pairing(bytes) => {
                 if !handoff::is_plist_dictionary(&bytes) {
                     return Err("The pairing tool sent something that isn't a pairing file.".into());
@@ -275,6 +398,7 @@ mod tests {
 
     #[test]
     fn hints() {
+        assert!(failure_text("Couldn't open a tunnel to this device (x)").contains("LocalDevVPN"));
         assert!(failure_text("Couldn't read the pairing file: x").contains("--repair"));
         assert!(failure_text("Apple ID sign-in failed: anisette").contains("--anisette"));
         assert_eq!(failure_text("Install failed: x"), "Install failed: x");

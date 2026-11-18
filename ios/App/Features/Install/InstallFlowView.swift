@@ -14,6 +14,7 @@ struct InstallFlowView: View {
     @State private var email = InstallController.shared.flowAppleID ?? AppleIDStore.email
     @State private var password = ""
     @State private var remember = true
+    @State private var logCopied = false
     @ObservedObject private var jit = JITCenter.shared
     @AppStorage(ExtensionsMode.defaultsKey) private var extensionsRaw = ExtensionsMode.keep.rawValue
     @FocusState private var focus: Field?
@@ -530,10 +531,19 @@ struct InstallFlowView: View {
                 Text(jit.finished?.message ?? "")
             }
 
-        case .failed:
+        case .failed(let message):
             VStack(spacing: 12) {
                 GlassActionButton(title: "Try Again", systemImage: "arrow.clockwise", prominent: true) {
                     controller.reset()
+                }
+                GlassActionButton(title: logCopied ? "Copied" : "Copy Log",
+                                  systemImage: logCopied ? "checkmark" : "doc.on.doc") {
+                    UIPasteboard.general.string = AppLog.shared.report(error: message)
+                    logCopied = true
+                    Task {
+                        try? await Task.sleep(for: .seconds(2))
+                        logCopied = false
+                    }
                 }
                 GlassActionButton(title: "Close") { controller.finish() }
             }

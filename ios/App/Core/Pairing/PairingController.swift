@@ -25,7 +25,19 @@ final class PairingController: ObservableObject {
         case failed(String)
     }
 
-    @Published var phase: Phase = .idle
+    @Published var phase: Phase = .idle {
+        didSet {
+            guard phase != oldValue else { return }
+            switch phase {
+            case .idle: break
+            case .waiting: AppLog.shared.info(.pairing, "Pairing started, waiting for a device")
+            // The code itself stays out of the log.
+            case .showPin: AppLog.shared.info(.pairing, "Showing the pairing code")
+            case .success(let saved): AppLog.shared.info(.pairing, "Paired with a \(saved.model.isEmpty ? "device" : saved.model)")
+            case .failed(let message): AppLog.shared.error(.pairing, "Pairing failed: \(message)")
+            }
+        }
+    }
 
     @Published var keepAliveAudio: Bool = PairingController.defaultOn("keepAlive.audio") {
         didSet { UserDefaults.standard.set(keepAliveAudio, forKey: "keepAlive.audio") }

@@ -37,7 +37,7 @@ pub fn read_reply<R: Read>(r: &mut R) -> Result<Reply, String> {
     let mut byte = [0u8; 1];
     loop {
         match r.read(&mut byte) {
-            Ok(0) => return Err("the pairing tool closed the connection".into()),
+            Ok(0) => return Err("the pairing tool closed the connection (restart it in rootshell)".into()),
             Ok(_) if byte[0] == b'\n' => break,
             Ok(_) => {
                 header.push(byte[0]);
@@ -85,7 +85,7 @@ pub fn fetch(code: &str) -> Result<Reply, String> {
     let addr = SocketAddr::from(ADDR);
     let mut stream = TcpStream::connect_timeout(&addr, TIMEOUT).map_err(|e| match e.kind() {
         std::io::ErrorKind::ConnectionRefused => {
-            "The pairing tool isn't running. Start it, then run altpair again.".to_string()
+            "The pairing tool isn't running. In rootshell run ./altpair.wasm and keep that tab open (rootshell stops in the background).".to_string()
         }
         _ => io_message(&e),
     })?;
@@ -101,7 +101,7 @@ pub fn fetch(code: &str) -> Result<Reply, String> {
 fn io_message(e: &std::io::Error) -> String {
     match e.kind() {
         std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut => {
-            "the pairing tool didn't answer in 10 s".into()
+            "The pairing tool didn't answer in 10 s. rootshell may have gone to the background: open it and check the tab is still running.".into()
         }
         _ => e.to_string(),
     }

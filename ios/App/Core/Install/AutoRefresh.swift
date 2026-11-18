@@ -145,16 +145,19 @@ final class AutoRefresh: ObservableObject {
         let wasRevoked = revoked.contains(app.bundleID)
         let account = app.appleID ?? AppleIDStore.email
         guard !account.isEmpty, let password = AppleIDStore.password(for: account) else {
+            AppLog.shared.info(.install, "Automatic refresh of \(app.name) skipped: no saved password")
             notifyOnce(app, title: String(localized: "\(app.name) needs a refresh"),
                        body: String(localized: "AltLoad can refresh it by itself once the password for its Apple ID is saved. Open AltLoad and refresh it once with Remember password on."))
             return
         }
         guard LocalDevVPN.isActive else {
+            AppLog.shared.info(.install, "Automatic refresh of \(app.name) skipped: LocalDevVPN is off")
             notifyOnce(app, title: String(localized: "\(app.name) needs a refresh"),
                        body: String(localized: "Turn on LocalDevVPN, then open AltLoad, and it refreshes by itself."))
             return
         }
 
+        AppLog.shared.info(.install, "Automatic refresh of \(app.name)")
         let result = await InstallController.shared.refreshQuietly(app, credentials: AppleIDCredentials(email: account, password: password))
         switch result {
         case .success(let refreshed):
@@ -170,11 +173,12 @@ final class AutoRefresh: ObservableObject {
                     ? String(localized: "The certificate it was signed with was revoked, so AltLoad signed it with a new one. It works until \(until).")
                     : String(localized: "It works until \(until)."))
         case .failure(.busy):
-            break
+            AppLog.shared.info(.install, "Automatic refresh of \(app.name) skipped: AltLoad is busy")
         case .failure(.vpnOff):
             notifyOnce(app, title: String(localized: "\(app.name) needs a refresh"),
                        body: String(localized: "Turn on LocalDevVPN, then open AltLoad, and it refreshes by itself."))
         case .failure(.failed(let reason)):
+            AppLog.shared.error(.install, "Automatic refresh of \(app.name) failed: \(reason)")
             notifyOnce(app, title: String(localized: "Couldn't refresh \(app.name)"),
                        body: String(localized: "\(reason) Open AltLoad and refresh it there."))
         }

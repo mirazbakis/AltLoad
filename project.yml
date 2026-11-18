@@ -14,6 +14,8 @@ settings:
     ALTLOAD_PRERELEASE: ""
     TARGETED_DEVICE_FAMILY: "1,2"
     EXCLUDED_ARCHS[sdk=iphonesimulator*]: x86_64
+    # Lets Xcode find String(localized:) text when exporting translations.
+    SWIFT_EMIT_LOC_STRINGS: YES
 
 targets:
   AltLoad:

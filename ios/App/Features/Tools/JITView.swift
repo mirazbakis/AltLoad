@@ -7,6 +7,7 @@ struct JITView: View {
     @ObservedObject private var pairings = PairingStore.shared
     @ObservedObject private var jit = JITCenter.shared
     @ObservedObject private var scripts = JITScripts.shared
+    @ObservedObject private var favorites = JITFavorites.shared
 
     @State private var apps: [DeviceOps.DeviceApp] = []
     @State private var loading = false
@@ -32,6 +33,30 @@ struct JITView: View {
 
             if let active = jit.active {
                 activeCard(active)
+            }
+
+            if !favorites.pinned.isEmpty {
+                VStack(spacing: 10) {
+                    SectionLabel(title: "Pinned", trailing: "\(pinnedShown.count)")
+                    ForEach(pinnedShown, id: \.self) { id in
+                        quickRow(bundleID: id, detail: id)
+                    }
+                }
+            }
+
+            if search.isEmpty && !recentShown.isEmpty {
+                VStack(spacing: 10) {
+                    SectionLabel(title: "Recent")
+                    ForEach(recentShown) { recent in
+                        quickRow(bundleID: recent.bundleID,
+                                 detail: String(localized: "Opened \(recent.date.formatted(.relative(presentation: .named)))"))
+                    }
+                    Button(String(localized: "Clear Recent")) { favorites.clearRecents() }
+                        .font(.footnote)
+                        .foregroundStyle(Aurora.secondaryText)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.horizontal, 4)
+                }
             }
 
             if loading {
@@ -69,7 +94,7 @@ struct JITView: View {
                     Toggle(String(localized: "Show apps that can't use JIT"), isOn: $showAll)
                         .font(.footnote)
                         .padding(.horizontal, 4)
-                    Text("Long-press an app to pick the script it uses.")
+                    Text("Long-press an app to pin it or pick the script it uses.")
                         .font(.caption)
                         .foregroundStyle(Aurora.secondaryText)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -159,10 +184,52 @@ struct JITView: View {
                     }
                 }
             }
+            pinButton(bundleID: app.bundleID, name: app.name)
             Button(String(localized: "Copy JIT Link"), systemImage: "link") {
                 UIPasteboard.general.string = "altload://enable-jit?bundle-id=\(app.bundleID)"
             }
         }
+    }
+
+    private func pinButton(bundleID: String, name: String) -> some View {
+        let pinned = favorites.isPinned(bundleID)
+        return Button(pinned ? String(localized: "Unpin") : String(localized: "Pin to Top"),
+                      systemImage: pinned ? "pin.slash" : "pin") {
+            favorites.togglePin(bundleID, name: name)
+        }
+    }
+
+    /// A pinned or recent app. Works before the app list is loaded; once it is,
+    /// apps that can't use JIT are greyed out.
+    private func quickRow(bundleID: String, detail: String) -> some View {
+        let name = apps.first { $0.bundleID == bundleID }?.name ?? favorites.name(for: bundleID)
+        let usable = apps.first { $0.bundleID == bundleID }?.debuggable ?? true
+        return AppBannerRow(name: name, detail: detail, symbol: favorites.isPinned(bundleID) ? "pin.fill" : "clock.fill") {
+            PillButton(title: String(localized: "JIT"), tint: Aurora.accent) {
+                jit.start(bundleID: bundleID, appName: name)
+            }
+            .disabled(jit.isRunning || !usable || pairings.selfPairing == nil)
+            .opacity(usable ? 1 : 0.4)
+        }
+        .contextMenu {
+            pinButton(bundleID: bundleID, name: name)
+            Button(String(localized: "Copy JIT Link"), systemImage: "link") {
+                UIPasteboard.general.string = "altload://enable-jit?bundle-id=\(bundleID)"
+            }
+        }
+    }
+
+    private var pinnedShown: [String] {
+        let query = search.trimmingCharacters(in: .whitespaces)
+        return favorites.pinned.filter {
+            query.isEmpty || $0.localizedCaseInsensitiveContains(query)
+                || favorites.name(for: $0).localizedCaseInsensitiveContains(query)
+        }
+    }
+
+    /// Recent apps that aren't pinned, up to four.
+    private var recentShown: [JITFavorites.Recent] {
+        Array(favorites.recents.filter { !favorites.isPinned($0.bundleID) }.prefix(4))
     }
 
     private var linksCard: some View {
@@ -170,7 +237,7 @@ struct JITView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Label(String(localized: "From other apps and Shortcuts"), systemImage: "link")
                     .font(.subheadline.weight(.semibold))
-                Text("Other apps can ask for JIT with a link, and Shortcuts has an Enable JIT action. AltLoad asks you before it follows a link.")
+                Text("Other apps can ask for JIT with a link. Shortcuts and Siri have Open App with JIT, which lists your pinned, recent and loaded apps. Pinned and recent apps are also in AltLoad's Home Screen quick actions. AltLoad asks you before it follows a link.")
                     .font(.footnote)
                     .foregroundStyle(Aurora.secondaryText)
                 Text(verbatim: "altload://enable-jit?bundle-id=com.example.app")
@@ -187,6 +254,7 @@ struct JITView: View {
     private var filtered: [DeviceOps.DeviceApp] {
         let query = search.trimmingCharacters(in: .whitespaces)
         return apps
+            .filter { !favorites.isPinned($0.bundleID) }
             .filter { showAll || $0.debuggable }
             .filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) || $0.bundleID.localizedCaseInsensitiveContains(query) }
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
@@ -199,8 +267,10 @@ struct JITView: View {
         defer { loading = false; stage = nil }
         do {
             apps = try await DeviceOps.listApps { text, _ in stage = text }
+            favorites.remember(apps)
         } catch {
             loadError = error.localizedDescription
+            AppLog.shared.error(.jit, "Couldn't list apps: \(error.localizedDescription)")
         }
     }
 }

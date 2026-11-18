@@ -108,6 +108,10 @@ struct InstalledApp: Codable, Equatable, Identifiable {
     var certificates: [Data]? = nil
     /// The store it was installed as, so a nightly refreshes as a nightly.
     var channel: String? = nil
+    /// Entitlement keys the last signed profile granted.
+    var grantedEntitlements: [String]? = nil
+    /// The developer team that signed it.
+    var teamName: String? = nil
 
     var id: String { bundleID }
 
@@ -215,7 +219,9 @@ final class InstallController: ObservableObject {
         case failed(String)
     }
 
-    @Published var phase: Phase = .idle
+    @Published var phase: Phase = .idle {
+        didSet { logPhase(oldValue) }
+    }
     /// The install flow on screen (full-screen cover), or nil.
     @Published var flow: InstallTarget?
     @Published private(set) var releases: [StoreApp: StoreRelease] = [:]
@@ -259,6 +265,8 @@ final class InstallController: ObservableObject {
     }
 
     private var session: OpaquePointer?
+    /// The last progress stage written to the log, so repeats aren't.
+    private var lastLoggedStage: String?
     /// Install parked at `.needsVPN`, with the IPA already downloaded.
     private var pending: (credentials: AppleIDCredentials, target: InstallTarget, ipa: URL)?
     private let appsKey = "installed.apps"
@@ -523,6 +531,10 @@ final class InstallController: ObservableObject {
     }
 
     private func run(_ credentials: AppleIDCredentials, target: InstallTarget, ipaOverride: URL? = nil, skipVPNCheck: Bool = false) async {
+        let existing = apps.first { $0.refreshTarget == target }
+        AppLog.shared.info(.install, "\(existing == nil ? "Install" : "Refresh") of \(target.title) started\(quiet ? " (automatic)" : "") with \(credentials.email)")
+        LocalDevVPN.logState()
+        lastLoggedStage = nil
         guard let pairing = PairingStore.shared.selfPairing else {
             phase = .failed(String(localized: "There's no pairing file for this iPhone yet. Create one in Tools › Pair first."))
             return
@@ -587,10 +599,12 @@ final class InstallController: ObservableObject {
             pairingPath: pairing.fileURL.path,
             endpoints: endpoints,
             ipa: ipa,
-            fallbackName: target.title)
+            fallbackName: target.title,
+            existingBundleID: existing?.bundleID)
 
         switch outcome {
-        case .installed(var app):
+        case .installed(var app, let teamNote):
+            if let teamNote { TeamSettings.shared.fallBack(for: credentials.email, note: teamNote) }
             if case .ipa(let url) = target { app.ipaFile = url.lastPathComponent }
             if case .store(let store) = target { app.channel = store.rawValue }
             app.appleID = credentials.email
@@ -623,8 +637,52 @@ final class InstallController: ObservableObject {
     }
 
     private enum Outcome {
-        case installed(InstalledApp)
+        case installed(InstalledApp, String?)
         case failed(String)
+    }
+
+    /// What the core reports about a finished install.
+    private struct InstallDetails {
+        let teamName: String?
+        let teamNote: String?
+        let entitlements: [String]
+
+        init?(session: OpaquePointer) {
+            guard let raw = altload_install_session_details(session) else { return nil }
+            let text = String(cString: raw)
+            altload_string_free(raw)
+            guard let json = try? JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any] else { return nil }
+            let team = json["team"] as? [String: Any]
+            let name = team?["name"] as? String ?? ""
+            let id = team?["id"] as? String ?? ""
+            teamName = name.isEmpty ? (id.isEmpty ? nil : id) : name
+            teamNote = json["teamNote"] as? String
+            entitlements = (json["entitlements"] as? [String: Any])?.keys.sorted() ?? []
+        }
+    }
+
+    private func logPhase(_ old: Phase) {
+        guard phase != old else { return }
+        switch phase {
+        case .needsVPN:
+            AppLog.shared.info(.vpn, "LocalDevVPN is off, install waits for it")
+        case .success(let app):
+            let until = app.expiration?.formatted(date: .abbreviated, time: .omitted) ?? "?"
+            let took = lastInstallDuration.map { String(format: " in %.0f s", $0) } ?? ""
+            AppLog.shared.info(.install, "Installed \(app.name) \(app.version) (\(app.bundleID)) with team \(app.teamName ?? app.teamID)\(took), valid until \(until)")
+            if let granted = app.grantedEntitlements {
+                AppLog.shared.info(.install, "Profile entitlements: \(granted.joined(separator: ", "))")
+            }
+        case .failed(let message):
+            AppLog.shared.error(.install, "Install failed at \(step): \(message)")
+        case .idle:
+            switch old {
+            case .checking, .downloading, .working: AppLog.shared.info(.install, "Install cancelled")
+            default: break
+            }
+        default:
+            break
+        }
     }
 
     private func runSession(
@@ -632,7 +690,8 @@ final class InstallController: ObservableObject {
         pairingPath: String,
         endpoints: [SelfEndpoint],
         ipa: URL,
-        fallbackName: String
+        fallbackName: String,
+        existingBundleID: String?
     ) async -> Outcome {
         guard let session = altload_install_session_new() else {
             return .failed(String(localized: "Couldn't start an install session."))
@@ -644,8 +703,14 @@ final class InstallController: ObservableObject {
         let anisette = await AnisetteServers.shared.signInList(preferred: anisetteURL)
         let serverID = Self.serverID
         let deviceName = UIDevice.current.name
-        let capabilities = EntitlementSettings.shared.requestValue
+        let freeTeam = TeamSettings.shared.isFreeTeam(for: credentials.email)
+        let capabilities = EntitlementSettings.shared.requestValue(for: existingBundleID, freeTeam: freeTeam)
         let extensionsMode = Int32(ExtensionsMode.saved.rawValue)
+        let teamID = TeamSettings.shared.teamID(for: credentials.email)
+        AppLog.shared.info(.install, "Team: \(teamID ?? "automatic") · entitlements: \(capabilities.isEmpty ? "none" : capabilities) · extensions mode \(extensionsMode)")
+        if let teamID {
+            teamID.withCString { altload_install_session_set_team(session, $0) }
+        }
 
         let outcome: Outcome = await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
@@ -705,7 +770,10 @@ final class InstallController: ObservableObject {
                     app.certificates = string(result.certificates)
                         .split(separator: ",")
                         .compactMap { Data(hex: String($0)) }
-                    outcome = .installed(app)
+                    let details = InstallDetails(session: session)
+                    app.grantedEntitlements = details?.entitlements
+                    app.teamName = details?.teamName
+                    outcome = .installed(app, details?.teamNote)
                 } else {
                     let message = string(result.error)
                     outcome = .failed(message.isEmpty ? String(localized: "Install failed (code \(rc)).") : message)
@@ -748,9 +816,14 @@ final class InstallController: ObservableObject {
 
     fileprivate func updateProgress(_ stage: String, _ fraction: Double) {
         guard isBusy else { return }
+        if stage != lastLoggedStage {
+            lastLoggedStage = stage
+            AppLog.shared.info(.install, stage)
+        }
         let value: Double? = fraction < 0 ? nil : fraction
         let lower = stage.lowercased()
-        if lower.hasPrefix("signing in") || lower.hasPrefix("registering") {
+        if lower.hasPrefix("signing in") || lower.hasPrefix("registering")
+            || lower.hasPrefix("loading your developer") || lower.hasPrefix("using team") || lower.hasPrefix("team ") {
             enter(.signIn, value)
         } else if lower.hasPrefix("signing") || lower.hasPrefix("enabling entitlements")
                     || lower.hasPrefix("preparing altstore") {
@@ -764,6 +837,7 @@ final class InstallController: ObservableObject {
     }
 
     fileprivate func presentPrompt(kind: Int32, json: Data) {
+        AppLog.shared.info(.install, kind == 1 ? "Apple asked for a two-factor code" : "No free certificate slot, asking which to revoke")
         if quiet {
             quietStop = kind == 1
                 ? String(localized: "Apple asked for a two-factor code.")

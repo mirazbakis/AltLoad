@@ -33,6 +33,24 @@
             "state": "translated",
             "value": "AltLoad 使用本地网络发现设备并完成配对。"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad usa tu red local para encontrar dispositivos y completar el emparejamiento."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O AltLoad usa sua rede local para encontrar dispositivos e concluir o emparelhamento."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoadはデバイスを検出してペアリングを完了するためにローカルネットワークを使用します。"
+          }
         }
       }
     },
@@ -68,6 +86,24 @@
             "state": "translated",
             "value": "AltLoad 可使用位置在后台持续运行，以便你在“设置”中完成配对。"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad puede usar la ubicación para seguir funcionando en segundo plano mientras completas el emparejamiento en Ajustes."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O AltLoad pode usar a localização para continuar funcionando em segundo plano enquanto você conclui o emparelhamento em Ajustes."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoadは、“設定”でペアリングを完了するあいだバックグラウンドで動作し続けるために位置情報を使用することがあります。"
+          }
         }
       }
     },
@@ -102,6 +138,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "AltLoad 可使用位置在后台持续运行，以便你在“设置”中完成配对。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad puede usar la ubicación para seguir funcionando en segundo plano mientras completas el emparejamiento en Ajustes."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O AltLoad pode usar a localização para continuar funcionando em segundo plano enquanto você conclui o emparelhamento em Ajustes."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoadは、“設定”でペアリングを完了するあいだバックグラウンドで動作し続けるために位置情報を使用することがあります。"
           }
         }
       }

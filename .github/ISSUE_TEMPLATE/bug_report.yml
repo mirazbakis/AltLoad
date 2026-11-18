@@ -1,0 +1,85 @@
+name: Bug report
+description: Something in AltLoad or altpair doesn't work.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please search the open and closed issues first; your problem may already have a fix.
+        Never paste your Apple ID password, two-factor codes or pairing file here.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where does it happen?
+      options:
+        - Installing or refreshing an app
+        - Apple ID sign-in
+        - Pairing (Pair tab or altpair.wasm)
+        - altpair installer (Open Minis)
+        - JIT
+        - AltServer / AltStore / SideStore
+        - Certificates or App IDs
+        - The website or a signed copy
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead. Include the exact error text.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the Install tab
+        2. Tap Install on SideStore
+        3. ...
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: In AltLoad, tap Copy Log on the error screen, or open Tools › Logs and tap Copy. Paste it here.
+      render: text
+  - type: input
+    id: altload
+    attributes:
+      label: AltLoad version
+      description: Shown on the About tab.
+      placeholder: 1.5.1 (42)
+    validations:
+      required: true
+  - type: input
+    id: ios
+    attributes:
+      label: iPhone model and iOS version
+      placeholder: iPhone 15, iOS 27.0.1
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Where did you get AltLoad?
+      options:
+        - GitHub Releases
+        - mirazbakis.github.io/AltLoad (signed copy)
+        - altpair (Apple ID Install)
+        - AltStore / SideStore source
+        - Somewhere else
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: LocalDevVPN is connected, and no other VPN or proxy app is on.
+        - label: Developer Mode is on.
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Screenshots or other details.

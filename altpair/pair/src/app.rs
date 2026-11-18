@@ -4,6 +4,7 @@
 use std::io::{Read, Write};
 use std::net::Ipv4Addr;
 use std::path::Path;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use idevice::remote_pairing::{PairableHost, PairableHostInfo, RpPairingFile, RpPairingSocket};
@@ -11,7 +12,7 @@ use idevice::remote_pairing::{PairableHost, PairableHostInfo, RpPairingFile, RpP
 use crate::abi::errno_text;
 use crate::args::{self, Options};
 use crate::host::{self, Socket, TcpConn};
-use crate::{bigdigits, dns, handoff, ifconfig, plistfix};
+use crate::{bigdigits, dns, handoff, hints, ifconfig, plistfix};
 
 /// Name shown in Settings ("Pair with AltLoad") and model reported to iOS.
 const HOST_NAME: &str = "AltLoad";
@@ -20,6 +21,19 @@ const PAIRING_FILE: &str = "rp_pairing_file.plist";
 const MDNS_GROUP: Ipv4Addr = Ipv4Addr::new(224, 0, 0, 251);
 const MDNS_PORT: u16 = 5353;
 const ANNOUNCE_COUNT: usize = 3;
+/// Tries per packet before an announcement counts as failed.
+const SEND_TRIES: usize = 3;
+
+static VERBOSE: AtomicBool = AtomicBool::new(false);
+
+/// Debug detail, printed with --verbose.
+macro_rules! debug {
+    ($($arg:tt)*) => {
+        if VERBOSE.load(Ordering::Relaxed) {
+            println!("  [debug] {}", format!($($arg)*));
+        }
+    };
+}
 
 enum Fail {
     Usage(String),
@@ -40,6 +54,12 @@ pub fn main() -> i32 {
         println!("{}", args::USAGE);
         return 0;
     }
+    if opts.version {
+        println!("altpair.wasm {}", env!("CARGO_PKG_VERSION"));
+        return 0;
+    }
+    VERBOSE.store(opts.verbose, Ordering::Relaxed);
+    debug!("altpair.wasm {}", env!("CARGO_PKG_VERSION"));
 
     let plist = if !opts.repair && Path::new(PAIRING_FILE).exists() {
         match std::fs::read(PAIRING_FILE) {
@@ -62,6 +82,7 @@ pub fn main() -> i32 {
             }
             Err(Fail::Other(m)) => {
                 println!("Failed: {m}");
+                println!("(--verbose shows more detail)");
                 return 1;
             }
         }
@@ -79,9 +100,9 @@ fn wifi_address(opts: &Options) -> Result<Ipv4Addr, Fail> {
     eprintln!("Reading ifconfig from stdin...");
     let mut text = String::new();
     let _ = std::io::stdin().take(256 * 1024).read_to_string(&mut text);
-    ifconfig::parse_inet(&text).ok_or_else(|| {
-        Fail::Usage("Run: ifconfig en0 > if.txt\nthen: ./altpair.wasm < if.txt".into())
-    })
+    debug!("read {} bytes of ifconfig output", text.len());
+    ifconfig::parse_inet(&text)
+        .ok_or_else(|| Fail::Usage(hints::no_address(text.trim().is_empty())))
 }
 
 fn announce(a: &dns::Announcement, times: usize) -> Result<(), String> {
@@ -92,9 +113,19 @@ fn announce(a: &dns::Announcement, times: usize) -> Result<(), String> {
         if i > 0 {
             std::thread::sleep(Duration::from_secs(1));
         }
-        match host::udp_send_once(&packet, MDNS_GROUP, MDNS_PORT) {
-            Ok(()) => sent += 1,
-            Err(e) => last_err = Some(e),
+        for attempt in 1..=SEND_TRIES {
+            match host::udp_send_once(&packet, MDNS_GROUP, MDNS_PORT) {
+                Ok(()) => {
+                    debug!("mDNS packet {} sent ({} bytes)", i + 1, packet.len());
+                    sent += 1;
+                    break;
+                }
+                Err(e) => {
+                    debug!("mDNS send {} try {attempt}: {e}", i + 1);
+                    last_err = Some(e);
+                    std::thread::sleep(Duration::from_millis(400));
+                }
+            }
         }
     }
     match (sent, last_err) {
@@ -117,9 +148,11 @@ fn show_pin(pin: &str) {
 
 fn pair(opts: &Options) -> Result<Vec<u8>, Fail> {
     let ip = wifi_address(opts)?;
-    println!("Wi-Fi address: {ip}");
+    println!("[1/3] Wi-Fi address: {ip}");
 
-    let listener = host::tcp_listen(Ipv4Addr::UNSPECIFIED, opts.port).map_err(Fail::Other)?;
+    let listener = host::tcp_listen(Ipv4Addr::UNSPECIFIED, opts.port)
+        .map_err(|e| Fail::Other(hints::listen(&e)))?;
+    debug!("listening on 0.0.0.0:{}", opts.port);
 
     let mut pairing_file = RpPairingFile::generate(HOST_NAME);
     let host_info = PairableHostInfo::generate(HOST_NAME, HOST_MODEL);
@@ -134,8 +167,8 @@ fn pair(opts: &Options) -> Result<Vec<u8>, Fail> {
         ttl: dns::ANNOUNCE_TTL,
     };
 
-    println!("Announcing on port {}...", opts.port);
-    announce(&ann, ANNOUNCE_COUNT).map_err(|e| Fail::Other(format!("mDNS: {e}")))?;
+    println!("[2/3] Announcing on port {}...", opts.port);
+    announce(&ann, ANNOUNCE_COUNT).map_err(|e| Fail::Other(hints::mdns(&e)))?;
 
     println!();
     println!("On this iPhone open Settings >");
@@ -143,7 +176,10 @@ fn pair(opts: &Options) -> Result<Vec<u8>, Fail> {
     println!("Developer Mode and tap");
     println!("\"Pair with {HOST_NAME}\".");
     println!();
-    println!("Waiting for the iPhone...");
+    println!("[3/3] Waiting for the iPhone...");
+    println!("Nothing after a minute? Check Wi-Fi,");
+    println!("update rootshell (1.0.16-177+),");
+    println!("then Ctrl-C and run again.");
     let _ = std::io::stdout().flush();
 
     let stream = listener
@@ -151,6 +187,7 @@ fn pair(opts: &Options) -> Result<Vec<u8>, Fail> {
         .map_err(|e| Fail::Other(format!("accept: {}", errno_text(e))))?;
     drop(listener);
     println!("Connected. Pairing...");
+    debug!("iPhone connected");
 
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_time()
@@ -163,7 +200,7 @@ fn pair(opts: &Options) -> Result<Vec<u8>, Fail> {
             host.accept(&mut pairing_file, |pin| async move { show_pin(&pin) })
                 .await
         })
-        .map_err(|e| Fail::Other(format!("pairing: {e}")))?;
+        .map_err(|e| Fail::Other(hints::pairing(&e.to_string())))?;
 
     // Withdraw the "Pair with" row now that pairing is done.
     ann.ttl = 0;

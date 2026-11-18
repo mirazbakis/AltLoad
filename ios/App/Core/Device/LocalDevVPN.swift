@@ -67,6 +67,18 @@ enum LocalDevVPN {
     /// Turns the VPN on if LocalDevVPN is installed; otherwise opens its App Store page.
     @MainActor
     static func turnOn() {
+        AppLog.shared.info(.vpn, isInstalled ? "Opening LocalDevVPN to turn it on" : "LocalDevVPN isn't installed, opening the App Store")
         UIApplication.shared.open(isInstalled ? enableURL : appStoreURL)
+    }
+
+    @MainActor private static var lastLogged: Bool?
+
+    /// Writes the VPN state to the log when it changed since last time.
+    @MainActor
+    static func logState() {
+        let active = isActive
+        guard active != lastLogged else { return }
+        lastLogged = active
+        AppLog.shared.info(.vpn, active ? "LocalDevVPN is on (target \(targetIP))" : "LocalDevVPN is off")
     }
 }

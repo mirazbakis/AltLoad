@@ -2,7 +2,10 @@ import SwiftUI
 
 @main
 struct AltLoadApp: App {
+    @UIApplicationDelegateAdaptor(AltLoadAppDelegate.self) private var appDelegate
+
     init() {
+        AppLog.shared.info(.app, "Launched: \(AppLog.deviceSummary)")
         PairingController.shared.registerBackgroundTask()
         AutoRefresh.shared.registerBackgroundTask()
         // Be ready as soon as AltStore looks for an AltServer.
@@ -99,6 +102,8 @@ struct RootView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
+                LocalDevVPN.logState()
+                JITFavorites.shared.updateQuickActions()
                 AltServerHost.shared.refresh()
                 AutoRefresh.shared.checkIfDue()
                 Task { await updates.check() }

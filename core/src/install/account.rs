@@ -2,11 +2,14 @@
 
 use super::*;
 
-/// Runs one account request against the signed-in Apple ID's own team.
+/// Runs one account request against one of the signed-in Apple ID's teams.
 ///
 /// `request_json`:
 ///   {"op":"overview"}                          list certificates, App IDs, devices
 ///   {"op":"revoke","serials":["ABC…", …]}      revoke those certificates, then list
+/// Either can carry "teamId"; without it, or when that team is gone, the first
+/// team is used. The overview names the team used, lists every team, and has a
+/// "teamNote" when it fell back to the first.
 ///
 /// On success returns 0 and `*out_json` holds the overview JSON; on failure
 /// returns 1 and `*out_json` holds the error message. Free with
@@ -93,13 +96,9 @@ pub(super) async fn run_account(
     check()?;
 
     cbs.progress("Loading your account…", -1.0);
-    let team = dev
-        .list_teams()
-        .await
-        .map_err(|e| err("Couldn't load your developer team", e))?
-        .into_iter()
-        .next()
-        .ok_or("This Apple ID has no developer team.")?;
+    let wanted = request.get("teamId").and_then(|v| v.as_str());
+    let (chosen, teams, note) = choose_team(&mut dev, wanted, cbs).await?;
+    let team = chosen.team.clone();
 
     if request.get("op").and_then(|v| v.as_str()) == Some("revoke") {
         let serials: Vec<String> = request
@@ -119,7 +118,13 @@ pub(super) async fn run_account(
 
     check()?;
     cbs.progress("Loading your account…", -1.0);
-    account_overview(&mut dev, &team).await
+    let mut overview = account_overview(&mut dev, &team).await?;
+    overview["team"] = chosen.json();
+    overview["teams"] = serde_json::Value::Array(teams.iter().map(TeamInfo::json).collect());
+    if let Some(note) = note {
+        overview["teamNote"] = serde_json::Value::String(note);
+    }
+    Ok(overview)
 }
 
 pub(super) fn unix(date: Option<plist::Date>) -> i64 {

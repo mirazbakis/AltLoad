@@ -251,31 +251,46 @@ pub(super) fn read_installed(app: &Path) -> Installed {
         if d.is_empty() { s("CFBundleName") } else { d }
     };
 
-    let (expiration_unix, team_id, certificates) = read_profile(&app.join("embedded.mobileprovision"));
+    let profile = read_profile(&app.join("embedded.mobileprovision"));
     Installed {
         bundle_id: s("CFBundleIdentifier"),
         app_name: name,
         app_version: s("CFBundleShortVersionString"),
         udid: String::new(),
-        team_id,
-        expiration_unix,
-        certificates,
+        team_id: profile.team_id,
+        expiration_unix: profile.expiration_unix,
+        certificates: profile.certificates,
+        entitlements: profile.entitlements,
+        team: serde_json::Value::Null,
+        team_note: None,
     }
 }
 
-/// Pulls ExpirationDate and TeamIdentifier out of the CMS-wrapped profile plist.
-/// Expiry, team and developer certificates (DER in hex, comma-separated) of a
-/// provisioning profile.
-pub(super) fn read_profile(path: &Path) -> (i64, String, String) {
+#[derive(Default)]
+pub(super) struct Profile {
+    pub(super) expiration_unix: i64,
+    pub(super) team_id: String,
+    pub(super) certificates: String,
+    /// The profile's Entitlements dictionary as JSON, or null.
+    pub(super) entitlements: serde_json::Value,
+}
+
+/// Expiry, team, developer certificates (DER in hex, comma-separated) and
+/// entitlements of a provisioning profile, read from the CMS-wrapped plist.
+pub(super) fn read_profile(path: &Path) -> Profile {
     let Ok(bytes) = std::fs::read(path) else {
-        return (0, String::new(), String::new());
+        return Profile::default();
     };
+    profile_from_bytes(&bytes)
+}
+
+pub(super) fn profile_from_bytes(bytes: &[u8]) -> Profile {
     let find = |needle: &[u8]| bytes.windows(needle.len()).position(|w| w == needle);
     let (Some(start), Some(end)) = (find(b"<?xml"), find(b"</plist>")) else {
-        return (0, String::new(), String::new());
+        return Profile::default();
     };
     let Ok(dict) = plist::from_bytes::<plist::Dictionary>(&bytes[start..end + b"</plist>".len()]) else {
-        return (0, String::new(), String::new());
+        return Profile::default();
     };
     let expiration = dict
         .get("ExpirationDate")
@@ -302,12 +317,55 @@ pub(super) fn read_profile(path: &Path) -> (i64, String, String) {
                 .join(",")
         })
         .unwrap_or_default();
-    (expiration, team, certificates)
+    let entitlements = dict.get("Entitlements").map(plist_to_json).unwrap_or(serde_json::Value::Null);
+    Profile { expiration_unix: expiration, team_id: team, certificates, entitlements }
+}
+
+/// Plist values as JSON. Data and dates become strings.
+pub(super) fn plist_to_json(value: &plist::Value) -> serde_json::Value {
+    use serde_json::Value as J;
+    match value {
+        plist::Value::Boolean(b) => J::Bool(*b),
+        plist::Value::String(s) => J::String(s.clone()),
+        plist::Value::Integer(i) => i
+            .as_signed()
+            .map(J::from)
+            .or_else(|| i.as_unsigned().map(J::from))
+            .unwrap_or(J::Null),
+        plist::Value::Real(r) => serde_json::Number::from_f64(*r).map(J::Number).unwrap_or(J::Null),
+        plist::Value::Array(a) => J::Array(a.iter().map(plist_to_json).collect()),
+        plist::Value::Dictionary(d) => J::Object(d.iter().map(|(k, v)| (k.clone(), plist_to_json(v))).collect()),
+        plist::Value::Date(d) => J::String(d.to_xml_format()),
+        plist::Value::Data(d) => J::String(format!("<{} bytes>", d.len())),
+        _ => J::Null,
+    }
 }
 
 #[cfg(test)]
 mod pairing_tests {
     use super::*;
+
+    #[test]
+    fn the_profile_entitlements_are_read() {
+        let mut ents = plist::Dictionary::new();
+        ents.insert("com.apple.developer.kernel.increased-memory-limit".into(), plist::Value::Boolean(true));
+        ents.insert("keychain-access-groups".into(), plist::Value::Array(vec![plist::Value::String("ABC.*".into())]));
+        let mut dict = plist::Dictionary::new();
+        dict.insert("Entitlements".into(), plist::Value::Dictionary(ents));
+        dict.insert("TeamIdentifier".into(), plist::Value::Array(vec![plist::Value::String("ABC".into())]));
+        let mut xml = Vec::new();
+        plist::to_writer_xml(&mut xml, &dict).unwrap();
+        // The CMS wrapper puts bytes before and after the plist.
+        let mut wrapped = b"\x30\x82junk".to_vec();
+        wrapped.extend_from_slice(&xml);
+        wrapped.extend_from_slice(b"\x00\x01tail");
+
+        let profile = profile_from_bytes(&wrapped);
+        assert_eq!(profile.team_id, "ABC");
+        assert_eq!(profile.entitlements["com.apple.developer.kernel.increased-memory-limit"], true);
+        assert_eq!(profile.entitlements["keychain-access-groups"][0], "ABC.*");
+        assert!(profile_from_bytes(b"nothing").entitlements.is_null());
+    }
 
     #[test]
     fn the_sealed_file_opens_with_the_machine_id() {

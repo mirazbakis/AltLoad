@@ -44,7 +44,7 @@ use isideload::dev::certificates::{CertificatesApi, DevelopmentCertificate};
 use isideload::dev::developer_session::DeveloperSession;
 use isideload::dev::device_type::DeveloperDeviceType;
 use isideload::dev::devices::DevicesApi;
-use isideload::dev::teams::{DeveloperTeam, TeamsApi};
+use isideload::dev::teams::DeveloperTeam;
 use isideload::sideload::builder::MaxCertsBehavior;
 use isideload::sideload::application::SpecialApp;
 use isideload::sideload::cert_identity::CertificateIdentity;
@@ -63,13 +63,16 @@ mod jit;
 mod prompts;
 mod sign_in;
 mod storage;
+mod teams;
 mod tunnel;
 
+pub use account::{altload_account_session_run, altload_string_free};
 use bundle::*;
 use extensions::*;
 use prompts::*;
 use sign_in::*;
 use storage::*;
+use teams::*;
 use tunnel::*;
 
 // MARK: - C types
@@ -142,6 +145,11 @@ impl AltLoadInstallResult {
 pub struct AltLoadInstallSession {
     responder: Mutex<Option<mpsc::UnboundedSender<String>>>,
     cancelled: AtomicBool,
+    /// The developer team to use, set with `altload_install_session_set_team`.
+    /// None (or an ID that isn't on the account) uses the first team.
+    team_id: Mutex<Option<String>>,
+    /// JSON about the last successful install, for `altload_install_session_details`.
+    details: Mutex<Option<String>>,
 }
 
 // MARK: - Helpers
@@ -263,6 +271,22 @@ struct Installed {
     team_id: String,
     expiration_unix: i64,
     certificates: String,
+    /// What the provisioning profile granted.
+    entitlements: serde_json::Value,
+    /// The team that signed it and why, for the details JSON.
+    team: serde_json::Value,
+    team_note: Option<String>,
+}
+
+impl Installed {
+    fn details_json(&self) -> String {
+        serde_json::json!({
+            "team": self.team,
+            "teamNote": self.team_note,
+            "entitlements": self.entitlements,
+        })
+        .to_string()
+    }
 }
 
 static INIT: Once = Once::new();
@@ -281,7 +305,37 @@ pub extern "C" fn altload_install_session_new() -> *mut AltLoadInstallSession {
     Box::into_raw(Box::new(AltLoadInstallSession {
         responder: Mutex::new(None),
         cancelled: AtomicBool::new(false),
+        team_id: Mutex::new(None),
+        details: Mutex::new(None),
     }))
+}
+
+/// Picks the developer team for the next run on this session. NULL or "" uses
+/// the first team. A team that isn't on the account also falls back to the first.
+#[no_mangle]
+pub unsafe extern "C" fn altload_install_session_set_team(
+    session: *mut AltLoadInstallSession,
+    team_id: *const c_char,
+) {
+    if session.is_null() {
+        return;
+    }
+    let team = opt(team_id, "");
+    *(*session).team_id.lock().unwrap() = if team.is_empty() { None } else { Some(team) };
+}
+
+/// JSON about the last successful install on this session:
+/// {"team":{id,name,type,kind},"teamNote":…,"entitlements":{…}}, or NULL.
+/// Free with `altload_string_free`.
+#[no_mangle]
+pub unsafe extern "C" fn altload_install_session_details(session: *mut AltLoadInstallSession) -> *mut c_char {
+    if session.is_null() {
+        return ptr::null_mut();
+    }
+    match (*session).details.lock().unwrap().as_ref() {
+        Some(json) => cstr(json.as_str()),
+        None => ptr::null_mut(),
+    }
 }
 
 /// Blocking. Call it from a background thread. Progress and prompts arrive via
@@ -313,6 +367,8 @@ pub unsafe extern "C" fn altload_install_session_run(
     let (tx, rx) = mpsc::unbounded_channel();
     *session.responder.lock().unwrap() = Some(tx);
     session.cancelled.store(false, Ordering::SeqCst);
+    *session.details.lock().unwrap() = None;
+    let team_id = session.team_id.lock().unwrap().clone();
 
     let cbs = Callbacks {
         progress: progress_cb,
@@ -333,6 +389,7 @@ pub unsafe extern "C" fn altload_install_session_run(
 
     let result = rt.block_on(run_install(
         cfg,
+        team_id,
         cbs,
         Arc::new(AsyncMutex::new(rx)),
         &session.cancelled,
@@ -341,6 +398,7 @@ pub unsafe extern "C" fn altload_install_session_run(
 
     match result {
         Ok(done) => {
+            *session.details.lock().unwrap() = Some(done.details_json());
             (*out).bundle_id = cstr(done.bundle_id);
             (*out).app_name = cstr(done.app_name);
             (*out).app_version = cstr(done.app_version);
@@ -419,6 +477,7 @@ type Replies = Arc<AsyncMutex<mpsc::UnboundedReceiver<String>>>;
 
 async fn run_install(
     cfg: Config,
+    team_id: Option<String>,
     cbs: Callbacks,
     replies: Replies,
     cancelled: &AtomicBool,
@@ -465,7 +524,7 @@ async fn run_install(
             .map_err(|e| err("Couldn't unpack the IPA", e))??;
         work_dir = Some(work);
         stamp_app(&app_dir, &udid, &cfg.server_id)?;
-        sign_and_install(&cfg, dev_session, cbs, replies, &check, &udid, app_dir, &mut adapter, &mut handshake).await
+        sign_and_install(&cfg, team_id.as_deref(), dev_session, cbs, replies, &check, &udid, app_dir, &mut adapter, &mut handshake).await
     }
     .await;
 
@@ -485,6 +544,7 @@ async fn run_install(
 #[allow(clippy::too_many_arguments)]
 async fn sign_and_install(
     cfg: &Config,
+    team_id: Option<&str>,
     dev_session: DeveloperSession,
     cbs: Callbacks,
     replies: Replies,
@@ -516,12 +576,12 @@ async fn sign_and_install(
         .delete_app_after_install(false)
         .build();
 
-    // 4. Register this device on the team.
+    // 4. Register this device on the chosen team. Every step below uses this
+    // team, so the sideloader's own team selection is never asked.
+    cbs.progress("Loading your developer teams…", -1.0);
+    let (chosen, _, team_note) = choose_team(sideloader.get_dev_session(), team_id, cbs).await?;
+    let team = chosen.team.clone();
     cbs.progress("Registering this device…", -1.0);
-    let team = sideloader
-        .get_team()
-        .await
-        .map_err(|e| err("Couldn't load your developer team", e))?;
     sideloader
         .get_dev_session()
         .ensure_device_registered(&team, &cfg.device_name, udid, None::<DeveloperDeviceType>)
@@ -613,5 +673,7 @@ async fn sign_and_install(
     if installed.team_id.is_empty() {
         installed.team_id = team.team_id.clone();
     }
+    installed.team = chosen.json();
+    installed.team_note = team_note;
     Ok(installed)
 }

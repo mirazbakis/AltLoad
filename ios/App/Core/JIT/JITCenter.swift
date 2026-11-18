@@ -60,6 +60,9 @@ final class JITCenter: ObservableObject {
             return
         }
         let script = script ?? bundleID.map { JITScripts.shared.script(for: $0) } ?? JITScripts.shared.builtIn
+        AppLog.shared.info(.jit, "JIT session started for \(bundleID ?? "pid \(pid ?? 0)") with script \(script.name)")
+        LocalDevVPN.logState()
+        if let bundleID, !bundleID.isEmpty { JITFavorites.shared.recordLaunch(bundleID: bundleID, name: name) }
         let session = JITSession()
         self.session = session
         log = []
@@ -78,10 +81,13 @@ final class JITCenter: ObservableObject {
                     Task { @MainActor in JITCenter.shared.handle(event) }
                 }
                 finished = Self.summary(outcome, appName: name, scriptName: script.name)
+                AppLog.shared.info(.jit, "JIT session ended (\(outcome.ended), \(outcome.requests) JIT requests, pid \(outcome.pid))")
             } catch is CancellationError {
+                AppLog.shared.info(.jit, "JIT session stopped before attaching")
                 finished = Finished(success: true, title: String(localized: "JIT stopped"),
                                     message: String(localized: "Stopped before AltLoad reached \(name)."))
             } catch {
+                AppLog.shared.error(.jit, "JIT failed: \(error.localizedDescription)")
                 finished = Finished(success: false, title: String(localized: "Couldn't enable JIT"),
                                     message: error.localizedDescription)
             }
@@ -90,17 +96,21 @@ final class JITCenter: ObservableObject {
 
     /// Lets the app go and ends the session.
     func stop() {
+        if session != nil { AppLog.shared.info(.jit, "Stop requested") }
         session?.stop()
     }
 
     private func handle(_ event: JITSession.Event) {
         switch event {
         case .stage(let text):
+            if active?.stage != text { AppLog.shared.info(.jit, text) }
             active?.stage = text
         case .attached(let pid):
+            AppLog.shared.info(.jit, "Attached to pid \(pid)")
             active?.pid = pid
             active?.stage = String(localized: "Serving JIT requests")
         case .log(let line):
+            AppLog.shared.info(.jit, "script: \(line)")
             log.append(line)
             if log.count > 200 { log.removeFirst(log.count - 200) }
         }

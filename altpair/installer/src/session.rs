@@ -12,6 +12,8 @@ use altload_ffi::{
 };
 
 use crate::prompts::{self, Cert};
+use altload_ffi::AltLoadProgressCb as ProgressCb;
+use altload_ffi::AltLoadPromptCb as PromptCb;
 use crate::term;
 use crate::ui::{self, Progress};
 
@@ -25,17 +27,52 @@ pub struct Request {
     pub pairing_file: String,
     pub ipa: String,
     pub server_id: String,
+    /// The developer team to sign with, or empty for the account's first.
+    pub team: String,
 }
 
 pub struct Installed {
     pub app_name: String,
     pub app_version: String,
+    pub team_id: String,
+    /// When the signing expires, as a Unix time, or 0 if unknown.
+    pub expiration_unix: i64,
+    /// The core's JSON about the install (team name and kind), or empty.
+    pub details: String,
+}
+
+enum Outcome {
+    Installed(Installed),
+    /// The account overview JSON.
+    Account(String),
 }
 
 enum Event {
     Progress(String, f64),
     Prompt(i32, String),
-    Done(Result<Installed, String>),
+    Done(Result<Outcome, String>),
+}
+
+// The core's team and account calls are C symbols in its library. Its Rust
+// re-exports don't list them yet, so they are declared here.
+// The session is only ever passed by pointer.
+#[allow(improper_ctypes)]
+extern "C" {
+    fn altload_install_session_set_team(session: *mut AltLoadInstallSession, team_id: *const c_char);
+    fn altload_install_session_details(session: *mut AltLoadInstallSession) -> *mut c_char;
+    fn altload_string_free(s: *mut c_char);
+    #[allow(clippy::too_many_arguments)]
+    fn altload_account_session_run(
+        session: *mut AltLoadInstallSession,
+        apple_id: *const c_char,
+        password: *const c_char,
+        anisette_url: *const c_char,
+        request_json: *const c_char,
+        progress_cb: ProgressCb,
+        prompt_cb: PromptCb,
+        ctx: *mut c_void,
+        out_json: *mut *mut c_char,
+    ) -> i32;
 }
 
 /// The callbacks' context: where to send what the core reports.
@@ -81,7 +118,26 @@ const MACHINE_NAME: &str = "AltLoad";
 /// UIDevice.current.name, which a Linux shell can't read; the core's default is "iPhone".
 const DEVICE_NAME: &str = "iPhone";
 
-pub fn run(mut req: Request) -> Result<Installed, String> {
+pub fn run(req: Request) -> Result<Installed, String> {
+    match drive(move |session, tx| run_blocking(session, tx, req).map(Outcome::Installed))? {
+        Outcome::Installed(done) => Ok(done),
+        Outcome::Account(_) => Err("The install stopped unexpectedly.".into()),
+    }
+}
+
+/// Signs in and returns the account overview JSON, naming `team` when it is not empty.
+pub fn account_overview(apple_id: String, password: String, anisette: String, team: String) -> Result<String, String> {
+    match drive(move |session, tx| account_blocking(session, tx, apple_id, password, anisette, &team).map(Outcome::Account))? {
+        Outcome::Account(json) => Ok(json),
+        Outcome::Installed(_) => Err("The account request stopped unexpectedly.".into()),
+    }
+}
+
+/// Runs `work` on a worker thread with a fresh core session, while this thread
+/// shows progress and answers the core's prompts.
+fn drive(
+    work: impl FnOnce(SessionPtr, &Sender<Event>) -> Result<Outcome, String> + Send + 'static,
+) -> Result<Outcome, String> {
     let session = altload_install_session_new();
     if session.is_null() {
         return Err("Couldn't start an install session.".into());
@@ -91,17 +147,11 @@ pub fn run(mut req: Request) -> Result<Installed, String> {
 
     let worker = {
         let tx = tx.clone();
-        let apple_id = std::mem::take(&mut req.apple_id);
-        let password = std::mem::take(&mut req.password);
-        let anisette = std::mem::take(&mut req.anisette);
-        let pairing = std::mem::take(&mut req.pairing_file);
-        let ipa = std::mem::take(&mut req.ipa);
-        let server_id = std::mem::take(&mut req.server_id);
         std::thread::Builder::new()
             .name("install".into())
             .spawn(move || {
                 let session = session;
-                let outcome = run_blocking(session, &tx, apple_id, password, anisette, pairing, ipa, server_id);
+                let outcome = work(session, &tx);
                 let _ = tx.send(Event::Done(outcome));
             })
             .map_err(|e| format!("Couldn't start the install thread: {e}"))?
@@ -136,17 +186,59 @@ pub fn run(mut req: Request) -> Result<Installed, String> {
     outcome
 }
 
-#[allow(clippy::too_many_arguments)]
-fn run_blocking(
+fn account_blocking(
     session: SessionPtr,
     tx: &Sender<Event>,
     apple_id: String,
     mut password: String,
     anisette: String,
-    pairing: String,
-    ipa: String,
-    server_id: String,
-) -> Result<Installed, String> {
+    team: &str,
+) -> Result<String, String> {
+    let c = |s: &str| CString::new(s).map_err(|_| "A setting contains a NUL byte.".to_string());
+    let apple_id = c(&apple_id)?;
+    let password_c = c(&password);
+    term::wipe(&mut password);
+    let password_c = password_c?;
+    let anisette = c(&anisette)?;
+    let request = c(&serde_json::json!({ "op": "overview", "teamId": team }).to_string())?;
+    let ctx = Box::new(Ctx { tx: tx.clone() });
+    let mut out: *mut c_char = ptr::null_mut();
+    let rc = unsafe {
+        altload_account_session_run(
+            session.0,
+            apple_id.as_ptr(),
+            password_c.as_ptr(),
+            anisette.as_ptr(),
+            request.as_ptr(),
+            Some(on_progress),
+            Some(on_prompt),
+            &*ctx as *const Ctx as *mut c_void,
+            &mut out,
+        )
+    };
+    let mut secret = password_c.into_bytes();
+    secret.fill(0);
+    drop(secret);
+    let text = unsafe { text(out) };
+    unsafe { altload_string_free(out) };
+    drop(ctx);
+    if rc == 0 {
+        Ok(text)
+    } else if text.is_empty() {
+        Err(format!("Couldn't load your account (code {rc})."))
+    } else {
+        Err(text)
+    }
+}
+
+fn run_blocking(session: SessionPtr, tx: &Sender<Event>, mut req: Request) -> Result<Installed, String> {
+    let apple_id = std::mem::take(&mut req.apple_id);
+    let mut password = std::mem::take(&mut req.password);
+    let anisette = std::mem::take(&mut req.anisette);
+    let pairing = std::mem::take(&mut req.pairing_file);
+    let ipa = std::mem::take(&mut req.ipa);
+    let server_id = std::mem::take(&mut req.server_id);
+    let team = std::mem::take(&mut req.team);
     let c = |s: &str| CString::new(s).map_err(|_| "A setting contains a NUL byte.".to_string());
     let apple_id = c(&apple_id)?;
     let password_c = c(&password);
@@ -160,6 +252,8 @@ fn run_blocking(
     let host_name = c(HOST_NAME)?;
     let machine = c(MACHINE_NAME)?;
     let device = c(DEVICE_NAME)?;
+    let team = c(&team)?;
+    unsafe { altload_install_session_set_team(session.0, team.as_ptr()) };
 
     let endpoint = AltLoadEndpoint {
         host: host.as_ptr(),
@@ -212,9 +306,18 @@ fn run_blocking(
     drop(secret);
 
     let result = if rc == 0 {
+        let details = unsafe {
+            let p = altload_install_session_details(session.0);
+            let t = text(p);
+            altload_string_free(p);
+            t
+        };
         Ok(Installed {
+            details,
             app_name: unsafe { text(out.app_name) },
             app_version: unsafe { text(out.app_version) },
+            team_id: unsafe { text(out.team_id) },
+            expiration_unix: out.expiration_unix,
         })
     } else {
         let message = unsafe { text(out.error) };

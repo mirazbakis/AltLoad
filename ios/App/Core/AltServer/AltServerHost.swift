@@ -121,6 +121,7 @@ final class AltServerHost: ObservableObject {
     func clearLog() { events.removeAll() }
 
     private func log(_ title: String, detail: String?, kind: Event.Kind) {
+        AppLog.shared.add(.altserver, detail.map { "\(title): \($0)" } ?? title, level: kind == .failure ? .error : .info)
         events.insert(Event(title: title, detail: detail, kind: kind), at: 0)
         if events.count > 40 { events.removeLast(events.count - 40) }
     }

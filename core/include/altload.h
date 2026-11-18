@@ -97,12 +97,20 @@ int32_t altload_install_session_respond(AltLoadInstallSession *session, const ch
 void altload_install_session_cancel(AltLoadInstallSession *session);
 void altload_install_session_free(AltLoadInstallSession *session);
 void altload_install_result_free(AltLoadInstallResult *r);
+/* Developer team for the next run on this session (installs and account
+   requests). NULL or "" uses the first team; so does an ID the account doesn't have. */
+void altload_install_session_set_team(AltLoadInstallSession *session, const char *team_id);
+/* After a successful install: {"team":{"id","name","type","kind"},"teamNote":…,
+   "entitlements":{…the profile's entitlements…}}, or NULL. kind is "free",
+   "individual", "organization" or "unknown". Free with altload_string_free. */
+char *altload_install_session_details(AltLoadInstallSession *session);
 
 
 /* ---- Certificate manager: your own Apple ID (core/src/install/mod.rs) ---- */
 
-/* Runs {"op":"overview"} or {"op":"revoke","serials":[...]} against the Apple
-   ID's own team. Reuses an AltLoadInstallSession for 2FA prompts and cancel.
+/* Runs {"op":"overview"} or {"op":"revoke","serials":[...]} against one of the
+   Apple ID's teams ("teamId" in the request, else the first). The overview has
+   "team", "teams" (every team on the account) and, after a fallback, "teamNote". Reuses an AltLoadInstallSession for 2FA prompts and cancel.
    Returns 0 with overview JSON in *out_json, or 1 with an error message.
    Free *out_json with altload_string_free. Blocking. */
 int32_t altload_account_session_run(AltLoadInstallSession *session,

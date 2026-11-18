@@ -24,16 +24,32 @@ pub(super) async fn open_tunnel_to(
         return Err("No address to reach this iPhone was given.".into());
     }
 
+    // The second connection (to the tunnel port remotepairingd just opened) sometimes
+    // stalls right after LocalDevVPN connects. Starting over with a fresh listener
+    // usually gets through, so try a few rounds before giving up.
+    const ATTEMPTS: u32 = 3;
     let mut last_error = String::new();
-    for ep in endpoints {
-        match connect_endpoint(&ep, host_name, &mut rpf).await {
-            Ok(tunnel) => return Ok(tunnel),
-            Err(e) => last_error = format!("{}:{}: {e}", ep.host, ep.port),
+    for attempt in 1..=ATTEMPTS {
+        for ep in &endpoints {
+            match connect_endpoint(ep, host_name, &mut rpf).await {
+                Ok(tunnel) => return Ok(tunnel),
+                Err(e) => {
+                    // A rejected pairing file won't fix itself; stop right away.
+                    if e.contains("no longer accepts the pairing file") {
+                        return Err(format!("Couldn't open a tunnel to this device ({e})."));
+                    }
+                    last_error = format!("{}:{}: {e}", ep.host, ep.port);
+                }
+            }
+        }
+        if attempt < ATTEMPTS {
+            tokio::time::sleep(Duration::from_millis(1500 * attempt as u64)).await;
         }
     }
     Err(format!(
-        "Couldn't open a tunnel to this device ({last_error}). Make sure LocalDevVPN is connected \
-         and Developer Mode is on."
+        "Couldn't open a tunnel to this device after {ATTEMPTS} tries ({last_error}). Turn \
+         LocalDevVPN off and on again, turn off any other VPN or proxy app, and make sure \
+         Developer Mode is on."
     ))
 }
 

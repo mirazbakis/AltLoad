@@ -14,12 +14,23 @@ usage:
   ./altpair.wasm < if.txt
   ./altpair.wasm --ip 192.168.1.5
 
+Use < to read if.txt. Do not pipe
+(ifconfig | ./altpair.wasm): rootshell
+answers \"wasm: command not found\".
+
+Needs rootshell 1.0.16-177 or later,
+Wi-Fi on, and rootshell in front
+(Location Diary Mode > Session Only
+keeps it running).
+
 options:
   --ip A.B.C.D  Wi-Fi address to use
   --port N      pairing port (49207)
   --repair      pair again even if
                 rp_pairing_file.plist
                 exists
+  -v, --verbose print debug detail
+  -V, --version show the version
   -h, --help    show this help
 
 exit codes: 0 ok, 1 failure, 2 usage";
@@ -30,10 +41,12 @@ pub struct Options {
     pub port: u16,
     pub repair: bool,
     pub help: bool,
+    pub version: bool,
+    pub verbose: bool,
 }
 
 pub fn parse<I: IntoIterator<Item = String>>(args: I) -> Result<Options, String> {
-    let mut o = Options { ip: None, port: DEFAULT_PORT, repair: false, help: false };
+    let mut o = Options { ip: None, port: DEFAULT_PORT, repair: false, help: false, version: false, verbose: false };
     let mut it = args.into_iter();
     while let Some(arg) = it.next() {
         let (flag, inline) = match arg.split_once('=') {
@@ -48,6 +61,8 @@ pub fn parse<I: IntoIterator<Item = String>>(args: I) -> Result<Options, String>
         };
         match flag.as_str() {
             "-h" | "--help" => o.help = true,
+            "-V" | "--version" => o.version = true,
+            "-v" | "--verbose" => o.verbose = true,
             "--repair" => o.repair = true,
             "--ip" => {
                 let v = value("--ip")?;
@@ -79,7 +94,7 @@ mod tests {
     fn defaults() {
         assert_eq!(
             p(&[]).unwrap(),
-            Options { ip: None, port: 49207, repair: false, help: false }
+            Options { ip: None, port: 49207, repair: false, help: false, version: false, verbose: false }
         );
     }
 
@@ -90,6 +105,10 @@ mod tests {
         assert_eq!(o.port, 50000);
         assert!(o.repair);
         assert!(p(&["-h"]).unwrap().help);
+        assert!(p(&["--version"]).unwrap().version);
+        assert!(p(&["-V"]).unwrap().version);
+        assert!(p(&["-v"]).unwrap().verbose);
+        assert!(p(&["--verbose"]).unwrap().verbose);
         assert_eq!(p(&["--ip=1.2.3.4"]).unwrap().ip, Some(Ipv4Addr::new(1, 2, 3, 4)));
     }
 

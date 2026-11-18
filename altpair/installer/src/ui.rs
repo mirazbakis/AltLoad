@@ -1,8 +1,28 @@
 // Output for a narrow phone terminal: lines of at most 45 columns.
 
 use std::io::Write;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 pub const WIDTH: usize = 45;
+
+static VERBOSE: AtomicBool = AtomicBool::new(false);
+
+pub fn set_verbose(on: bool) {
+    VERBOSE.store(on, Ordering::Relaxed);
+}
+
+pub fn is_verbose() -> bool {
+    VERBOSE.load(Ordering::Relaxed)
+}
+
+/// Debug detail, shown with --verbose.
+pub fn debug(text: &str) {
+    if is_verbose() {
+        for line in wrap(text, WIDTH - 15) {
+            println!("      [debug] {line}");
+        }
+    }
+}
 
 /// Cuts a line to `width` characters, ending it with "…" when cut.
 pub fn fit(s: &str, width: usize) -> String {
@@ -65,9 +85,11 @@ pub fn eprint_wrapped(text: &str) {
     }
 }
 
-/// "[n/4] what" at the start of a step.
+pub const STEPS: u32 = 5;
+
+/// "[n/5] what" at the start of a step.
 pub fn step(n: u32, what: &str) {
-    println!("{}", fit(&format!("[{n}/4] {what}"), WIDTH));
+    println!("{}", fit(&format!("[{n}/{STEPS}] {what}"), WIDTH));
 }
 
 /// The indented result line that ends a step.

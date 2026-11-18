@@ -38,10 +38,6 @@ struct DevDevice: Identifiable, Hashable, Decodable {
 }
 
 struct AccountOverview: Decodable, Equatable {
-    struct Team: Decodable, Equatable {
-        let id: String
-        let name: String
-    }
     struct AppIDs: Decodable, Equatable {
         let items: [DevAppID]?
         let max: Int?
@@ -49,7 +45,11 @@ struct AccountOverview: Decodable, Equatable {
         let error: String?
     }
 
-    let team: Team
+    let team: DevTeam
+    /// Every team on the Apple ID.
+    let teams: [DevTeam]?
+    /// Set when the chosen team was gone and the first one was used.
+    let teamNote: String?
     let certificates: [DevCertificate]
     let appIds: AppIDs
     let devices: [DevDevice]
@@ -78,6 +78,9 @@ final class CertificatesController: ObservableObject {
 
     private var session: OpaquePointer?
     private var credentials: AppleIDCredentials?
+
+    /// The Apple ID the overview belongs to.
+    var appleID: String { credentials?.email ?? AppleIDStore.email }
 
     var isBusy: Bool {
         if case .loading = phase { return true }
@@ -140,6 +143,10 @@ final class CertificatesController: ObservableObject {
 
     private func run(request: [String: Any]) {
         guard !isBusy, let credentials else { return }
+        var request = request
+        if let teamID = TeamSettings.shared.teamID(for: credentials.email) { request["teamId"] = teamID }
+        let op = request["op"] as? String ?? "?"
+        AppLog.shared.info(.account, "Account request \(op) for \(credentials.email), team \(request["teamId"] as? String ?? "automatic")")
         guard let requestData = try? JSONSerialization.data(withJSONObject: request),
               let requestJSON = String(data: requestData, encoding: .utf8),
               let session = altload_install_session_new() else {
@@ -191,13 +198,25 @@ final class CertificatesController: ObservableObject {
             switch result {
             case .success(let data):
                 do {
-                    overview = try JSONDecoder().decode(AccountOverview.self, from: data)
+                    let loaded = try JSONDecoder().decode(AccountOverview.self, from: data)
+                    overview = loaded
                     lastUpdated = .now
                     phase = .loaded
+                    TeamSettings.shared.update(teams: loaded.teams ?? [loaded.team], for: credentials.email, note: loaded.teamNote)
+                    if loaded.teamNote != nil {
+                        TeamSettings.shared.fallBack(for: credentials.email, note: loaded.teamNote)
+                    }
+                    AppLog.shared.info(.account, "Account loaded: team \(loaded.team.displayName) (\(loaded.team.id), \(loaded.team.kind ?? "unknown")), \(loaded.certificates.count) certificates, \(loaded.teams?.count ?? 1) teams")
                 } catch {
                     phase = .failed(String(localized: "Couldn't read the account data: \(error.localizedDescription)"))
+                    AppLog.shared.error(.account, "Couldn't decode the account data: \(error.localizedDescription)")
                 }
             case .failure(.message(let message)):
+                if message == "Cancelled." {
+                    AppLog.shared.info(.account, "Account request cancelled")
+                } else {
+                    AppLog.shared.error(.account, "Account request failed: \(message)")
+                }
                 if message == "Cancelled." {
                     phase = overview == nil ? .signedOut : .loaded
                 } else {
@@ -213,10 +232,12 @@ final class CertificatesController: ObservableObject {
 
     fileprivate func updateProgress(_ stage: String) {
         guard isBusy else { return }
+        if phase != .loading(stage) { AppLog.shared.info(.account, stage) }
         phase = .loading(stage)
     }
 
     fileprivate func presentTwoFactor(_ json: Data) {
+        AppLog.shared.info(.account, "Apple asked for a two-factor code")
         struct Payload: Decodable {
             let unknown: Bool
             let sms: Bool
