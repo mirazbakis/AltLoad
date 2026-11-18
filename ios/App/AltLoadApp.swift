@@ -28,8 +28,20 @@ struct RootView: View {
     @StateObject private var jit = JITCenter.shared
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
+    @AppStorage("welcome.seen") private var welcomeSeen = false
 
     var body: some View {
+        if welcomeSeen {
+            tabs
+        } else {
+            WelcomeView {
+                withAnimation(.easeInOut(duration: 0.35)) { welcomeSeen = true }
+            }
+            .transition(.opacity)
+        }
+    }
+
+    private var tabs: some View {
         TabView(selection: $tab) {
             Tab(String(localized: "Install"), systemImage: "tray.and.arrow.down.fill", value: AppTab.install) {
                 InstallView(selectedTab: $tab)
