@@ -20,7 +20,7 @@
 > [!CAUTION]
 > **Only install AltLoad from the [official website](https://mirazbakis.github.io/AltLoad/) or [this repository](https://github.com/mirazbakis/AltLoad).**
 >
-> AltLoad handles your Apple ID password and your iPhone's pairing data, and a modified copy could send both to someone else. Any other website, source, file host, Telegram channel or Discord server is unofficial, however real it looks. AltLoad is free. The only builds I publish are on the official website and in this repository, and forks may not publish builds.
+> AltLoad handles your Apple ID password and your iPhone's pairing data, and a modified copy could send both to someone else. Any other website, source, file host, Telegram channel or Discord server is unofficial, however real it looks. That includes **applejr.net**, which is not affiliated with AltLoad: its copies aren't published or checked by me and may be modified. AltLoad is free. The only builds I publish are on the official website and in this repository, and forks may not publish builds.
 >
 > Already used an unofficial copy? Delete it, change your Apple ID password at [account.apple.com](https://account.apple.com), remove any devices you don't recognize, and delete any pairing files it could reach.
 

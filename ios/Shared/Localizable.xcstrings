@@ -3464,6 +3464,58 @@
         }
       }
     },
+    "AltLoad by Miraz Bakis": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad von Miraz Bakis"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad par Miraz Bakis"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad di Miraz Bakis"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad от Miraz Bakis"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad，作者 Miraz Bakis"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad por Miraz Bakis"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad por Miraz Bakis"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad（作者：Miraz Bakis）"
+          }
+        }
+      }
+    },
     "AltLoad %@ is available. You have %@.": {
       "extractionState": "manual",
       "localizations": {

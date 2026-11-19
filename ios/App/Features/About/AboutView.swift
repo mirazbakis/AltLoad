@@ -97,6 +97,9 @@ struct AboutView: View {
                 Text("Version \(version)")
                     .font(.subheadline)
                     .foregroundStyle(Aurora.secondaryText)
+                Text("AltLoad by Miraz Bakis")
+                    .font(.caption)
+                    .foregroundStyle(Aurora.secondaryText)
             }
             Text("AltStore, SideStore, LiveContainer and Husk, signed and installed on this iPhone. No computer.")
                 .font(.subheadline)
