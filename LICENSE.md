@@ -15,7 +15,7 @@ The above copyright notice and this permission notice must be included in all co
 The Software, and any build of it, modified or not, may **only** be distributed through:
 
 - the official repository, <https://github.com/mirazbakis/AltLoad>, including its GitHub Releases, and
-- the official website, <https://mirazbakis.github.io/AltLoad/>.
+- the official website, <https://altload.org/> (previously <https://mirazbakis.github.io/AltLoad/>, which now redirects there).
 
 Without prior written permission from the copyright holder, you may **not** distribute, upload, mirror, re-host, re-sign or repackage the Software or any build of it anywhere else. That includes other websites, file hosts, app stores, AltStore or SideStore sources, app repositories, Telegram or Discord channels and torrents.
 

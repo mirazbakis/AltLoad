@@ -6,14 +6,14 @@
 
 **Installez AltStore, SideStore et LiveContainer depuis votre iPhone, signés avec votre propre identifiant Apple. Pas d'ordinateur, pas de certificat partagé.**
 
-[Installer](https://mirazbakis.github.io/AltLoad/) · [Télécharger l'IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [Ajouter la source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [Versions](https://github.com/mirazbakis/AltLoad/releases)
+[Installer](https://altload.org/) · [Télécharger l'IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [Ajouter la source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [Versions](https://github.com/mirazbakis/AltLoad/releases)
 
 [English](README.md) · [简体中文](README.zh-Hans.md) · [Русский](README.ru.md) · Français
 
 </div>
 
 > [!CAUTION]
-> **Installez AltLoad uniquement depuis le [site officiel](https://mirazbakis.github.io/AltLoad/) ou [ce dépôt](https://github.com/mirazbakis/AltLoad).**
+> **Installez AltLoad uniquement depuis le [site officiel](https://altload.org/) ou [ce dépôt](https://github.com/mirazbakis/AltLoad).**
 >
 > AltLoad traite le mot de passe de votre identifiant Apple et les données de jumelage de votre iPhone. Une copie modifiée pourrait envoyer les deux à quelqu'un d'autre. Tout autre site, source, hébergeur de fichiers, canal Telegram ou serveur Discord est non officiel, même s'il paraît authentique. C'est aussi le cas de **applejr.net**, qui n'est pas affilié à AltLoad : ses copies ne sont ni publiées ni vérifiées par moi, et elles peuvent être modifiées. AltLoad est gratuit. Je ne publie de versions que sur le site officiel et dans ce dépôt, et les forks n'ont pas le droit d'en publier.
 >
@@ -53,8 +53,8 @@ Vous avez aussi besoin du [Mode développeur](https://developer.apple.com/docume
 
 **1. Obtenir AltLoad.** Choisissez une méthode :
 
-- **Installation avec identifiant Apple (altpair).** Signé avec votre propre identifiant Apple, sans ordinateur et sans profil DNS. Vous installez trois apps gratuites de l'App Store et suivez les étapes sur le [site officiel](https://mirazbakis.github.io/AltLoad/). Voir [altpair/README.md](altpair/README.md).
-- **Installation directe.** La méthode la plus rapide, avec un certificat partagé. Ouvrez le [site officiel](https://mirazbakis.github.io/AltLoad/) dans Safari, acceptez les Conditions, ajoutez le profil DNS et touchez une installation signée.
+- **Installation avec identifiant Apple (altpair).** Signé avec votre propre identifiant Apple, sans ordinateur et sans profil DNS. Vous installez trois apps gratuites de l'App Store et suivez les étapes sur le [site officiel](https://altload.org/). Voir [altpair/README.md](altpair/README.md).
+- **Installation directe.** La méthode la plus rapide, avec un certificat partagé. Ouvrez le [site officiel](https://altload.org/) dans Safari, acceptez les Conditions, ajoutez le profil DNS et touchez une installation signée.
 - **AltStore ou SideStore.** Si vous en utilisez déjà un, [ajoutez la source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) et recevez les mises à jour depuis là.
 - **Votre propre outil de signature.** Téléchargez `AltLoad.ipa` depuis les [Versions](https://github.com/mirazbakis/AltLoad/releases).
 
@@ -143,6 +143,6 @@ make sim    # un build pour le Simulator
 
 AltLoad est open source sous une licence personnalisée basée sur MIT. Vous pouvez lire son code, le modifier, le compiler pour vous-même et réutiliser des parties dans des projets non commerciaux, avec la mention *"Based on AltLoad by mirazbakis"*. Les versions ne peuvent être distribuées que via ce dépôt et le site officiel. Voir [LICENSE.md](LICENSE.md).
 
-Signalez les problèmes de sécurité comme décrit dans [SECURITY.md](SECURITY.md). Utiliser AltLoad implique d'accepter les [Conditions d'utilisation](https://mirazbakis.github.io/AltLoad/terms.html). AltLoad n'est affilié ni à Apple ni à aucune app qu'il installe.
+Signalez les problèmes de sécurité comme décrit dans [SECURITY.md](SECURITY.md). Utiliser AltLoad implique d'accepter les [Conditions d'utilisation](https://altload.org/terms.html). AltLoad n'est affilié ni à Apple ni à aucune app qu'il installe.
 
 Voir [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md) pour les projets dont AltLoad dépend, et [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) pour les licences.

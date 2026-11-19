@@ -6,14 +6,14 @@
 
 **Install AltStore, SideStore and LiveContainer from your iPhone, signed with your own Apple ID. No computer, no shared certificate.**
 
-[Install](https://mirazbakis.github.io/AltLoad/) · [Download the IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [Add the source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [Releases](https://github.com/mirazbakis/AltLoad/releases)
+[Install](https://altload.org/) · [Download the IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [Add the source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [Releases](https://github.com/mirazbakis/AltLoad/releases)
 
 English · [简体中文](README.zh-Hans.md) · [Русский](README.ru.md) · [Français](README.fr.md)
 
 </div>
 
 > [!CAUTION]
-> **Only install AltLoad from the [official website](https://mirazbakis.github.io/AltLoad/) or [this repository](https://github.com/mirazbakis/AltLoad).**
+> **Only install AltLoad from the [official website](https://altload.org/) or [this repository](https://github.com/mirazbakis/AltLoad).**
 >
 > AltLoad handles your Apple ID password and your iPhone's pairing data, and a modified copy could send both to someone else. Any other website, source, file host, Telegram channel or Discord server is unofficial, however real it looks. That includes **applejr.net**, which is not affiliated with AltLoad: its copies aren't published or checked by me and may be modified. AltLoad is free. The only builds I publish are on the official website and in this repository, and forks may not publish builds.
 >
@@ -53,8 +53,8 @@ You also need [Developer Mode](https://developer.apple.com/documentation/xcode/e
 
 **1. Get AltLoad.** Pick one route:
 
-- **Apple ID Install (altpair).** Signed with your own Apple ID, with no computer and no DNS profile. You install three free App Store apps and follow the steps on the [official website](https://mirazbakis.github.io/AltLoad/). See [altpair/README.md](altpair/README.md).
-- **Direct Install.** The fastest route, using a shared certificate. Open the [official website](https://mirazbakis.github.io/AltLoad/) in Safari, accept the Terms, add the DNS profile and tap a signed install.
+- **Apple ID Install (altpair).** Signed with your own Apple ID, with no computer and no DNS profile. You install three free App Store apps and follow the steps on the [official website](https://altload.org/). See [altpair/README.md](altpair/README.md).
+- **Direct Install.** The fastest route, using a shared certificate. Open the [official website](https://altload.org/) in Safari, accept the Terms, add the DNS profile and tap a signed install.
 - **AltStore or SideStore.** If you already run one, [add the source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) and get updates there.
 - **Your own signer.** Download `AltLoad.ipa` from [Releases](https://github.com/mirazbakis/AltLoad/releases).
 
@@ -143,6 +143,6 @@ make sim    # a Simulator build
 
 AltLoad is open source under a custom MIT-based license. You can read it, change it, build it for yourself and reuse parts in non-commercial projects with the credit *"Based on AltLoad by mirazbakis"*. Builds may only be distributed through this repository and the official website. See [LICENSE.md](LICENSE.md).
 
-Report security issues as described in [SECURITY.md](SECURITY.md). Using AltLoad means agreeing to the [Terms of Service](https://mirazbakis.github.io/AltLoad/terms.html). AltLoad isn't affiliated with Apple or with any app it installs.
+Report security issues as described in [SECURITY.md](SECURITY.md). Using AltLoad means agreeing to the [Terms of Service](https://altload.org/terms.html). AltLoad isn't affiliated with Apple or with any app it installs.
 
 See [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md) for the projects AltLoad relies on, and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for licenses.

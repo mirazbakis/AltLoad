@@ -30,7 +30,7 @@ site/
    `_site/installs/altload<N>/{app.ipa,manifest.plist}`.
 3. Builds `_site/installs/index.json`; `site/index.html` fetches it and renders a button
    per slot — **labelled with the app id** — pointing at `itms-services://…/manifest.plist`.
-4. Deploys `_site` to GitHub Pages at `https://mirazbakis.github.io/AltLoad/`.
+4. Deploys `_site` to GitHub Pages at `https://altload.org/`.
 
 Triggers: **Actions → "Sign IPAs & Deploy OTA" → Run workflow**, any push under
 `signing/**`, `site/**` or the workflow file, every published release, and once a

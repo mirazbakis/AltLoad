@@ -6,7 +6,7 @@ import Foundation
 final class UpdateChecker: ObservableObject {
     static let shared = UpdateChecker()
 
-    static let downloadPage = URL(string: "https://mirazbakis.github.io/AltLoad/")!
+    static let downloadPage = URL(string: "https://altload.org/")!
     private static let latestRelease = URL(string: "https://api.github.com/repos/mirazbakis/AltLoad/releases/latest")!
     private static let dismissedKey = "update.dismissedVersion"
     private static let checkInterval: TimeInterval = 6 * 60 * 60

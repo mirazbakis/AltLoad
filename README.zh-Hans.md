@@ -6,14 +6,14 @@
 
 **直接用你自己的 Apple ID 在 iPhone 上安装 AltStore、SideStore 和 LiveContainer。无需电脑，不共享证书。**
 
-[安装](https://mirazbakis.github.io/AltLoad/) · [下载 IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [添加源](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [发布版本](https://github.com/mirazbakis/AltLoad/releases)
+[安装](https://altload.org/) · [下载 IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [添加源](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [发布版本](https://github.com/mirazbakis/AltLoad/releases)
 
 [English](README.md) · 简体中文 · [Русский](README.ru.md) · [Français](README.fr.md)
 
 </div>
 
 > [!CAUTION]
-> **只从[官方网站](https://mirazbakis.github.io/AltLoad/)或[本仓库](https://github.com/mirazbakis/AltLoad)安装 AltLoad。**
+> **只从[官方网站](https://altload.org/)或[本仓库](https://github.com/mirazbakis/AltLoad)安装 AltLoad。**
 >
 > AltLoad 会处理你的 Apple ID 密码和 iPhone 的配对数据，被修改的副本可能会把这两者发送给他人。其他任何网站、源、文件托管、Telegram 频道或 Discord 服务器都是非官方的，即使看起来很真实。这也包括 **applejr.net**，它与 AltLoad 没有关联：其上的副本并非由我发布或检查，可能已被修改。AltLoad 是免费的。我只在官方网站和本仓库发布构建版本，分支不得发布构建版本。
 >
@@ -53,8 +53,8 @@ AltLoad 在 iPhone 上完成电脑的工作。它让手机与自身配对，用�
 
 **1. 获取 AltLoad。** 选择一种方式：
 
-- **Apple ID 安装（altpair）。** 使用你自己的 Apple ID 签名，无需电脑，也无需 DNS 描述文件。你需要安装三款免费的 App Store 应用，并按照[官方网站](https://mirazbakis.github.io/AltLoad/)上的步骤操作。参见 [altpair/README.md](altpair/README.md)。
-- **直接安装。** 最快的方式，使用共享证书。在 Safari 中打开[官方网站](https://mirazbakis.github.io/AltLoad/)，接受条款，添加 DNS 描述文件，然后点按已签名的安装。
+- **Apple ID 安装（altpair）。** 使用你自己的 Apple ID 签名，无需电脑，也无需 DNS 描述文件。你需要安装三款免费的 App Store 应用，并按照[官方网站](https://altload.org/)上的步骤操作。参见 [altpair/README.md](altpair/README.md)。
+- **直接安装。** 最快的方式，使用共享证书。在 Safari 中打开[官方网站](https://altload.org/)，接受条款，添加 DNS 描述文件，然后点按已签名的安装。
 - **AltStore 或 SideStore。** 如果你已经在使用其中之一，请[添加源](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json)并在那里获取更新。
 - **使用你自己的签名工具。** 从[发布版本](https://github.com/mirazbakis/AltLoad/releases)下载 `AltLoad.ipa`。
 
@@ -143,6 +143,6 @@ make sim    # 构建模拟器版本
 
 AltLoad 是基于自定义 MIT 许可证的开源软件。你可以阅读、修改、为自己构建它，并在非商业项目中复用其部分内容，但须注明 *"Based on AltLoad by mirazbakis"*。构建版本只能通过本仓库和官方网站分发。参见 [LICENSE.md](LICENSE.md)。
 
-按照 [SECURITY.md](SECURITY.md) 中的说明报告安全问题。使用 AltLoad 即表示你同意[服务条款](https://mirazbakis.github.io/AltLoad/terms.html)。AltLoad 与 Apple 以及它安装的任何应用均无关联。
+按照 [SECURITY.md](SECURITY.md) 中的说明报告安全问题。使用 AltLoad 即表示你同意[服务条款](https://altload.org/terms.html)。AltLoad 与 Apple 以及它安装的任何应用均无关联。
 
 有关 AltLoad 所依赖的项目，请参见 [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)；有关许可证，请参见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

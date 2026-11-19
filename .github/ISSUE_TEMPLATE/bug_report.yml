@@ -65,7 +65,7 @@ body:
       label: Where did you get AltLoad?
       options:
         - GitHub Releases
-        - mirazbakis.github.io/AltLoad (signed copy)
+        - altload.org (signed copy)
         - altpair (Apple ID Install)
         - AltStore / SideStore source
         - Somewhere else

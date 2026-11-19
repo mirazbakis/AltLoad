@@ -33,7 +33,7 @@ I wrote altpair from scratch as a pair of small tools for AltLoad:
 5. Open Open Minis. Run the installer:
 
    ```sh
-   wget -qO- https://mirazbakis.github.io/AltLoad/install.sh | sh
+   wget -qO- https://altload.org/install.sh | sh
    ```
 
 6. Enter the transfer code, your Apple ID and your password when asked. If your Apple ID has more than one developer team, `altpair` lists them (name, ID, type) and you pick by number. Return takes the first.

@@ -26,7 +26,7 @@ struct WelcomeView: View {
                 Spacer()
                 VStack(spacing: 12) {
                     GlassActionButton(title: "Continue", prominent: true, action: onContinue)
-                    Text("Official downloads: mirazbakis.github.io/AltLoad")
+                    Text("Official downloads: altload.org")
                         .font(.caption)
                         .foregroundStyle(Aurora.secondaryText)
                 }

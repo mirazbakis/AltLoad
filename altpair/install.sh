@@ -4,11 +4,11 @@
 #
 # In the Open Minis terminal on the iPhone, with LocalDevVPN connected:
 #
-#   wget -qO- https://mirazbakis.github.io/AltLoad/install.sh | sh
+#   wget -qO- https://altload.org/install.sh | sh
 #
 # Arguments after "sh -s --" are passed to altpair, for example:
 #
-#   wget -qO- https://mirazbakis.github.io/AltLoad/install.sh | sh -s -- --repair
+#   wget -qO- https://altload.org/install.sh | sh -s -- --repair
 #
 # altpair is downloaded from AltLoad's latest release, checked against its
 # published SHA-256, and kept in ~/.altload/bin. Nothing is installed unless the

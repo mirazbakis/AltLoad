@@ -19416,54 +19416,54 @@
         }
       }
     },
-    "Official downloads: mirazbakis.github.io/AltLoad": {
+    "Official downloads: altload.org": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offizielle Downloads: mirazbakis.github.io/AltLoad"
+            "value": "Offizielle Downloads: altload.org"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Descargas oficiales: mirazbakis.github.io/AltLoad"
+            "value": "Descargas oficiales: altload.org"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Téléchargements officiels : mirazbakis.github.io/AltLoad"
+            "value": "Téléchargements officiels : altload.org"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Download ufficiali: mirazbakis.github.io/AltLoad"
+            "value": "Download ufficiali: altload.org"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "公式ダウンロード: mirazbakis.github.io/AltLoad"
+            "value": "公式ダウンロード: altload.org"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Downloads oficiais: mirazbakis.github.io/AltLoad"
+            "value": "Downloads oficiais: altload.org"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Официальные загрузки: mirazbakis.github.io/AltLoad"
+            "value": "Официальные загрузки: altload.org"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "官方下载：mirazbakis.github.io/AltLoad"
+            "value": "官方下载：altload.org"
           }
         }
       }

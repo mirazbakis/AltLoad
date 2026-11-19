@@ -52,7 +52,7 @@ struct AboutView: View {
                 VStack(spacing: 10) {
                     SectionLabel(title: "Legal")
                     VStack(spacing: 0) {
-                        link(String(localized: "Terms of Service"), symbol: "doc.text", url: "https://mirazbakis.github.io/terms.html")
+                        link(String(localized: "Terms of Service"), symbol: "doc.text", url: "https://mirazbakis.com/terms.html")
                         divider
                         link(String(localized: "AltLoad License"), symbol: "checkmark.seal", url: "https://github.com/mirazbakis/AltLoad/blob/main/LICENSE.md")
                         divider
@@ -66,7 +66,7 @@ struct AboutView: View {
                 VStack(spacing: 10) {
                     SectionLabel(title: "Project")
                     VStack(spacing: 0) {
-                        link(String(localized: "Website"), symbol: "globe", url: "https://mirazbakis.github.io/AltLoad.html")
+                        link(String(localized: "Website"), symbol: "globe", url: "https://altload.org/")
                         divider
                         link(String(localized: "Source Code"), symbol: "chevron.left.forwardslash.chevron.right", url: "https://github.com/mirazbakis/AltLoad")
                         divider

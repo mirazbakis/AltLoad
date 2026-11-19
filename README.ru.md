@@ -6,14 +6,14 @@
 
 **Установите AltStore, SideStore и LiveContainer с iPhone, подписав их своим Apple ID. Без компьютера и без общего сертификата.**
 
-[Установить](https://mirazbakis.github.io/AltLoad/) · [Скачать IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [Добавить источник](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [Релизы](https://github.com/mirazbakis/AltLoad/releases)
+[Установить](https://altload.org/) · [Скачать IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [Добавить источник](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [Релизы](https://github.com/mirazbakis/AltLoad/releases)
 
 [English](README.md) · [简体中文](README.zh-Hans.md) · Русский · [Français](README.fr.md)
 
 </div>
 
 > [!CAUTION]
-> **Устанавливайте AltLoad только с [официального сайта](https://mirazbakis.github.io/AltLoad/) или из [этого репозитория](https://github.com/mirazbakis/AltLoad).**
+> **Устанавливайте AltLoad только с [официального сайта](https://altload.org/) или из [этого репозитория](https://github.com/mirazbakis/AltLoad).**
 >
 > AltLoad работает с паролем вашего Apple ID и данными сопряжения вашего iPhone. Измененная копия может передать их кому-то другому. Любой другой сайт, источник, файловый хостинг, канал в Telegram или сервер Discord является неофициальным, даже если выглядит настоящим. Это относится и к **applejr.net**: он не связан с AltLoad, его копии не публикуются и не проверяются мной и могут быть изменены. AltLoad бесплатен. Я публикую сборки только на официальном сайте и в этом репозитории, а форкам публиковать сборки запрещено.
 >
@@ -53,8 +53,8 @@ AltLoad делает работу компьютера на iPhone. Он соп�
 
 **1. Получите AltLoad.** Выберите один из путей:
 
-- **Установка через Apple ID (altpair).** Подпись вашим Apple ID, без компьютера и без профиля DNS. Вы устанавливаете три бесплатных приложения из App Store и следуете шагам на [официальном сайте](https://mirazbakis.github.io/AltLoad/). См. [altpair/README.md](altpair/README.md).
-- **Прямая установка.** Самый быстрый путь, с использованием общего сертификата. Откройте [официальный сайт](https://mirazbakis.github.io/AltLoad/) в Safari, примите условия, добавьте профиль DNS и нажмите подписанную установку.
+- **Установка через Apple ID (altpair).** Подпись вашим Apple ID, без компьютера и без профиля DNS. Вы устанавливаете три бесплатных приложения из App Store и следуете шагам на [официальном сайте](https://altload.org/). См. [altpair/README.md](altpair/README.md).
+- **Прямая установка.** Самый быстрый путь, с использованием общего сертификата. Откройте [официальный сайт](https://altload.org/) в Safari, примите условия, добавьте профиль DNS и нажмите подписанную установку.
 - **AltStore или SideStore.** Если вы уже используете один из них, [добавьте источник](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) и получайте обновления там.
 - **Собственный подписывающий инструмент.** Скачайте `AltLoad.ipa` из [Релизов](https://github.com/mirazbakis/AltLoad/releases).
 
@@ -143,6 +143,6 @@ make sim    # сборка для Simulator
 
 AltLoad распространяется с открытым исходным кодом по собственной лицензии на основе MIT. Вы можете читать его, изменять, собирать для себя и повторно использовать части в некоммерческих проектах с указанием авторства *"Based on AltLoad by mirazbakis"*. Сборки можно распространять только через этот репозиторий и официальный сайт. См. [LICENSE.md](LICENSE.md).
 
-Сообщайте о проблемах безопасности так, как описано в [SECURITY.md](SECURITY.md). Используя AltLoad, вы соглашаетесь с [Условиями использования](https://mirazbakis.github.io/AltLoad/terms.html). AltLoad не связан с Apple и с любым приложением, которое он устанавливает.
+Сообщайте о проблемах безопасности так, как описано в [SECURITY.md](SECURITY.md). Используя AltLoad, вы соглашаетесь с [Условиями использования](https://altload.org/terms.html). AltLoad не связан с Apple и с любым приложением, которое он устанавливает.
 
 Проекты, на которые опирается AltLoad, перечислены в [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md), а лицензии — в [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

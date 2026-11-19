@@ -4,5 +4,5 @@ contact_links:
     url: https://github.com/mirazbakis/AltLoad/blob/main/SECURITY.md
     about: Please report security problems privately, as described in the security policy.
   - name: Install guide
-    url: https://mirazbakis.github.io/AltLoad/
+    url: https://altload.org/
     about: Step-by-step install instructions and answers to common questions.
