@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Direct Install · AltLoad</title>
+<meta name="description" content="Install AltLoad in about two minutes: add the DNS profile, tap Install, trust it.">
+<meta property="og:title" content="Direct Install · AltLoad">
+<meta property="og:description" content="Install AltLoad in about two minutes from Safari on your iPhone.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://altload.org/AltLoad.png">
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" href="AltLoad.png">
+<link rel="apple-touch-icon" href="AltLoad.png">
+<style>
+  :root{
+    --bg:#000;
+    --card:#0b0b0b;
+    --card-hi:#141414;
+    --edge:rgba(255,255,255,.1);
+    --edge-hi:rgba(255,255,255,.28);
+    --ink:#fff;
+    --ink-2:rgba(255,255,255,.66);
+    --ink-3:rgba(255,255,255,.42);
+    --mint:#86ead8;
+    --bad:#ff8a8a;
+    --btn:#fff;
+    --btn-ink:#000;
+    --sans:-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--bg)}
+  body{font-family:var(--sans);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:clip;background:var(--bg)}
+  a{color:inherit}
+  img{display:block}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  .wrap{width:min(1080px,100% - 40px);margin-inline:auto}
+  .col{width:min(600px,100% - 40px);margin-inline:auto}
+  @media (max-width:560px){.wrap,.col{width:calc(100% - 32px)}}
+
+  /* ---- nav (same as the main page) ---- */
+  .nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
+    background:rgba(0,0,0,.78);border-bottom:1px solid var(--edge)}
+  .nav .wrap{display:flex;align-items:center;gap:10px;height:60px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;text-decoration:none}
+  .brand img{width:30px;height:30px;border-radius:8px}
+  .nav nav{margin-left:auto;display:flex;align-items:center;gap:4px}
+  .nav nav a{padding:8px 12px;border-radius:99px;font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:none}
+  .nav nav a:hover{color:var(--ink);background:var(--card)}
+  @media (max-width:420px){.nav nav a{padding:7px 9px;font-size:13.5px}.brand{gap:8px;font-size:16px}.brand img{width:26px;height:26px}}
+
+  /* ---- page head ---- */
+  .head{padding:36px 0 26px;text-align:center}
+  .back{display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:none}
+  .back:hover{color:var(--ink)}
+  .back svg{width:16px;height:16px}
+  .app{width:88px;height:88px;border-radius:21px;margin:22px auto 0;box-shadow:0 0 0 1px var(--edge)}
+  h1{font-size:clamp(30px,6vw,40px);font-weight:800;letter-spacing:-.04em;line-height:1.1;margin-top:16px}
+  .meta{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .meta span{height:28px;display:inline-flex;align-items:center;padding:0 11px;border-radius:99px;border:1px solid var(--edge);font-size:13px;font-weight:600;color:var(--ink-2)}
+  .meta .v{color:var(--ink)}
+
+  /* ---- small banners ---- */
+  .note{display:flex;gap:11px;align-items:flex-start;padding:13px 15px;border-radius:16px;border:1px solid var(--edge);background:var(--card);font-size:14px;color:var(--ink-2);margin-top:12px}
+  .note svg{flex:none;width:18px;height:18px;margin-top:1px;color:var(--ink-3)}
+  .note a{color:var(--ink);font-weight:650}
+  .note code{font-family:var(--mono);font-size:13px;color:var(--ink)}
+  .note.desk{display:none}
+  .note.desk.on{display:flex}
+  .note .cp{margin-left:auto;flex:none;font-size:13px;font-weight:650;padding:4px 11px;border-radius:99px;border:1px solid var(--edge-hi)}
+
+  .agree{display:flex;align-items:center;gap:12px;margin-top:12px;padding:14px 16px;border-radius:16px;border:1px solid var(--edge-hi);font-size:15px;cursor:pointer;transition:border-color .2s,background .2s}
+  .agree input{appearance:none;-webkit-appearance:none;flex:none;width:22px;height:22px;border-radius:7px;border:1.5px solid var(--edge-hi);display:grid;place-items:center;cursor:pointer}
+  .agree input:checked{background:#fff;border-color:#fff}
+  .agree input:checked::after{content:"";width:6px;height:11px;border:solid #000;border-width:0 2.5px 2.5px 0;transform:translate(0,-1px) rotate(45deg)}
+  .agree a{font-weight:650}
+  .agree.ok{border-color:var(--edge)}
+  .agree.nudge{border-color:#fff;background:var(--card-hi)}
+
+  /* ---- steps: three grouped cards ---- */
+  .step{margin-top:30px}
+  .step-h{display:flex;align-items:center;gap:10px;padding:0 4px 10px}
+  .step-h .n{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:800;background:#fff;color:#000}
+  .step-h h2{font-size:17px;font-weight:750;letter-spacing:-.01em}
+  .step-h .r{margin-left:auto;font-size:13px;color:var(--ink-3);font-weight:600}
+  .group{border-radius:20px;border:1px solid var(--edge);background:var(--card);overflow:hidden}
+
+  .row{display:flex;align-items:center;gap:13px;padding:13px 14px;min-height:68px}
+  .row + .row{border-top:1px solid var(--edge)}
+  .ico{flex:none;width:44px;height:44px;border-radius:11px;display:grid;place-items:center;background:var(--card-hi);border:1px solid var(--edge)}
+  .ico svg{width:22px;height:22px;color:var(--ink)}
+  .row img.ico{padding:0;border:0;box-shadow:0 0 0 1px var(--edge)}
+  .t{min-width:0;flex:1}
+  .t b{display:block;font-size:15.5px;font-weight:650;line-height:1.3}
+  .t small{display:block;font-size:13px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .t small.id{font-family:var(--mono);font-size:11.5px}
+
+  .pill{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:76px;height:34px;padding:0 15px;border-radius:99px;
+    font-size:14px;font-weight:750;text-decoration:none;background:#fff;color:#000;transition:opacity .15s,transform .1s}
+  .pill:active{transform:scale(.96)}
+  .pill.line{background:transparent;color:var(--ink);border:1px solid var(--edge-hi)}
+  .pill[aria-disabled="true"]{opacity:.35}
+
+  .how{border-top:1px solid var(--edge)}
+  .how summary{list-style:none;cursor:pointer;padding:12px 16px;font-size:14px;font-weight:650;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+  .how summary::-webkit-details-marker{display:none}
+  .how summary::after{content:"";width:7px;height:7px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);margin:-3px 0 0 4px;transition:transform .2s}
+  .how[open] summary::after{transform:rotate(225deg);margin-top:3px}
+  .how ol{padding:0 16px 14px 36px;font-size:14px;color:var(--ink-2);display:grid;gap:5px}
+  .how b{color:var(--ink)}
+  .credit{padding:0 16px 14px;font-size:12.5px;color:var(--ink-3)}
+
+  /* the one big button */
+  .quick{padding:16px}
+  .big{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;height:54px;border-radius:99px;background:#fff;color:#000;
+    font-size:17px;font-weight:800;text-decoration:none;transition:opacity .15s,transform .1s}
+  .big:active{transform:scale(.985)}
+  .big svg{width:20px;height:20px}
+  .big[aria-disabled="true"]{opacity:.35}
+  .quick p{text-align:center;font-size:13px;color:var(--ink-3);margin-top:10px}
+
+  /* after a tap: what to expect, and a way to the next one */
+  .after{display:none;margin:0 16px 16px;padding:14px 15px;border-radius:14px;background:var(--card-hi);border:1px solid var(--edge);font-size:14px;color:var(--ink-2)}
+  .after.on{display:block}
+  .after b{color:var(--ink)}
+  .after .acts{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+
+  .list-h{display:flex;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid var(--edge);font-size:13px;font-weight:650;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+  .list-h span{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:600}
+  .copies{list-style:none;border-top:1px solid var(--edge)}
+  .copies .row{min-height:64px}
+  .copies .empty{justify-content:center;color:var(--ink-3);font-size:14px}
+  .t b.id{font-size:14.5px;font-weight:650;overflow-wrap:anywhere;line-height:1.35}
+  .st{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:650;color:var(--ink-3);margin-top:3px}
+  .st .ok{display:inline-flex;align-items:center;gap:5px;color:var(--mint)}
+  .st .ok i{width:6px;height:6px;border-radius:50%;background:var(--mint)}
+  .st .tried{color:var(--ink-3);font-weight:600}
+  .copies .row.was .t b{color:var(--ink-2)}
+
+  .path{padding:14px 16px;font-size:14.5px;color:var(--ink-2)}
+  .path b{color:var(--ink)}
+  .path + .path{border-top:1px solid var(--edge)}
+
+  /* ---- help ---- */
+  .help{margin-top:34px}
+  .help h2{font-size:17px;font-weight:750;padding:0 4px 10px}
+  .help details{border-top:1px solid var(--edge)}
+  .help details:first-of-type{border-top:0}
+  .help summary{list-style:none;cursor:pointer;padding:14px 16px;font-size:15px;font-weight:650}
+  .help summary::-webkit-details-marker{display:none}
+  .help details p{padding:0 16px 15px;font-size:14px;color:var(--ink-2)}
+  .help a{color:var(--ink);font-weight:650}
+
+  footer{border-top:1px solid var(--edge);padding:30px 0 46px;margin-top:56px;font-size:13.5px;color:var(--ink-3)}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center}
+  footer a{color:var(--ink-2);text-decoration:none}
+  footer a:hover{color:var(--ink)}
+  footer span{margin-left:auto}
+  @media (max-width:640px){footer span{margin-left:0;flex-basis:100%}}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="AltLoad.png" alt="">AltLoad</a>
+    <nav>
+      <a href="./#install">Install options</a>
+      <a href="https://github.com/mirazbakis/AltLoad">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="col">
+  <div class="head">
+    <a class="back" href="./#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>All install options</a>
+    <img class="app" src="AltLoad.png" alt="">
+    <h1>Direct Install</h1>
+    <div class="meta"><span class="v">Version&nbsp;<b id="ver">…</b></span><span>About 2 minutes</span></div>
+  </div>
+
+  <p class="note desk" id="desk">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>
+    <span>Open <code>altload.org/direct</code> in Safari on the iPhone or iPad you're setting up.</span>
+    <button type="button" class="cp" data-copy="https://altload.org/direct">Copy</button>
+  </p>
+
+  <p class="note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+    <span>These copies share certificates, so any of them can stop working. For a copy signed by you that nobody else can revoke, use <a href="./#apple-id">Apple ID Install</a>.</span>
+  </p>
+
+  <label class="agree" id="tosRow">
+    <input type="checkbox" id="tos">
+    <span>I've read and accept the <a href="terms.html">Terms of Service</a>.</span>
+  </label>
+
+  <!-- 1. DNS profile -->
+  <section class="step">
+    <div class="step-h"><span class="n">1</span><h2>Add the DNS profile</h2><span class="r">Once</span></div>
+    <div class="group">
+      <div class="row">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6L12 3z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <div class="t"><b>AltLoad DNS</b><small>Keeps the shared certificates working longer</small></div>
+        <a class="pill gated" href="AltLoadDNS.mobileconfig" aria-disabled="true">Get</a>
+      </div>
+      <details class="how">
+        <summary>Then install it in Settings</summary>
+        <ol>
+          <li>Tap <b>Allow</b> when Safari asks.</li>
+          <li>Settings › <b>Profile Downloaded</b> › <b>Install</b>.</li>
+          <li>General › VPN &amp; Device Management › <b>DNS</b> › <b>AltLoad</b>.</li>
+        </ol>
+        <p class="credit">DNS thanks to madNS by WSF Team.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- 2. Install -->
+  <section class="step">
+    <div class="step-h"><span class="n">2</span><h2>Install AltLoad</h2></div>
+    <div class="group">
+      <div class="quick">
+        <a class="big get" id="quick" href="#" aria-disabled="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+          <span id="quickText">Install AltLoad</span>
+        </a>
+        <p id="quickHint">Picks a certificate for you. Tap again to try the next one.</p>
+      </div>
+      <div class="after" id="after">
+        <b>Go to your Home Screen.</b> AltLoad should appear and start downloading within a few seconds.
+        If nothing appears, or it says it can't be installed, that certificate is used up.
+        <div class="acts"><button type="button" class="pill line" id="worked">It worked</button></div>
+      </div>
+      <div class="list-h">All certificates<span id="count"></span></div>
+      <ul class="copies" id="copies"><li class="row empty">Loading…</li></ul>
+    </div>
+  </section>
+
+  <!-- 3. Trust -->
+  <section class="step">
+    <div class="step-h"><span class="n">3</span><h2>Trust it</h2></div>
+    <div class="group">
+      <p class="path">Settings › General › <b>VPN &amp; Device Management</b> › the developer under Enterprise App › <b>Trust</b>.</p>
+      <p class="path">Once AltLoad opens, you can delete the DNS profile in the same place.</p>
+    </div>
+  </section>
+
+  <section class="help">
+    <h2>If it doesn't work</h2>
+    <div class="group">
+      <details><summary>Tapping Install does nothing.</summary><p>Tick the Terms box above, and make sure you're in Safari, not another browser or an in-app browser. If it still does nothing, add the DNS profile first.</p></details>
+      <details><summary>"Unable to install AltLoad".</summary><p>That certificate is revoked or full. Tap <b>Install AltLoad</b> again, or pick another certificate from the list.</p></details>
+      <details><summary>It installed but won't open.</summary><p>Trust it in step 3. If it closes right away, its certificate was revoked: delete it and install from another certificate.</p></details>
+      <details><summary>None of them work.</summary><p>All the shared certificates can be revoked at once. Use <a href="./#apple-id">Apple ID Install</a>, which signs AltLoad with your own Apple ID.</p></details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="./">Home</a>
+    <a href="https://github.com/mirazbakis/AltLoad/releases">Releases</a>
+    <a href="terms.html">Terms</a>
+    <span>© 2026 mirazbakis. Not affiliated with Apple, AltStore, SideStore or LiveContainer.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var list = document.getElementById('copies');
+  var countEl = document.getElementById('count');
+  var verEl = document.getElementById('ver');
+  var quick = document.getElementById('quick');
+  var quickText = document.getElementById('quickText');
+  var quickHint = document.getElementById('quickHint');
+  var after = document.getElementById('after');
+  var tos = document.getElementById('tos');
+  var tosRow = document.getElementById('tosRow');
+  var KEY = 'altload-terms';      // shared with the main page
+  var TRIED = 'altload-tried';    // which certificates this visitor already tapped
+  var slots = [];
+  var tried = {};
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function num(slug){ var m=/(\d+)$/.exec(slug||''); return m ? parseInt(m[1],10) : 0; }
+  function load(k, d){ try{ return JSON.parse(localStorage.getItem(k) || 'null') || d; }catch(e){ return d; } }
+  function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+  // Outside iOS, say where to open the page instead.
+  var ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  if(!ios) document.getElementById('desk').classList.add('on');
+
+  // Install links unlock once the Terms box is ticked.
+  function gate(){
+    var state = tos.checked ? 'false' : 'true';
+    [].forEach.call(document.querySelectorAll('.gated, .get'), function(a){ a.setAttribute('aria-disabled', state); });
+    tosRow.classList.toggle('ok', tos.checked);
+  }
+  try{ tos.checked = localStorage.getItem(KEY)==='1'; }catch(e){}
+  tos.addEventListener('change', function(){
+    try{ tos.checked ? localStorage.setItem(KEY,'1') : localStorage.removeItem(KEY); }catch(e){}
+    gate();
+  });
+
+  // A certificate is keyed by its app id and version, so a new release starts fresh.
+  function key(s){ return (s.bundleId || s.slug) + '@' + (s.version || ''); }
+  // Valid means not expired. A revoked one still installs with the DNS profile.
+  function isValid(s){ return s.status === 'valid' || s.status === 'revoked'; }
+  function order(a, b){
+    return (isValid(b) ? 1 : 0) - (isValid(a) ? 1 : 0) || num(a.slug) - num(b.slug);
+  }
+  // The first certificate this visitor hasn't tried yet, best first.
+  function pick(){
+    for(var i = 0; i < slots.length; i++) if(!tried[key(slots[i])]) return slots[i];
+    return null;
+  }
+
+  function paint(){
+    var p = pick();
+    if(!slots.length){
+      quickText.textContent = 'No certificates right now';
+      quick.removeAttribute('href');
+      quickHint.innerHTML = 'Use <a href="./#apple-id">Apple ID Install</a> instead.';
+      list.innerHTML = '<li class="row empty">No signed copies right now.</li>';
+      countEl.textContent = '';
+      return;
+    }
+    var n = Object.keys(tried).length;
+    quick.href = p ? p.installUrl : slots[0].installUrl;
+    quickText.textContent = n && p ? 'Try the next one' : 'Install AltLoad';
+    quickHint.textContent = !p ? 'You’ve tried them all. Tap to start again from the top.'
+      : 'Picks a certificate for you. Tap again to try the next one.';
+    var valid = slots.filter(isValid).length;
+    countEl.textContent = slots.length + (valid ? ' · ' + valid + ' valid' : '');
+    list.innerHTML = slots.map(function(s){
+      var was = !!tried[key(s)];
+      return '<li class="row' + (was ? ' was' : '') + '">'
+        + '<img class="ico" src="' + esc(s.iconUrl || 'AltLoad.png') + '" alt="">'
+        + '<div class="t"><b class="id">' + esc(s.bundleId || s.slug).replace(/\./g, '.<wbr>') + '</b>'
+        + ((isValid(s) || was) ? '<span class="st">' + (isValid(s) ? '<span class="ok"><i></i>Valid</span>' : '')
+          + (was ? '<span class="tried">' + (isValid(s) ? ' · ' : '') + 'tried</span>' : '') + '</span>' : '')
+        + '</div>'
+        + '<a class="pill get' + (was ? ' line' : '') + '" data-k="' + esc(key(s)) + '" href="' + esc(s.installUrl) + '">'
+        + (was ? 'Again' : 'Install') + '</a></li>';
+    }).join('');
+    gate();
+  }
+
+  document.addEventListener('click', function(e){
+    var cp = e.target.closest && e.target.closest('.cp');
+    if(cp){
+      var t = cp.getAttribute('data-copy');
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ cp.textContent = 'Copied'; }, function(){ cp.textContent = 'Select it'; });
+      return;
+    }
+    var a = e.target.closest && e.target.closest('.gated, .get');
+    if(!a) return;
+    if(!tos.checked){
+      e.preventDefault();
+      tosRow.scrollIntoView({behavior:'smooth', block:'center'});
+      tosRow.classList.add('nudge');
+      setTimeout(function(){ tosRow.classList.remove('nudge'); }, 900);
+      return;
+    }
+    if(!a.classList.contains('get') || !slots.length) return;
+    // Remember which certificate was tapped, after the link has had its turn.
+    var k = a.getAttribute('data-k');
+    if(!k){
+      var p = pick();
+      if(!p){ tried = {}; p = slots[0]; a.href = p.installUrl; }
+      k = key(p);
+    }
+    tried[k] = Date.now(); save(TRIED, tried);
+    after.classList.add('on');
+    setTimeout(paint, 0);
+  });
+  document.getElementById('worked').addEventListener('click', function(){
+    after.classList.remove('on');
+    document.querySelectorAll('.step')[2].scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  fetch('installs/index.json', {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      slots = ((d && d.slots) || []).slice().sort(order);
+      if(slots.length && slots[0].version) verEl.textContent = slots[0].version; else verEl.textContent = '';
+      // Forget certificates that are no longer listed (a new release, say).
+      var keep = {}, all = load(TRIED, {});
+      slots.forEach(function(s){ if(all[key(s)]) keep[key(s)] = all[key(s)]; });
+      tried = keep; save(TRIED, tried);
+      paint();
+    })
+    .catch(function(){ slots = []; paint(); });
+
+  gate();
+})();
+</script>
+</body>
+</html>

@@ -39,6 +39,7 @@ for meta in "$OUT_DIR"/installs/*/meta.txt; do
   BUNDLE_ID="$(read_meta BUNDLE_ID "$meta")"
   MANIFEST_URL="$(read_meta MANIFEST_URL "$meta")"
   ICON_URL="$(read_meta ICON_URL "$meta")"
+  STATUS="$(read_meta STATUS "$meta")"
   INSTALL_URL="itms-services://?action=download-manifest&url=${MANIFEST_URL}"
 
   OBJ="$(cat <<JSON
@@ -49,6 +50,7 @@ for meta in "$OUT_DIR"/installs/*/meta.txt; do
       "bundleId": "$(json_esc "$BUNDLE_ID")",
       "manifestUrl": "$(json_esc "$MANIFEST_URL")",
       "iconUrl": "$(json_esc "$ICON_URL")",
+      "status": "$(json_esc "${STATUS:-unverified}")",
       "installUrl": "$(json_esc "$INSTALL_URL")"
     }
 JSON

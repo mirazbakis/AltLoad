@@ -115,6 +115,7 @@
   /* ---- install ---- */
   .install{border-block:1px solid var(--edge)}
   #apple-id,#direct{scroll-margin-top:76px}
+  .direct-go{margin-top:6px}
   .sub-h{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
 
   /* the two routes compared, each with a jump link */
@@ -456,7 +457,7 @@
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>May stop working without notice</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>Needs a DNS profile</li>
           </ul>
-          <a class="pk-go" href="#direct">Go<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
+          <a class="pk-go" href="direct.html">Go<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
         </div>
       </div>
 
@@ -633,49 +634,8 @@
           </div>
           <span class="tag tag-dns">DNS profile</span>
         </div>
-        <ol class="dsteps">
-          <li class="dstp">
-            <div class="stp-top">
-              <span class="num">1</span>
-              <div class="stp-h"><h4>Add the DNS profile</h4><span class="where">Safari, Settings</span>
-                <p class="why">The profile stops your iPhone from checking whether these shared certificates were revoked, so they keep working longer.</p></div>
-              <a class="getapp gated" href="AltLoadDNS.mobileconfig" aria-disabled="true">Get Profile</a>
-            </div>
-            <div class="stp-body">
-              <ol class="flow">
-                <li>Tap <b>Get Profile</b>, then <b>Allow</b>.</li>
-                <li>Settings › <b>Profile Downloaded</b> › <b>Install</b>.</li>
-                <li>General › VPN &amp; Device Management › <b>DNS</b> › <b>AltLoad</b>.</li>
-              </ol>
-              <p class="credit">DNS thanks to madNS by WSF Team.</p>
-            </div>
-          </li>
-          <li class="dstp">
-            <div class="stp-top">
-              <span class="num">2</span>
-              <div class="stp-h"><h4>Pick a signed install</h4><span class="where">This page</span>
-                <p class="why">Each one is AltLoad signed with a different certificate.</p></div>
-              <span class="count" id="count"></span>
-            </div>
-            <div class="stp-body">
-              <div class="notice">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/></svg>
-                <span>If one won't install or open, its certificate was revoked. Try another.</span>
-              </div>
-              <ul class="copies" id="copies"><li class="copy empty">Loading…</li></ul>
-            </div>
-          </li>
-          <li class="dstp">
-            <div class="stp-top">
-              <span class="num">3</span>
-              <div class="stp-h"><h4>Trust and clean up</h4><span class="where">Settings</span>
-                <p class="why">iOS won't open AltLoad until you trust its developer.</p></div>
-            </div>
-            <div class="stp-body">
-              <p>Settings › General › <b>VPN &amp; Device Management</b> › the developer › <b>Trust</b>. Once AltLoad opens, you can remove the DNS profile in the same place.</p>
-            </div>
-          </li>
-        </ol>
+        <a class="btn btn-solid direct-go" href="direct.html">Open Direct Install<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
+        <p class="fine">Add the DNS profile, tap Install, trust it. Each copy is signed with a shared certificate, and the page picks one for you.</p>
       </div>
 
       <!-- Route 3: for people who already sideload. -->
@@ -846,11 +806,12 @@
 
   // Every signed install, always shown.
   function render(slots){
+    if(!list) return;
     if(!slots.length){
       list.innerHTML = '<li class="copy empty">No signed installs right now. Download the IPA instead.</li>';
       return;
     }
-    countEl.textContent = slots.length + ' available';
+    if(countEl) countEl.textContent = slots.length + ' available';
     list.innerHTML = slots.map(function(s, i){
       return '<li class="copy"><div class="head"><img src="' + esc(s.iconUrl || 'AltLoad.png') + '" alt="">'
         + '<div class="t"><div class="n">' + esc(s.bundleId || ('Signed Install ' + (i + 1))).replace(/\./g, '.<wbr>') + '</div>'
@@ -865,7 +826,7 @@
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(d){
       var slots = ((d && d.slots) || []).slice().sort(function(a,b){ return num(a.slug) - num(b.slug); });
-      if(slots.length && slots[0].version) verEl.textContent = slots[0].version;
+      if(verEl && slots.length && slots[0].version) verEl.textContent = slots[0].version;
       render(slots);
     })
     .catch(function(){ render([]); });
