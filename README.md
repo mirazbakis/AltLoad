@@ -13,23 +13,11 @@ English · [简体中文](README.zh-Hans.md) · [Русский](README.ru.md) �
 </div>
 
 > [!CAUTION]
-> **Only install AltLoad from the [official website](https://altload.org/) or [this repository](https://github.com/mirazbakis/AltLoad).**
->
-> AltLoad handles your Apple ID password and your iPhone's pairing data, and a modified copy could send both to someone else. Any other website, source, file host, Telegram channel or Discord server is unofficial, however real it looks. That includes **applejr.net**, which is not affiliated with AltLoad: its copies aren't published or checked by me and may be modified. AltLoad is free. The only builds I publish are on the official website and in this repository, and forks may not publish builds.
->
-> Already used an unofficial copy? Delete it, change your Apple ID password at [account.apple.com](https://account.apple.com), remove any devices you don't recognize, and delete any pairing files it could reach.
+> **[altload.org](https://altload.org/) and this repository are the only official sources.** AltLoad is free and handles your Apple ID password and pairing data, so a copy from anywhere else could be modified to steal them. Already used one? Delete it and change your Apple ID password at [account.apple.com](https://account.apple.com).
 
 ## What it does
 
-Sideloading usually means one of two things. Either a computer pairs with your iPhone, signs the app and refreshes it every 7 days, or you install from a shared certificate that its owner pays for and Apple can revoke at any time, taking every app signed with it.
-
-AltLoad does the computer's job on the iPhone. It pairs the phone with itself, signs the store with your own Apple ID, installs it, and then acts as AltServer on the same device so AltStore can refresh. It works with a free Apple ID, and your password goes to Apple only.
-
-- **No computer** at any step on iOS 27. On iOS 18 to 26 you make one pairing file on a computer, once.
-- **Your own certificate,** so there's nothing shared for someone else to revoke.
-- **Stores and apps:** AltStore, SideStore, LiveContainer, Husk, UTM, MeloNX and Madeira, or any IPA from Files.
-- **Refreshes on the phone:** AltStore refreshes itself once Remote AltServer is set up, or through AltLoad's built-in AltServer.
-- **Free and open source.** Nothing leaves the phone except the sign-in to Apple.
+Sideloading usually needs either a computer that signs your apps and refreshes them every 7 days, or a shared certificate that Apple can revoke at any time. AltLoad does the computer's job on the iPhone: it pairs the phone with itself, signs the store with your own Apple ID, installs it, and then acts as AltServer on the same device so AltStore can refresh. It works with a free Apple ID, and your password goes to Apple only.
 
 | | With a computer | With a shared certificate | With AltLoad |
 | :-- | :-- | :-- | :-- |
@@ -39,7 +27,7 @@ AltLoad does the computer's job on the iPhone. It pairs the phone with itself, s
 | JIT | Needs a computer-side tool | Not part of the certificate | Built in |
 | Cost | Free Apple ID works | Set by whoever runs the certificate | Free |
 
-## Compatibility
+## Requirements
 
 | iOS | Installing and signing | Pairing |
 | :-- | :-- | :-- |
@@ -47,16 +35,22 @@ AltLoad does the computer's job on the iPhone. It pairs the phone with itself, s
 | **18 to 26** | Supported | Import a remote pairing file made once on a computer with [iloader](https://github.com/nab138/iloader) or [idevice_pair](https://github.com/jkcoxson/idevice_pair) |
 | **17 and earlier** | Not supported | Not supported |
 
-You also need [Developer Mode](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device), [LocalDevVPN](https://apps.apple.com/app/id6755608044) from the App Store and an Apple ID. With a free Apple ID, apps last 7 days.
+You also need:
+
+- [Developer Mode](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device) turned on
+- [LocalDevVPN](https://apps.apple.com/app/id6755608044) from the App Store
+- An Apple ID. With a free one, apps last 7 days
 
 ## Install
 
 **1. Get AltLoad.** Pick one route:
 
-- **Apple ID Install (altpair).** Signed with your own Apple ID, with no computer and no DNS profile. You install three free App Store apps and follow the steps on the [official website](https://altload.org/). See [altpair/README.md](altpair/README.md).
-- **Direct Install.** The fastest route, using a shared certificate. Open the [official website](https://altload.org/) in Safari, accept the Terms, add the DNS profile and tap a signed install.
-- **AltStore or SideStore.** If you already run one, [add the source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) and get updates there.
-- **Your own signer.** Download `AltLoad.ipa` from [Releases](https://github.com/mirazbakis/AltLoad/releases).
+| Route | Best for | How |
+| :-- | :-- | :-- |
+| **Apple ID Install** (recommended) | Signing with your own Apple ID, no computer and no DNS profile | Install three free App Store apps and follow the steps on [altload.org](https://altload.org/). See [altpair/README.md](altpair/README.md) |
+| **Direct Install** | The fastest route. Uses a shared certificate, so it can be revoked | Open [altload.org](https://altload.org/) in Safari, accept the Terms, add the DNS profile and tap a signed install |
+| **AltStore or SideStore** | You already run one | [Add the source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) and get updates there |
+| **Your own signer** | You sign IPAs yourself | Download `AltLoad.ipa` from [Releases](https://github.com/mirazbakis/AltLoad/releases) |
 
 **2. Pair your iPhone.** In AltLoad, open **Tools › Pair**, then go to **Settings › Privacy & Security › Developer Mode › Pair with AltLoad** and enter the code.
 
@@ -64,22 +58,26 @@ You also need [Developer Mode](https://developer.apple.com/documentation/xcode/e
 
 ## Features
 
-| | |
-| :-- | :-- |
-| **On-device pairing** | On iOS 27, pair by entering a code from your Dynamic Island |
-| **On-device AltServer** | AltStore finds AltLoad the way it finds a computer, and it can stay running in the background |
-| **Stores** | AltStore Classic and Beta, SideStore and SideStore + LiveContainer, stable or nightly |
-| **Your own apps** | Sign and install any IPA from Files |
-| **Developer team** | Pick which team signs, if your Apple ID belongs to more than one |
-| **Entitlements** | Per-app capabilities, presets for emulators and network tools, and what the last profile actually granted |
-| **JIT** | Open apps with JIT from Tools, Shortcuts, Siri or the Home Screen. Pin the ones you use, run scripts, and take requests from links |
-| **AltStore without AltServer** | AltLoad leaves this iPhone's pairing file where AltStore 2.3.1 and later look for it, so AltStore can refresh by itself |
-| **Several Apple IDs** | Save more than one and switch when you sign in. Each app remembers the Apple ID that signed it |
-| **Pairing files** | Place this iPhone's pairing file in SideStore, StikDebug and other sideloaded apps |
-| **Automatic refresh** | Refreshes apps before they expire and re-signs revoked ones in the background, with LocalDevVPN on and the password saved |
-| **Logs** | See what AltLoad did, and copy a report when something fails. Emails are masked and passwords are never logged |
-| **More tools** | Location simulation, certificates, App IDs, and app extension options |
-| **Languages** | English, Chinese, French, German, Italian, Japanese, Portuguese (Brazil), Russian and Spanish |
+**Installing and signing**
+- **Stores:** AltStore Classic and Beta, SideStore and SideStore + LiveContainer, stable or nightly. Also Husk, UTM, MeloNX and Madeira
+- **Your own apps:** sign and install any IPA from Files
+- **Developer team:** pick which team signs, if your Apple ID belongs to more than one
+- **Several Apple IDs:** save more than one and switch when you sign in. Each app remembers the Apple ID that signed it
+- **Entitlements:** per-app capabilities, presets for emulators and network tools, and what the last profile actually granted
+
+**Pairing and refresh**
+- **On-device pairing:** on iOS 27, pair by entering a code from your Dynamic Island
+- **On-device AltServer:** AltStore finds AltLoad the way it finds a computer, and it can stay running in the background
+- **AltStore without AltServer:** AltLoad leaves this iPhone's pairing file where AltStore 2.3.1 and later look for it, so AltStore can refresh by itself
+- **Automatic refresh:** refreshes apps before they expire and re-signs revoked ones in the background, with LocalDevVPN on and the password saved
+- **Pairing files:** place this iPhone's pairing file in SideStore, StikDebug and other sideloaded apps
+
+**JIT and tools**
+- **JIT:** open apps with JIT from Tools, Shortcuts, Siri or the Home Screen. Pin the ones you use, run scripts, and take requests from links
+- **More tools:** location simulation, certificates, App IDs, and app extension options
+- **Logs:** see what AltLoad did, and copy a report when something fails. Emails are masked and passwords are never logged
+
+**Languages:** English, Chinese, French, German, Italian, Japanese, Portuguese (Brazil), Russian and Spanish.
 
 ## Troubleshooting
 

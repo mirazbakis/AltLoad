@@ -13,23 +13,11 @@
 </div>
 
 > [!CAUTION]
-> **Installez AltLoad uniquement depuis le [site officiel](https://altload.org/) ou [ce dépôt](https://github.com/mirazbakis/AltLoad).**
->
-> AltLoad traite le mot de passe de votre identifiant Apple et les données de jumelage de votre iPhone. Une copie modifiée pourrait envoyer les deux à quelqu'un d'autre. Tout autre site, source, hébergeur de fichiers, canal Telegram ou serveur Discord est non officiel, même s'il paraît authentique. C'est aussi le cas de **applejr.net**, qui n'est pas affilié à AltLoad : ses copies ne sont ni publiées ni vérifiées par moi, et elles peuvent être modifiées. AltLoad est gratuit. Je ne publie de versions que sur le site officiel et dans ce dépôt, et les forks n'ont pas le droit d'en publier.
->
-> Vous avez déjà utilisé une copie non officielle ? Supprimez-la, changez le mot de passe de votre identifiant Apple sur [account.apple.com](https://account.apple.com), retirez les appareils que vous ne reconnaissez pas et supprimez tous les fichiers de jumelage auxquels elle a pu accéder.
+> **[altload.org](https://altload.org/) et ce dépôt sont les seules sources officielles.** AltLoad est gratuit et traite le mot de passe de votre identifiant Apple et vos données de jumelage : une copie provenant d'ailleurs pourrait être modifiée pour les voler. Vous en avez déjà utilisé une ? Supprimez-la et changez le mot de passe de votre identifiant Apple sur [account.apple.com](https://account.apple.com).
 
 ## Ce qu'il fait
 
-L'installation hors App Store (sideloading) passe en général par l'une de ces deux voies. Soit un ordinateur jumelle votre iPhone, signe l'app et la renouvelle tous les 7 jours, soit vous installez à partir d'un certificat partagé payé par son propriétaire, qu'Apple peut révoquer à tout moment, ce qui désactive toutes les apps signées avec lui.
-
-AltLoad fait le travail de l'ordinateur directement sur l'iPhone. Il jumelle le téléphone avec lui-même, signe le store avec votre propre identifiant Apple, l'installe, puis agit comme AltServer sur le même appareil afin qu'AltStore puisse se renouveler. Il fonctionne avec un identifiant Apple gratuit, et votre mot de passe n'est transmis qu'à Apple.
-
-- **Aucun ordinateur** à aucune étape sous iOS 27. Sous iOS 18 à 26, vous créez un fichier de jumelage sur un ordinateur, une seule fois.
-- **Votre propre certificat**, donc rien de partagé que quelqu'un d'autre pourrait révoquer.
-- **Stores et apps :** AltStore, SideStore, LiveContainer, Husk, UTM, MeloNX et Madeira, ou toute IPA depuis Fichiers.
-- **Renouvellements sur le téléphone :** AltStore se renouvelle lui-même une fois Remote AltServer configuré, ou via l'AltServer intégré à AltLoad.
-- **Gratuit et open source.** Rien ne quitte le téléphone, à part la connexion à Apple.
+L'installation hors App Store (sideloading) demande en général soit un ordinateur qui signe vos apps et les renouvelle tous les 7 jours, soit un certificat partagé qu'Apple peut révoquer à tout moment. AltLoad fait le travail de l'ordinateur directement sur l'iPhone : il jumelle le téléphone avec lui-même, signe le store avec votre propre identifiant Apple, l'installe, puis agit comme AltServer sur le même appareil afin qu'AltStore puisse se renouveler. Il fonctionne avec un identifiant Apple gratuit, et votre mot de passe n'est transmis qu'à Apple.
 
 | | Avec un ordinateur | Avec un certificat partagé | Avec AltLoad |
 | :-- | :-- | :-- | :-- |
@@ -39,7 +27,7 @@ AltLoad fait le travail de l'ordinateur directement sur l'iPhone. Il jumelle le 
 | JIT | Nécessite un outil sur ordinateur | Ne fait pas partie du certificat | Intégré |
 | Coût | L'identifiant Apple gratuit suffit | Fixé par celui qui gère le certificat | Gratuit |
 
-## Compatibilité
+## Prérequis
 
 | iOS | Installation et signature | Jumelage |
 | :-- | :-- | :-- |
@@ -47,16 +35,22 @@ AltLoad fait le travail de l'ordinateur directement sur l'iPhone. Il jumelle le 
 | **18 à 26** | Pris en charge | Importer un fichier de jumelage distant créé une fois sur un ordinateur avec [iloader](https://github.com/nab138/iloader) ou [idevice_pair](https://github.com/jkcoxson/idevice_pair) |
 | **17 et antérieures** | Non pris en charge | Non pris en charge |
 
-Vous avez aussi besoin du [Mode développeur](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device), de [LocalDevVPN](https://apps.apple.com/app/id6755608044) depuis l'App Store et d'un identifiant Apple. Avec un identifiant Apple gratuit, les apps durent 7 jours.
+Vous avez aussi besoin de :
+
+- Du [Mode développeur](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device) activé
+- [LocalDevVPN](https://apps.apple.com/app/id6755608044) depuis l'App Store
+- Un identifiant Apple. Avec un identifiant gratuit, les apps durent 7 jours
 
 ## Installation
 
 **1. Obtenir AltLoad.** Choisissez une méthode :
 
-- **Installation avec identifiant Apple (altpair).** Signé avec votre propre identifiant Apple, sans ordinateur et sans profil DNS. Vous installez trois apps gratuites de l'App Store et suivez les étapes sur le [site officiel](https://altload.org/). Voir [altpair/README.md](altpair/README.md).
-- **Installation directe.** La méthode la plus rapide, avec un certificat partagé. Ouvrez le [site officiel](https://altload.org/) dans Safari, acceptez les Conditions, ajoutez le profil DNS et touchez une installation signée.
-- **AltStore ou SideStore.** Si vous en utilisez déjà un, [ajoutez la source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) et recevez les mises à jour depuis là.
-- **Votre propre outil de signature.** Téléchargez `AltLoad.ipa` depuis les [Versions](https://github.com/mirazbakis/AltLoad/releases).
+| Méthode | Idéal pour | Comment |
+| :-- | :-- | :-- |
+| **Installation avec identifiant Apple** (recommandée) | Signer avec votre propre identifiant Apple, sans ordinateur et sans profil DNS | Installez trois apps gratuites de l'App Store et suivez les étapes sur [altload.org](https://altload.org/). Voir [altpair/README.md](altpair/README.md) |
+| **Installation directe** | La méthode la plus rapide. Utilise un certificat partagé, donc révocable | Ouvrez [altload.org](https://altload.org/) dans Safari, acceptez les Conditions, ajoutez le profil DNS et touchez une installation signée |
+| **AltStore ou SideStore** | Vous en utilisez déjà un | [Ajoutez la source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) et recevez les mises à jour depuis là |
+| **Votre propre outil de signature** | Vous signez vous-même les IPA | Téléchargez `AltLoad.ipa` depuis les [Versions](https://github.com/mirazbakis/AltLoad/releases) |
 
 **2. Jumeler votre iPhone.** Dans AltLoad, ouvrez **Outils › Jumeler**, puis allez dans **Réglages › Confidentialité et sécurité › Mode développeur › Jumeler avec AltLoad** et saisissez le code.
 
@@ -64,22 +58,26 @@ Vous avez aussi besoin du [Mode développeur](https://developer.apple.com/docume
 
 ## Fonctionnalités
 
-| | |
-| :-- | :-- |
-| **Jumelage sur l'appareil** | Sous iOS 27, jumelez en saisissant un code depuis la Dynamic Island |
-| **AltServer sur l'appareil** | AltStore trouve AltLoad comme il trouve un ordinateur, et il peut rester actif en arrière-plan |
-| **Stores** | AltStore Classic et Beta, SideStore et SideStore + LiveContainer, stable ou nightly |
-| **Vos propres apps** | Signez et installez n'importe quelle IPA depuis Fichiers |
-| **Équipe de développement** | Choisissez l'équipe qui signe, si votre identifiant Apple appartient à plusieurs équipes |
-| **Droits** | Capacités par app, préréglages pour les émulateurs et les outils réseau, et ce que le dernier profil a réellement accordé |
-| **JIT** | Ouvrez les apps avec JIT depuis Outils, Raccourcis, Siri ou l'écran d'accueil. Épinglez celles que vous utilisez, exécutez des scripts et acceptez des demandes depuis des liens |
-| **AltStore sans AltServer** | AltLoad place le fichier de jumelage de cet iPhone là où AltStore 2.3.1 et versions ultérieures le cherchent, afin qu'AltStore puisse se renouveler seul |
-| **Plusieurs identifiants Apple** | Enregistrez-en plusieurs et changez lors de la connexion. Chaque app mémorise l'identifiant Apple qui l'a signée |
-| **Fichiers de jumelage** | Placez le fichier de jumelage de cet iPhone dans SideStore, StikDebug et d'autres apps installées hors App Store |
-| **Renouvellement automatique** | Renouvelle les apps avant leur expiration et re-signe en arrière-plan celles qui ont été révoquées, avec LocalDevVPN activé et le mot de passe enregistré |
-| **Journaux** | Voyez ce qu'AltLoad a fait et copiez un rapport en cas d'échec. Les adresses e-mail sont masquées et les mots de passe ne sont jamais journalisés |
-| **Outils supplémentaires** | Simulation de position, certificats, App IDs et options d'extensions d'app |
-| **Langues** | Anglais, chinois, français, allemand, italien, japonais, portugais (Brésil), russe et espagnol |
+**Installation et signature**
+- **Stores :** AltStore Classic et Beta, SideStore et SideStore + LiveContainer, stable ou nightly. Aussi Husk, UTM, MeloNX et Madeira
+- **Vos propres apps :** signez et installez n'importe quelle IPA depuis Fichiers
+- **Équipe de développement :** choisissez l'équipe qui signe, si votre identifiant Apple appartient à plusieurs équipes
+- **Plusieurs identifiants Apple :** enregistrez-en plusieurs et changez lors de la connexion. Chaque app mémorise l'identifiant Apple qui l'a signée
+- **Droits :** capacités par app, préréglages pour les émulateurs et les outils réseau, et ce que le dernier profil a réellement accordé
+
+**Jumelage et renouvellement**
+- **Jumelage sur l'appareil :** sous iOS 27, jumelez en saisissant un code depuis la Dynamic Island
+- **AltServer sur l'appareil :** AltStore trouve AltLoad comme il trouve un ordinateur, et il peut rester actif en arrière-plan
+- **AltStore sans AltServer :** AltLoad place le fichier de jumelage de cet iPhone là où AltStore 2.3.1 et versions ultérieures le cherchent, afin qu'AltStore puisse se renouveler seul
+- **Renouvellement automatique :** renouvelle les apps avant leur expiration et re-signe en arrière-plan celles qui ont été révoquées, avec LocalDevVPN activé et le mot de passe enregistré
+- **Fichiers de jumelage :** placez le fichier de jumelage de cet iPhone dans SideStore, StikDebug et d'autres apps installées hors App Store
+
+**JIT et outils**
+- **JIT :** ouvrez les apps avec JIT depuis Outils, Raccourcis, Siri ou l'écran d'accueil. Épinglez celles que vous utilisez, exécutez des scripts et acceptez des demandes depuis des liens
+- **Outils supplémentaires :** simulation de position, certificats, App IDs et options d'extensions d'app
+- **Journaux :** voyez ce qu'AltLoad a fait et copiez un rapport en cas d'échec. Les adresses e-mail sont masquées et les mots de passe ne sont jamais journalisés
+
+**Langues :** anglais, chinois, français, allemand, italien, japonais, portugais (Brésil), russe et espagnol.
 
 ## Dépannage
 

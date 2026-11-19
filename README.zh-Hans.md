@@ -13,23 +13,11 @@
 </div>
 
 > [!CAUTION]
-> **只从[官方网站](https://altload.org/)或[本仓库](https://github.com/mirazbakis/AltLoad)安装 AltLoad。**
->
-> AltLoad 会处理你的 Apple ID 密码和 iPhone 的配对数据，被修改的副本可能会把这两者发送给他人。其他任何网站、源、文件托管、Telegram 频道或 Discord 服务器都是非官方的，即使看起来很真实。这也包括 **applejr.net**，它与 AltLoad 没有关联：其上的副本并非由我发布或检查，可能已被修改。AltLoad 是免费的。我只在官方网站和本仓库发布构建版本，分支不得发布构建版本。
->
-> 已经使用过非官方副本？请删除它，在 [account.apple.com](https://account.apple.com) 修改你的 Apple ID 密码，移除所有你不认识的设备，并删除它可能接触到的所有配对文件。
+> **[altload.org](https://altload.org/) 和本仓库是仅有的官方来源。** AltLoad 免费，并会处理你的 Apple ID 密码和配对数据，所以来自其他地方的副本可能被修改以窃取它们。已经用过？请删除它，并在 [account.apple.com](https://account.apple.com) 修改你的 Apple ID 密码。
 
 ## 功能简介
 
-侧载通常有两种方式。一种是电脑与 iPhone 配对、签名应用，并每 7 天刷新一次；另一种是安装共享证书签名的应用，而证书的所有者需要付费，并且 Apple 随时可能吊销该证书，从而使所有用它签名的应用全部失效。
-
-AltLoad 在 iPhone 上完成电脑的工作。它让手机与自身配对，用你自己的 Apple ID 为商店签名，安装它，然后在同一台设备上充当 AltServer，让 AltStore 能够刷新。它可以使用免费的 Apple ID，你的密码只会发送给 Apple。
-
-- **无需电脑**：在 iOS 27 上，每一步都不需要电脑。在 iOS 18 至 26 上，只需在电脑上制作一次配对文件。
-- **你自己的证书**：没有共享的证书，因此没有人能替你吊销它。
-- **商店与应用**：AltStore、SideStore、LiveContainer、Husk、UTM、MeloNX 和 Madeira，或任何来自“文件”的 IPA。
-- **在手机上刷新**：设置好 Remote AltServer 后，AltStore 可以自行刷新，也可以通过 AltLoad 内置的 AltServer 刷新。
-- **免费且开源**：除了登录 Apple 之外，没有任何数据离开手机。
+侧载通常需要一台为应用签名并每 7 天刷新一次的电脑，或者一个 Apple 随时可能吊销的共享证书。AltLoad 在 iPhone 上完成电脑的工作：它让手机与自身配对，用你自己的 Apple ID 为商店签名并安装，然后在同一台设备上充当 AltServer，让 AltStore 能够刷新。它可以使用免费的 Apple ID，你的密码只会发送给 Apple。
 
 | | 使用电脑 | 使用共享证书 | 使用 AltLoad |
 | :-- | :-- | :-- | :-- |
@@ -39,7 +27,7 @@ AltLoad 在 iPhone 上完成电脑的工作。它让手机与自身配对，用�
 | JIT | 需要电脑端工具 | 不属于证书的功能 | 内置 |
 | 费用 | 免费 Apple ID 即可 | 由运行证书的人决定 | 免费 |
 
-## 兼容性
+## 系统要求
 
 | iOS | 安装与签名 | 配对 |
 | :-- | :-- | :-- |
@@ -47,16 +35,22 @@ AltLoad 在 iPhone 上完成电脑的工作。它让手机与自身配对，用�
 | **18 至 26** | 支持 | 导入一次性在电脑上用 [iloader](https://github.com/nab138/iloader) 或 [idevice_pair](https://github.com/jkcoxson/idevice_pair) 制作的远程配对文件 |
 | **17 及更早版本** | 不支持 | 不支持 |
 
-你还需要[开发者模式](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device)、App Store 中的 [LocalDevVPN](https://apps.apple.com/app/id6755608044) 和一个 Apple ID。使用免费 Apple ID 时，应用有效期为 7 天。
+你还需要：
+
+- 开启[开发者模式](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device)
+- App Store 中的 [LocalDevVPN](https://apps.apple.com/app/id6755608044)
+- 一个 Apple ID。使用免费 Apple ID 时，应用有效期为 7 天
 
 ## 安装
 
 **1. 获取 AltLoad。** 选择一种方式：
 
-- **Apple ID 安装（altpair）。** 使用你自己的 Apple ID 签名，无需电脑，也无需 DNS 描述文件。你需要安装三款免费的 App Store 应用，并按照[官方网站](https://altload.org/)上的步骤操作。参见 [altpair/README.md](altpair/README.md)。
-- **直接安装。** 最快的方式，使用共享证书。在 Safari 中打开[官方网站](https://altload.org/)，接受条款，添加 DNS 描述文件，然后点按已签名的安装。
-- **AltStore 或 SideStore。** 如果你已经在使用其中之一，请[添加源](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json)并在那里获取更新。
-- **使用你自己的签名工具。** 从[发布版本](https://github.com/mirazbakis/AltLoad/releases)下载 `AltLoad.ipa`。
+| 方式 | 适用场景 | 做法 |
+| :-- | :-- | :-- |
+| **Apple ID 安装**（推荐） | 使用你自己的 Apple ID 签名，无需电脑，也无需 DNS 描述文件 | 安装三款免费的 App Store 应用，并按照 [altload.org](https://altload.org/) 上的步骤操作。参见 [altpair/README.md](altpair/README.md) |
+| **直接安装** | 最快的方式。使用共享证书，因此可能被吊销 | 在 Safari 中打开 [altload.org](https://altload.org/)，接受条款，添加 DNS 描述文件，然后点按已签名的安装 |
+| **AltStore 或 SideStore** | 你已经在使用其中之一 | [添加源](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json)并在那里获取更新 |
+| **你自己的签名工具** | 你自己为 IPA 签名 | 从[发布版本](https://github.com/mirazbakis/AltLoad/releases)下载 `AltLoad.ipa` |
 
 **2. 配对你的 iPhone。** 在 AltLoad 中打开 **工具 › 配对**，然后前往 **设置 › 隐私与安全性 › 开发者模式 › 与 AltLoad 配对**，输入验证码。
 
@@ -64,22 +58,26 @@ AltLoad 在 iPhone 上完成电脑的工作。它让手机与自身配对，用�
 
 ## 功能
 
-| | |
-| :-- | :-- |
-| **本机配对** | 在 iOS 27 上，输入灵动岛显示的验证码即可配对 |
-| **本机 AltServer** | AltStore 像查找电脑一样查找 AltLoad，并可在后台持续运行 |
-| **商店** | AltStore Classic 与 Beta、SideStore 以及 SideStore + LiveContainer，可选稳定版或每夜版 |
-| **你自己的应用** | 签名并安装任何来自“文件”的 IPA |
-| **开发者团队** | 如果你的 Apple ID 属于多个团队，可选择由哪个团队签名 |
-| **权限** | 按应用设置功能，提供模拟器和网络工具的预设，并显示上一个描述文件实际授予的权限 |
-| **JIT** | 可从“工具”、快捷指令、Siri 或主屏幕以 JIT 打开应用。可固定常用应用、运行脚本，并接收来自链接的请求 |
-| **无需 AltServer 的 AltStore** | AltLoad 会将此 iPhone 的配对文件放在 AltStore 2.3.1 及更高版本查找的位置，因此 AltStore 可以自行刷新 |
-| **多个 Apple ID** | 可保存多个，登录时切换。每个应用都会记住签名它的 Apple ID |
-| **配对文件** | 将此 iPhone 的配对文件放入 SideStore、StikDebug 及其他侧载应用中 |
-| **自动刷新** | 在应用过期前刷新，并在后台为被吊销的应用重新签名，前提是已开启 LocalDevVPN 且已保存密码 |
-| **日志** | 查看 AltLoad 执行的操作，失败时拷贝报告。邮箱会被遮蔽，密码从不记录 |
-| **更多工具** | 位置模拟、证书、App ID 以及 App 扩展选项 |
-| **语言** | 英语、中文、法语、德语、意大利语、日语、葡萄牙语（巴西）、俄语和西班牙语 |
+**安装与签名**
+- **商店：** AltStore Classic 与 Beta、SideStore 以及 SideStore + LiveContainer，可选稳定版或每夜版。还有 Husk、UTM、MeloNX 和 Madeira
+- **你自己的应用：** 签名并安装任何来自“文件”的 IPA
+- **开发者团队：** 如果你的 Apple ID 属于多个团队，可选择由哪个团队签名
+- **多个 Apple ID：** 可保存多个，登录时切换。每个应用都会记住签名它的 Apple ID
+- **权限：** 按应用设置功能，提供模拟器和网络工具的预设，并显示上一个描述文件实际授予的权限
+
+**配对与刷新**
+- **本机配对：** 在 iOS 27 上，输入灵动岛显示的验证码即可配对
+- **本机 AltServer：** AltStore 像查找电脑一样查找 AltLoad，并可在后台持续运行
+- **无需 AltServer 的 AltStore：** AltLoad 会将此 iPhone 的配对文件放在 AltStore 2.3.1 及更高版本查找的位置，因此 AltStore 可以自行刷新
+- **自动刷新：** 在应用过期前刷新，并在后台为被吊销的应用重新签名，前提是已开启 LocalDevVPN 且已保存密码
+- **配对文件：** 将此 iPhone 的配对文件放入 SideStore、StikDebug 及其他侧载应用中
+
+**JIT 与工具**
+- **JIT：** 可从“工具”、快捷指令、Siri 或主屏幕以 JIT 打开应用。可固定常用应用、运行脚本，并接收来自链接的请求
+- **更多工具：** 位置模拟、证书、App ID 以及 App 扩展选项
+- **日志：** 查看 AltLoad 执行的操作，失败时拷贝报告。邮箱会被遮蔽，密码从不记录
+
+**语言：** 英语、中文、法语、德语、意大利语、日语、葡萄牙语（巴西）、俄语和西班牙语。
 
 ## 故障排除
 
