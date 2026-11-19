@@ -383,6 +383,8 @@
   .copy:hover{transform:translateY(-2px)}
   .copy{transition:border-color .15s,transform .15s}
   @media (prefers-reduced-motion:reduce){.pk:hover,.copy:hover{transform:none}}
+  .more-ways{margin-top:22px;display:flex;justify-content:center}
+  .more-ways .btn{white-space:normal;text-align:center}
 </style>
 </head>
 <body>
@@ -391,7 +393,7 @@
   <div class="wrap">
     <a class="brand" href="./"><img src="AltLoad.png" alt="">AltLoad</a>
     <nav>
-      <a class="go" href="#install">Install</a>
+      <a class="go" href="install.html">Install</a>
       <a href="https://github.com/mirazbakis/AltLoad">GitHub</a>
       <a href="#faq">Troubleshoot</a>
     </nav>
@@ -406,7 +408,7 @@
         <h1 class="stage-title">Your iPhone is<br><span>the computer now.</span></h1>
         <p class="hero-sub">AltLoad pairs, signs and installs AltStore, SideStore and LiveContainer, all on the phone, with your own Apple ID.</p>
         <div class="cta">
-          <a class="btn btn-solid" href="#install">Install AltLoad</a>
+          <a class="btn btn-solid" href="install.html">Install AltLoad</a>
           <a class="btn btn-line" href="#faq">Troubleshoot</a>
         </div>
         <div class="meta"><span>Version <b id="ver">–</b></span><span><b>iOS 27</b> or later</span><span><b>Free</b> Apple ID works</span></div>
@@ -448,7 +450,7 @@
             <li class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Can't be revoked by anyone else</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>Re-sign every 7 days with a free Apple ID (AltLoad reminds you)</li>
           </ul>
-          <a class="pk-go" href="#apple-id">Go<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
+          <a class="pk-go" href="apple-id.html">Start Apple ID Install<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
         </div>
         <div class="pk">
           <div class="pk-h"><h3>Direct Install</h3><span class="pk-t">About 2 minutes</span></div>
@@ -457,214 +459,11 @@
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>May stop working without notice</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>Needs a DNS profile</li>
           </ul>
-          <a class="pk-go" href="direct.html">Go<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
+          <a class="pk-go" href="direct.html">Start Direct Install<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
         </div>
       </div>
 
-      <!-- What to have ready before either route. -->
-      <div class="pre">
-        <h3 class="sub-h">Before you start</h3>
-        <ul class="pre-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>
-            <b>iOS 27 or later</b><span>On the iPhone or iPad you're setting up.</span></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg>
-            <b>Developer Mode on</b>
-            <details><summary>How to turn it on</summary><p>Settings › Privacy &amp; Security › Developer Mode › On, then restart and confirm.</p></details></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19.5h.01"/></svg>
-            <b>Wi-Fi</b><span>Pairing runs over your local network.</span></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-            <b>About 10 minutes</b><span>Direct Install takes about 2.</span></li>
-        </ul>
-        <p class="desk"><span>Setting up an iPhone? Open <code>altload.org</code> on it in Safari.</span><button type="button" class="cp" aria-label="Copy link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></p>
-      </div>
-
-      <label class="agree" id="tosRow">
-        <input type="checkbox" id="tos">
-        <span>I've read and accept the <a href="terms.html">Terms of Service</a>.</span>
-      </label>
-
-      <!-- Route 1: signed on the iPhone with the owner's Apple ID. -->
-      <div class="method prime" id="apple-id">
-        <div class="method-head">
-          <div class="mh">
-            <h3>Apple ID Install <small>(No DNS)</small></h3>
-            <p>Signed by you, on the iPhone, with three free App Store apps. Tick each step as you go; this page keeps your place.</p>
-          </div>
-          <span class="tag tag-new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Recommended</span>
-        </div>
-
-        <div class="prog" aria-live="polite"><span class="prog-bar"><i id="progFill"></i></span><span id="progText">0 of 4 done</span></div>
-        <ol class="steps" id="steps">
-          <li class="stp" data-step="1">
-            <div class="stp-top">
-              <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 1 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
-              <div class="stp-h"><span class="idx">01</span><h4>Pair the iPhone with itself</h4><span class="where">rootshell</span>
-                <p class="why">This lets AltLoad's installer talk to your iPhone. You only do it once.</p></div>
-              <a class="getapp" href="https://apps.apple.com/app/rootshell-local-terminal-ssh/id6755794662" target="_blank" rel="noopener">Get rootshell</a>
-            </div>
-            <div class="stp-body duo">
-              <div class="stp-main">
-                <p>In rootshell's settings, switch <b>Location Diary Mode</b> to <b>Session Only</b> so iOS doesn't pause it while you're in Settings. Then enter these three lines, one at a time:</p>
-                <div class="term">
-                  <div class="cmd"><code>curl -fsSLO https://github.com/mirazbakis/AltLoad/releases/latest/download/altpair.wasm</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
-                  <div class="cmd"><code>ifconfig en0 &gt; if.txt</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
-                  <div class="cmd"><code>./altpair.wasm &lt; if.txt</code><button type="button" class="cp" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
-                </div>
-                <p>rootshell shows a 6-digit PIN. Open Settings › Privacy &amp; Security › <b>Developer Mode</b> and tap the new row at the very bottom, <b>Pair with AltLoad</b>. Enter your passcode, then the PIN. Leave rootshell open.</p>
-              </div>
-              <div class="shot" aria-hidden="true">
-                <div class="shot-cap">What you'll see</div>
-                <div class="scr">
-                  <div class="scr-back">‹ Privacy &amp; Security</div>
-                  <div class="scr-t">Developer Mode</div>
-                  <div class="grp"><div class="row">Developer Mode<span class="tog"></span></div></div>
-                  <div class="grp"><div class="row hi"><i class="dot"></i>Pair with AltLoad<span class="chev">›</span></div></div>
-                </div>
-                <div class="tile"><small>rootshell shows this</small><b>482 017</b></div>
-              </div>
-              <details class="trouble"><summary>If this doesn't work</summary>
-                <ul>
-                  <li><b>Pair with AltLoad doesn't appear.</b>Check Developer Mode is on and the iPhone is on Wi-Fi, then run the last two lines again and reopen Settings.</li>
-                  <li><b>The PIN was rejected.</b>Run <code>./altpair.wasm &lt; if.txt</code> again for a new PIN; each one works once.</li>
-                  <li><b>rootshell stopped.</b>Set Location Diary Mode to Session Only and allow Local Network access, then start again.</li>
-                  <li><b>It says <code>wasm: command not found</code>.</b>rootshell can't pipe into a <code>.wasm</code> program. Use the three lines above (save to <code>if.txt</code>, then read it with <code>&lt;</code>), not <code>ifconfig en0 | ./altpair.wasm</code>.</li>
-                </ul>
-              </details>
-            </div>
-          </li>
-          <li class="stp" data-step="2">
-            <div class="stp-top">
-              <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 2 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
-              <div class="stp-h"><span class="idx">02</span><h4>Open the tunnel</h4><span class="where">LocalDevVPN</span>
-                <p class="why">The installer reaches your iPhone through this local tunnel.</p></div>
-              <a class="getapp" href="https://apps.apple.com/app/id6755608044" target="_blank" rel="noopener">Get LocalDevVPN</a>
-            </div>
-            <div class="stp-body duo">
-              <div class="stp-main">
-                <p>Open LocalDevVPN, tap <b>Connect</b> and allow the VPN configuration if iOS asks. It only links the iPhone to itself; your internet traffic doesn't go through it.</p>
-              </div>
-              <div class="shot" aria-hidden="true">
-                <div class="shot-cap">What you'll see</div>
-                <div class="scr">
-                  <div class="scr-t">LocalDevVPN</div>
-                  <div class="grp">
-                    <div class="row"><span>LocalDevVPN<small>Local tunnel</small></span><span class="tog"></span></div>
-                    <div class="row"><i class="dot"></i>Connected</div>
-                  </div>
-                </div>
-              </div>
-              <details class="trouble"><summary>If this doesn't work</summary>
-                <ul>
-                  <li><b>LocalDevVPN won't connect.</b>Open it, remove the VPN configuration, add it again and tap Connect.</li>
-                  <li><b>Another VPN is on.</b>Turn it off; iOS runs one VPN at a time.</li>
-                </ul>
-              </details>
-            </div>
-          </li>
-          <li class="stp" data-step="3">
-            <div class="stp-top">
-              <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 3 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
-              <div class="stp-h"><span class="idx">03</span><h4>Sign and install</h4><span class="where">Open Minis</span>
-                <p class="why">This signs AltLoad with your Apple ID and installs it, so no shared certificate is involved.</p></div>
-              <a class="getapp" href="https://apps.apple.com/app/id6759188481" target="_blank" rel="noopener">Get Open Minis</a>
-            </div>
-            <div class="stp-body duo">
-              <div class="stp-main">
-                <p>In Minis's terminal, enter:</p>
-                <div class="term">
-                  <div class="cmd"><code>wget -qO- https://altload.org/install.sh | sh</code><button type="button" class="cp gated" aria-label="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span>Copy</span></button></div>
-                </div>
-                <p>Type the <b>transfer code</b> rootshell shows, then your <b>Apple ID</b> and password. Stay in Minis until it says <b>Done</b>; iOS pauses it in the background.</p>
-              </div>
-              <div class="shot" aria-hidden="true">
-                <div class="shot-cap">What you'll see</div>
-                <div class="tile">
-                  <span>Transfer code: ______</span>
-                  <span>Apple ID: you@icloud.com</span>
-                  <span>Installing AltLoad… 100%</span>
-                  <span class="ok">Done</span>
-                </div>
-              </div>
-              <details class="trouble"><summary>If this doesn't work</summary>
-                <ul>
-                  <li><b>It can't find the pairing file.</b>Keep rootshell open in the background and type the transfer code it shows.</li>
-                  <li><b>Sign-in fails.</b>Check the Apple ID and password. Two-factor codes go to your other devices. If none arrives, type <code>r</code> to resend it or <code>s</code> to get it by text.</li>
-                  <li><b>It stops partway.</b>Check LocalDevVPN is still connected, then run the line again.</li>
-                </ul>
-              </details>
-            </div>
-          </li>
-          <li class="stp" data-step="4">
-            <div class="stp-top">
-              <button type="button" class="tick" aria-pressed="false" aria-label="Mark step 4 done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
-              <div class="stp-h"><span class="idx">04</span><h4>Trust it</h4><span class="where">Settings</span>
-                <p class="why">iOS won't open an app from a new developer until you trust it.</p></div>
-            </div>
-            <div class="stp-body duo">
-              <div class="stp-main">
-                <p>Settings › General › <b>VPN &amp; Device Management</b> › your Apple ID › <b>Trust</b>. AltLoad is on your Home Screen, signed by you.</p>
-              </div>
-              <div class="shot" aria-hidden="true">
-                <div class="shot-cap">What you'll see</div>
-                <div class="scr">
-                  <div class="scr-back">‹ General</div>
-                  <div class="scr-t">VPN &amp; Device Management</div>
-                  <div class="grp-h">Developer App</div>
-                  <div class="grp"><div class="row"><span>Apple Development:<small>you@icloud.com</small></span><span class="trust">Trust</span></div></div>
-                </div>
-              </div>
-              <details class="trouble"><summary>If this doesn't work</summary>
-                <ul>
-                  <li><b>AltLoad closes right away.</b>Trust it first. If it still closes, delete it and run step 3 again.</li>
-                  <li><b>Your Apple ID isn't listed.</b>Step 3 didn't finish. Run it again and stay in Minis until Done.</li>
-                </ul>
-              </details>
-            </div>
-          </li>
-        </ol>
-        <p class="fine">Pairing and install run on altpair, AltLoad's own <a href="https://github.com/mirazbakis/AltLoad/tree/main/altpair">open-source tools</a>. Your Apple ID password is typed into altpair on your iPhone and goes to Apple only.</p>
-      </div>
-
-      <!-- Route 2: the ready-signed copies, which only install through the DNS profile. -->
-      <div class="method" id="direct">
-        <div class="method-head">
-          <div class="mh">
-            <h3>Direct Install <small>(DNS Required)</small></h3>
-            <p>Already signed, so it's quick. The certificates are shared, so any of them can stop working without notice.</p>
-          </div>
-          <span class="tag tag-dns">DNS profile</span>
-        </div>
-        <a class="btn btn-solid direct-go" href="direct.html">Open Direct Install<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
-        <p class="fine">Add the DNS profile, tap Install, trust it. Each copy is signed with a shared certificate, and the page picks one for you.</p>
-      </div>
-
-      <!-- Route 3: for people who already sideload. -->
-      <div class="method" id="other">
-        <div class="method-head">
-          <div class="mh">
-            <h3>Already sideloading?</h3>
-            <p>Skip the steps: add AltLoad to your store, or sign the IPA yourself.</p>
-          </div>
-          <span class="tag tag-alt">Other ways</span>
-        </div>
-        <div class="alts">
-          <div class="alt">
-            <h4>Add the source</h4>
-            <p>Get AltLoad and its updates in AltStore or SideStore.</p>
-            <div class="src-row">
-              <a class="btn btn-line gated" href="altstore://source?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json" aria-disabled="true">Add to AltStore</a>
-              <a class="btn btn-line gated" href="sidestore://source?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json" aria-disabled="true">Add to SideStore</a>
-            </div>
-            <p class="src-url">Source URL: <code>https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json</code></p>
-          </div>
-          <div class="alt">
-            <h4>Download the IPA</h4>
-            <p>The unsigned build from the latest release, for your own signer.</p>
-            <a class="btn btn-line gated" id="dlBtn" href="https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa" aria-disabled="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>Download IPA</a>
-          </div>
-        </div>
-      </div>
+      <p class="more-ways"><a class="btn btn-line" href="install.html#other">Already sideloading? Add the source or get the IPA<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></p>
     </div>
   </section>
 
@@ -736,17 +535,18 @@
 
   // Every install link unlocks once the Terms box is ticked.
   function gate(){
+    if(!tos) return;
     var state = tos.checked ? 'false' : 'true';
     [].forEach.call(document.querySelectorAll('.gated, .get'), function(a){ a.setAttribute('aria-disabled', state); });
   }
-  try{ tos.checked = localStorage.getItem(KEY)==='1'; }catch(e){}
-  tos.addEventListener('change', function(){
+  if(tos) try{ tos.checked = localStorage.getItem(KEY)==='1'; }catch(e){}
+  if(tos) tos.addEventListener('change', function(){
     try{ tos.checked ? localStorage.setItem(KEY,'1') : localStorage.removeItem(KEY); }catch(e){}
     gate();
   });
   document.addEventListener('click', function(e){
     var a = e.target.closest && e.target.closest('.gated, .get');
-    if(!a || tos.checked) return;
+    if(!a || !tos || tos.checked) return;
     e.preventDefault();
     tosRow.scrollIntoView({behavior:'smooth', block:'center'});
     tosRow.classList.add('nudge');
@@ -780,6 +580,8 @@
   });
 
   // The checklist remembers what's done, since each step happens in another app.
+  // The Apple ID Install checklist (on apple-id.html).
+  if(document.getElementById('steps')) (function(){
   var STEPS = 'altload-steps';
   var stepEls = [].slice.call(document.querySelectorAll('.stp'));
   var done = {};
@@ -803,6 +605,7 @@
     paintSteps();
   });
   paintSteps();
+  })();
 
   // Every signed install, always shown.
   function render(slots){

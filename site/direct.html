@@ -167,7 +167,7 @@
   <div class="wrap">
     <a class="brand" href="./"><img src="AltLoad.png" alt="">AltLoad</a>
     <nav>
-      <a href="./#install">Install options</a>
+      <a href="install.html">Install options</a>
       <a href="https://github.com/mirazbakis/AltLoad">GitHub</a>
     </nav>
   </div>
@@ -175,7 +175,7 @@
 
 <main class="col">
   <div class="head">
-    <a class="back" href="./#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>All install options</a>
+    <a class="back" href="install.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>All install options</a>
     <img class="app" src="AltLoad.png" alt="">
     <h1>Direct Install</h1>
     <div class="meta"><span class="v">Version&nbsp;<b id="ver">…</b></span><span>About 2 minutes</span></div>
@@ -189,7 +189,7 @@
 
   <p class="note">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-    <span>These copies share certificates, so any of them can stop working. For a copy signed by you that nobody else can revoke, use <a href="./#apple-id">Apple ID Install</a>.</span>
+    <span>These copies share certificates, so any of them can stop working. For a copy signed by you that nobody else can revoke, use <a href="apple-id.html">Apple ID Install</a>.</span>
   </p>
 
   <label class="agree" id="tosRow">
@@ -254,7 +254,7 @@
       <details><summary>Tapping Install does nothing.</summary><p>Tick the Terms box above, and make sure you're in Safari, not another browser or an in-app browser. If it still does nothing, add the DNS profile first.</p></details>
       <details><summary>"Unable to install AltLoad".</summary><p>That certificate is revoked or full. Tap <b>Install AltLoad</b> again, or pick another certificate from the list.</p></details>
       <details><summary>It installed but won't open.</summary><p>Trust it in step 3. If it closes right away, its certificate was revoked: delete it and install from another certificate.</p></details>
-      <details><summary>None of them work.</summary><p>All the shared certificates can be revoked at once. Use <a href="./#apple-id">Apple ID Install</a>, which signs AltLoad with your own Apple ID.</p></details>
+      <details><summary>None of them work.</summary><p>All the shared certificates can be revoked at once. Use <a href="apple-id.html">Apple ID Install</a>, which signs AltLoad with your own Apple ID.</p></details>
     </div>
   </section>
 </main>
@@ -324,7 +324,7 @@
     if(!slots.length){
       quickText.textContent = 'No certificates right now';
       quick.removeAttribute('href');
-      quickHint.innerHTML = 'Use <a href="./#apple-id">Apple ID Install</a> instead.';
+      quickHint.innerHTML = 'Use <a href="apple-id.html">Apple ID Install</a> instead.';
       list.innerHTML = '<li class="row empty">No signed copies right now.</li>';
       countEl.textContent = '';
       return;
