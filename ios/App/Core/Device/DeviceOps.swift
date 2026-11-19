@@ -35,8 +35,7 @@ enum DeviceOps {
         guard let pairingPath else { throw OpError.noPairing }
         guard LocalDevVPN.isActive else { throw OpError.vpnOff }
 
-        let host = LocalDevVPN.targetIP
-        let port = LocalDevVPN.remotePairingPort
+        let endpoints = await RemotePairingPort.endpoints()
         // Never take AltLoad's own provisioning profile off the device: AltStore's
         // list of active apps doesn't include it, and AltLoad would stop opening.
         var request = request
@@ -52,20 +51,19 @@ enum DeviceOps {
                     owned.append(p)
                     return UnsafePointer(p)
                 }
-                var endpoint = AltLoadEndpoint(host: c(host), port: UInt16(clamping: port), identifier: nil, auth_tag: nil)
+                let endpointBuffer = endpoints.cArray(c)
+                defer { endpointBuffer.deallocate() }
                 var out: UnsafeMutablePointer<CChar>?
-                let rc: Int32 = withUnsafePointer(to: &endpoint) { endpointPointer in
-                    var config = AltLoadInstallConfig(
-                        apple_id: nil, password: nil, anisette_url: nil,
-                        pairing_file_path: c(pairingPath),
-                        host_name: c("AltLoad"),
-                        endpoints: endpointPointer,
-                        endpoint_count: 1,
-                        ipa_path: nil, device_name: nil, machine_name: nil, server_id: nil,
-                        capabilities: nil, extensions_mode: 0)
-                    let ctx = Unmanaged.passUnretained(box).toOpaque()
-                    return altload_device_run(&config, json, deviceProgressCallback, ctx, &out)
-                }
+                var config = AltLoadInstallConfig(
+                    apple_id: nil, password: nil, anisette_url: nil,
+                    pairing_file_path: c(pairingPath),
+                    host_name: c("AltLoad"),
+                    endpoints: UnsafePointer(endpointBuffer),
+                    endpoint_count: endpoints.count,
+                    ipa_path: nil, device_name: nil, machine_name: nil, server_id: nil,
+                    capabilities: nil, extensions_mode: 0)
+                let ctx = Unmanaged.passUnretained(box).toOpaque()
+                let rc = altload_device_run(&config, json, deviceProgressCallback, ctx, &out)
                 let text = out.map { String(cString: $0) } ?? ""
                 if let out { altload_string_free(out) }
                 owned.forEach { free($0) }

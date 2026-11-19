@@ -7,6 +7,9 @@ import UserNotifications
 struct SelfEndpoint: Sendable {
     let host: String
     let port: Int
+    /// From the Bonjour advertisement, so the core can tell which one is this iPhone.
+    var identifier: String? = nil
+    var authTag: String? = nil
 }
 
 /// What an install flow signs and installs: a store's newest release, or an IPA the user picked.
@@ -589,7 +592,7 @@ final class InstallController: ObservableObject {
             phase = .needsVPN
             return
         }
-        let endpoints = [SelfEndpoint(host: LocalDevVPN.targetIP, port: LocalDevVPN.remotePairingPort)]
+        let endpoints = await RemotePairingPort.endpoints()
 
         // 3. Rust does the rest.
         enter(.link)
@@ -730,8 +733,8 @@ final class InstallController: ObservableObject {
                     endpointBuffer[i] = AltLoadEndpoint(
                         host: c(e.host),
                         port: UInt16(clamping: e.port),
-                        identifier: nil,
-                        auth_tag: nil)
+                        identifier: e.identifier.flatMap { c($0) },
+                        auth_tag: e.authTag.flatMap { c($0) })
                 }
 
                 var config = AltLoadInstallConfig(

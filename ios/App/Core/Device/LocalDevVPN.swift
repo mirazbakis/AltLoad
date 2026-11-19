@@ -10,8 +10,7 @@ import UIKit
 enum LocalDevVPN {
     static let appStoreURL = URL(string: "https://apps.apple.com/app/id6755608044")!
     static let defaultTargetIP = "10.7.0.1"
-    /// remotepairingd's RemotePairing port (the same one StikDebug uses).
-    static let remotePairingPort = 49152
+    // remotepairingd's port isn't fixed; RemotePairingPort looks it up.
 
     /// Opens LocalDevVPN, turns the VPN on and comes back to AltLoad via `altload://`.
     static let enableURL = URL(string: "localdevvpn://enable?scheme=altload")!

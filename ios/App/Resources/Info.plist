@@ -89,6 +89,7 @@
     <string>AltLoad uses your local network to discover devices and complete pairing.</string>
     <key>NSBonjourServices</key>
     <array>
+        <string>_remotepairing._tcp</string>
         <string>_remotepairing-pairable-host._tcp</string>
         <!-- AltLoad's on-device AltServer, found by AltStore over Wi-Fi. -->
         <string>_altserver._tcp</string>

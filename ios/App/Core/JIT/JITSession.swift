@@ -17,8 +17,7 @@ final class JITSession: @unchecked Sendable {
     /// Where the session connects, and the Developer Disk Image to mount.
     struct Target {
         let pairingPath: String
-        let host: String
-        let port: Int
+        let endpoints: [SelfEndpoint]
         let ddiDirectory: String
     }
 
@@ -133,19 +132,18 @@ final class JITSession: @unchecked Sendable {
         let box = EventBox(onEvent)
         var session: OpaquePointer?
         var out: UnsafeMutablePointer<CChar>?
-        var endpoint = AltLoadEndpoint(host: c(target.host), port: UInt16(clamping: target.port), identifier: nil, auth_tag: nil)
-        let rc: Int32 = withUnsafePointer(to: &endpoint) { endpointPointer in
-            var config = AltLoadInstallConfig(
-                apple_id: nil, password: nil, anisette_url: nil,
-                pairing_file_path: c(target.pairingPath),
-                host_name: c("AltLoad"),
-                endpoints: endpointPointer,
-                endpoint_count: 1,
-                ipa_path: nil, device_name: nil, machine_name: nil, server_id: nil,
-                capabilities: nil, extensions_mode: 0)
-            let ctx = Unmanaged.passUnretained(box).toOpaque()
-            return altload_debug_open(&config, json, jitProgressCallback, ctx, &session, &out)
-        }
+        let endpointBuffer = target.endpoints.cArray(c)
+        defer { endpointBuffer.deallocate() }
+        var config = AltLoadInstallConfig(
+            apple_id: nil, password: nil, anisette_url: nil,
+            pairing_file_path: c(target.pairingPath),
+            host_name: c("AltLoad"),
+            endpoints: UnsafePointer(endpointBuffer),
+            endpoint_count: target.endpoints.count,
+            ipa_path: nil, device_name: nil, machine_name: nil, server_id: nil,
+            capabilities: nil, extensions_mode: 0)
+        let ctx = Unmanaged.passUnretained(box).toOpaque()
+        let rc = altload_debug_open(&config, json, jitProgressCallback, ctx, &session, &out)
         withExtendedLifetime(box) {}
         let text = out.map { String(cString: $0) } ?? ""
         if let out { altload_string_free(out) }

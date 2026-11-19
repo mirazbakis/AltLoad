@@ -167,8 +167,7 @@ final class JITCenter: ObservableObject {
         let ddi = try await DeveloperDiskImage.ensureDownloaded(progress: progress)
         return JITSession.Target(
             pairingPath: pairing.fileURL.path,
-            host: LocalDevVPN.targetIP,
-            port: LocalDevVPN.remotePairingPort,
+            endpoints: await RemotePairingPort.endpoints(),
             ddiDirectory: ddi.path)
     }
 

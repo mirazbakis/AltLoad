@@ -28,7 +28,7 @@ tokio = { version = "1", default-features = false, features = ["rt", "io-util", 
 getrandom = "0.2"
 
 [patch.crates-io]
-idevice = { git = "https://github.com/jkcoxson/idevice.git", rev = "d32c8189c51c2789496b0768039419c3705498c3" }
+idevice = { git = "https://github.com/jkcoxson/idevice.git", rev = "2dca9a58a9a1dd02ec7d6213fcfd8fe861e74132" }
 
 [profile.release]
 opt-level = "z"
