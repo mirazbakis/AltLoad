@@ -13,7 +13,7 @@ English · [简体中文](README.zh-Hans.md) · [Русский](README.ru.md) �
 </div>
 
 > [!CAUTION]
-> **[altload.org](https://altload.org/) and this repository are the only official sources.** AltLoad is free and handles your Apple ID password and pairing data, so a copy from anywhere else could be modified to steal them. Already used one? Delete it and change your Apple ID password at [account.apple.com](https://account.apple.com).
+> **altload.org** and this repository are the only official sources.** AltLoad is free and handles your Apple ID password and pairing data, so a copy from anywhere else could be modified to steal them. Already used one? Delete it and change your Apple ID password at [account.apple.com](https://account.apple.com).
 
 ## What it does
 
