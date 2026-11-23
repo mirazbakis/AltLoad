@@ -1,6 +1,6 @@
 [package]
 name = "altpair"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Installs AltLoad onto the iPhone it runs on, from a Linux shell, signed with your own Apple ID"
 publish = false

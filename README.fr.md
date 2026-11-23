@@ -81,7 +81,7 @@ Vous avez aussi besoin de :
 
 ## Dépannage
 
-Quand une opération échoue, ouvrez **Outils › Assistance › Journaux** et touchez **Copier**, ou touchez **Copier le journal** sur l'écran d'erreur. Collez-le dans un [ticket](https://github.com/mirazbakis/AltLoad/issues).
+Quand une opération échoue, ouvrez **Réglages › Journaux** et touchez **Copier**, ou touchez **Copier le journal** sur l'écran d'erreur. Collez-le dans un [ticket](https://github.com/mirazbakis/AltLoad/issues).
 
 <details>
 <summary><b>« Impossible de se connecter à cet iPhone » ou « Connexion refusée »</b></summary>

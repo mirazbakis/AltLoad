@@ -81,7 +81,7 @@
 
 ## 故障排除
 
-出现问题时，打开 **工具 › 支持 › 日志** 并点按 **拷贝**，或在错误页面点按 **拷贝日志**。然后将其粘贴到[问题反馈](https://github.com/mirazbakis/AltLoad/issues)中。
+出现问题时，打开 **设置 › 日志** 并点按 **拷贝**，或在错误页面点按 **拷贝日志**。然后将其粘贴到[问题反馈](https://github.com/mirazbakis/AltLoad/issues)中。
 
 <details>
 <summary><b>“无法连接到此 iPhone”或“连接被拒绝”</b></summary>

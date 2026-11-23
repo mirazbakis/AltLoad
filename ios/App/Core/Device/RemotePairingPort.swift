@@ -11,6 +11,8 @@ enum RemotePairingPort {
     /// core knocks on the iPhone's other ports to find it.
     static let usualPorts = [49152]
     private static let lastKey = "vpn.remotePairingPort"
+    /// The ports in the last log line, so repeats aren't logged.
+    @MainActor private static var lastLoggedPorts: String?
 
     /// The last port Bonjour reported, tried first when Bonjour finds nothing.
     static var lastKnown: Int? {
@@ -36,10 +38,14 @@ enum RemotePairingPort {
         if let lastKnown { add(lastKnown) }
         usualPorts.forEach { add($0) }
 
+        // Looked up before every device call, so only a change is worth a log line.
         let ports = found.map { String($0.port) }.joined(separator: ", ")
-        AppLog.shared.info(.vpn, found.isEmpty
-            ? "Bonjour found no remote pairing service; trying the usual ports"
-            : "Remote pairing advertised on port \(ports)")
+        if ports != lastLoggedPorts {
+            lastLoggedPorts = ports
+            AppLog.shared.info(.vpn, found.isEmpty
+                ? "Bonjour found no remote pairing service; trying the usual ports"
+                : "Remote pairing advertised on port \(ports)")
+        }
         return result
     }
 }
