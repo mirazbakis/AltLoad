@@ -10,8 +10,11 @@ struct InstallView: View {
     @StateObject private var pairings = PairingStore.shared
     @ObservedObject private var entitlements = EntitlementSettings.shared
     @ObservedObject private var autoRefresh = AutoRefresh.shared
+    @ObservedObject private var sources = AppSources.shared
+    @State private var sourceError: String?
     @AppStorage(StoreApp.defaultsKey) private var selectedRaw = StoreApp.altstore.rawValue
     @State private var showImporter = false
+    @State private var showSources = false
     @State private var importError: String?
     @State private var vpnActive = LocalDevVPN.isActive
     @Environment(\.scenePhase) private var scenePhase
@@ -79,14 +82,19 @@ struct InstallView: View {
                             showImporter = true
                         }
                         .disabled(pairings.selfPairing == nil || controller.isBusy)
+                        Button(String(localized: "Sources"), systemImage: "square.stack.3d.down.right") {
+                            showSources = true
+                        }
                     } label: {
                         Label(String(localized: "More"), systemImage: "ellipsis")
                     }
                 }
             }
             .settingsButton()
+            .navigationDestination(isPresented: $showSources) { SourcesView() }
             .task {
                 if controller.releases.count < StoreApp.allCases.count { await controller.loadCatalogs() }
+                if sources.sources.isEmpty, !sources.urls.isEmpty { await sources.refresh() }
             }
             .task(id: selectedRaw) {
                 await controller.checkDevice(store)
@@ -107,6 +115,11 @@ struct InstallView: View {
                 case .failure(let error):
                     importError = error.localizedDescription
                 }
+            }
+            .alert(String(localized: "Couldn't install the app"), isPresented: Binding(get: { sourceError != nil }, set: { if !$0 { sourceError = nil } })) {
+                Button(String(localized: "OK")) { sourceError = nil }
+            } message: {
+                Text(sourceError ?? "")
             }
             .alert(String(localized: "Couldn't import the IPA"), isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
                 Button(String(localized: "OK")) { importError = nil }
@@ -340,7 +353,7 @@ struct InstallView: View {
             name: app.name,
             detail: appDetail(app),
             detailColor: app.isExpired || autoRefresh.revoked.contains(app.bundleID) ? Aurora.danger : Aurora.secondaryText,
-            iconURL: app.store.flatMap { controller.releases[$0]?.iconURL },
+            iconURL: app.store.flatMap { controller.releases[$0]?.iconURL } ?? sources.sourceApp(for: app)?.iconURL,
             symbol: app.store?.fallbackSymbol ?? "app.fill"
         ) {
             if let target = app.refreshTarget {
@@ -348,6 +361,11 @@ struct InstallView: View {
                     PillButton(caption: String(localized: "Expired"), title: String(localized: "Refresh"), tint: Aurora.danger) { controller.begin(target) }
                 } else if let store = app.store, controller.updateAvailable(store) {
                     PillButton(title: String(localized: "Update")) { controller.begin(target) }
+                } else if app.store == nil, let source = sources.sourceApp(for: app), sources.hasUpdate(source), let latest = source.latest {
+                    PillButton(title: String(localized: "Update")) {
+                        SourceInstall.run(source, latest, installError: $sourceError)
+                    }
+                    .disabled(controller.isBusy || sources.download != nil)
                 } else if let days = app.daysLeft {
                     PillButton(caption: String(localized: "Expires in"), title: days == 1 ? String(localized: "1 day") : String(localized: "\(days) days")) { controller.begin(target) }
                 } else {

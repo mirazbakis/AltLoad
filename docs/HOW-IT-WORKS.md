@@ -47,6 +47,8 @@ The steps:
 4. **User-space TCP:** the tunnel carries raw IPv6 packets, so `idevice::tcp::adapter::Adapter` (jktcp) runs a TCP stack over it. AltLoad needs no VPN entitlement of its own. The only VPN involved is LocalDevVPN's simple reflector.
 5. **RSD:** `RsdHandshake` lists the device's services and properties. AltLoad reads `UniqueDeviceID` from those properties.
 
+Only one tunnel is set up at a time: two setups that overlap on remotepairingd can both stall, which is what happened when an install and the JIT tab connected together. `core/src/install/tunnel.rs` holds a lock for the whole setup, limits it to 45 s so a stuck step can't block later connections, and retries up to 3 rounds. The JIT tab also waits for a running install before it lists apps.
+
 This is the same path StikDebug uses (`tunnel_create_rppairing` to `10.7.0.1:49152`) with pairing files from StikPair.
 
 ## 3. Apple ID sign-in (Install, step 2)
@@ -105,6 +107,10 @@ A free-account profile lasts 7 days. AltStore's built-in refresh expects to find
 `ios/App/Core/Install/AutoRefresh.swift` refreshes apps without the install screen (`InstallController.refreshQuietly`): ones that expire within two days, and ones whose signing certificate is gone. It runs when AltLoad comes to the front (at most every six hours, unless something expires within a day) and in a `BGProcessingTask` (`<bundle id>.autorefresh`) that iOS starts when it sees fit, usually overnight. Each refresh uses the Apple ID that signed the app and needs its password saved and LocalDevVPN on. A prompt (two-factor, or a full set of certificates) is declined rather than shown, and the user gets a notification saying what to do; so do a closed VPN and a missing password, once per app until it's refreshed.
 
 A refresh is also how a revoked certificate is replaced: `sign_app` looks for the account's certificate (`CertificateIdentity::retrieve`), requests a new one when it's gone, and always downloads a new provisioning profile. To notice a revocation, AltLoad keeps the developer certificates from each app's profile (`DeveloperCertificates`, returned by the core as `certificates`) and, once a day per Apple ID, lists the account's active certificates through the developer services AltLoad signs with (`CertificateCheck.swift`, the core's `overview`). An app whose profile names a certificate that's no longer active is signed again. It doesn't use Apple's OCSP servers, which DNS profiles often block. The new profile only lists active certificates, so this happens once.
+
+## Sources
+
+`ios/App/Core/Install/AppSources.swift` keeps the source links the user added (in `UserDefaults`, `sources.urls`) and reads them when AltLoad opens and on pull-to-refresh. Parsing is lenient: an app or version that fails to decode is skipped, not the whole source. Installing downloads the version's IPA into the IPA cache as `Imported-<name> <version>.ipa`, checks it starts like a zip, and calls `InstallController.begin(.ipa(_:))`, the same path as an IPA from Files. So the app refreshes from that cached file, and only the newest download of each app is kept. An installed app matches a source app when its bundle ID is the source's or starts with it plus a dot (signing appends the team ID). See [Sources](SOURCES.md) for the fields.
 
 ## Update notice
 
