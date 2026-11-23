@@ -534,7 +534,7 @@ enum StoreCatalog {
 }
 
 /// Reports download progress for the async `URLSession.download(from:delegate:)`.
-private final class DownloadProgressObserver: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+final class DownloadProgressObserver: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
     private let onProgress: @Sendable (Double) -> Void
     private var observation: NSKeyValueObservation?
 
