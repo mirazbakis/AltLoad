@@ -6,6 +6,11 @@
 
 **Install AltStore, SideStore and LiveContainer from your iPhone, signed with your own Apple ID. No computer, no shared certificate.**
 
+[![Latest release](https://img.shields.io/github/v/release/mirazbakis/AltLoad?label=release)](https://github.com/mirazbakis/AltLoad/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/mirazbakis/AltLoad/total)](https://github.com/mirazbakis/AltLoad/releases)
+[![iOS](https://img.shields.io/badge/iOS-18%2B-blue)](#requirements)
+[![Stars](https://img.shields.io/github/stars/mirazbakis/AltLoad)](https://github.com/mirazbakis/AltLoad/stargazers)
+
 [Install](https://altload.org/) · [Download the IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [Add the source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [Releases](https://github.com/mirazbakis/AltLoad/releases)
 
 English · [简体中文](README.zh-Hans.md) · [Русский](README.ru.md) · [Français](README.fr.md)
@@ -56,11 +61,14 @@ You also need:
 
 **3. Install a store.** Turn on LocalDevVPN, choose a store on the **Install** tab and sign in.
 
+**4. Install more apps (optional).** In the Install tab's **…** menu, open **Sources** to add an AltStore-format source and install its apps, or **Install IPA from Files** for an IPA you have. See [Sources](docs/SOURCES.md).
+
 ## Features
 
 **Installing and signing**
 - **Stores:** AltStore Classic and Beta, SideStore and SideStore + LiveContainer, stable or nightly. Also Husk, UTM, MeloNX and Madeira
 - **Your own apps:** sign and install any IPA from Files
+- **Sources:** add AltStore and SideStore sources, browse their apps, read release notes, install older versions, and see when an update is out
 - **Developer team:** pick which team signs, if your Apple ID belongs to more than one
 - **Several Apple IDs:** save more than one and switch when you sign in. Each app remembers the Apple ID that signed it
 - **Entitlements:** per-app capabilities, presets for emulators and network tools, and what the last profile actually granted
@@ -75,19 +83,26 @@ You also need:
 **JIT and tools**
 - **JIT:** open apps with JIT from Tools, Shortcuts, Siri or the Home Screen. Pin the ones you use, run scripts, and take requests from links
 - **More tools:** location simulation, certificates, App IDs, and app extension options
-- **Logs:** see what AltLoad did, and copy a report when something fails. Emails are masked and passwords are never logged
+- **Logs:** in Settings, see what AltLoad did and copy a report when something fails. Emails are masked and passwords are never logged
 
 **Languages:** English, Chinese, French, German, Italian, Japanese, Portuguese (Brazil), Russian and Spanish.
 
 ## Troubleshooting
 
-When something fails, open **Settings › Logs** and tap **Copy**, or tap **Copy Log** on the error screen. Paste it into an [issue](https://github.com/mirazbakis/AltLoad/issues).
+When something fails, open **Settings › Logs** and tap **Copy**, or tap **Copy Log** on the error screen. Paste it into an [issue](https://github.com/mirazbakis/AltLoad/issues). The most common problems are below; [Troubleshooting](docs/TROUBLESHOOTING.md) has the full list.
 
 <details>
 <summary><b>"Can't connect to this iPhone" or "Connection refused"</b></summary>
 <br>
 
 LocalDevVPN must be connected, Developer Mode on, and this iPhone paired in **Tools › Pair**. Allow Local Network access if AltLoad asks. Turn off any other VPN or proxy app. If it still fails, turn LocalDevVPN off and on, or pair again.
+</details>
+
+<details>
+<summary><b>"Couldn't open a tunnel to this device"</b></summary>
+<br>
+
+The pairing service answered, but the next connection stalled. Turn LocalDevVPN off and on, wait a few seconds and try again. AltLoad 1.6.2 and later set up one connection at a time, so an install and the JIT tab no longer stall each other.
 </details>
 
 <details>
@@ -118,6 +133,17 @@ Free Apple IDs get only a few development certificates. AltLoad asks which one t
 If a store's sources are all down, get its IPA another way and use **Install IPA from Files** in the Install tab's **…** menu.
 </details>
 
+## Documentation
+
+| Guide | What's in it |
+| :-- | :-- |
+| [FAQ](docs/FAQ.md) | Passwords, limits, revocation, and how AltLoad differs from AltStore and SideStore |
+| [Sources](docs/SOURCES.md) | Adding sources, updates, and the source fields AltLoad reads |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | Errors and what to do about them |
+| [How it works](docs/HOW-IT-WORKS.md) | Pairing, the tunnel, signing and installing, step by step |
+| [altpair](altpair/README.md) | Installing AltLoad with your Apple ID, without a computer |
+| [Contributing](CONTRIBUTING.md) | Building, the project layout and pull requests |
+
 ## Building
 
 You need Xcode, Rust with the `aarch64-apple-ios` and `aarch64-apple-ios-sim` targets, and XcodeGen.
@@ -128,6 +154,8 @@ make ipa    # build/AltLoad.ipa, ad-hoc signed like the release builds
 make sim    # a Simulator build
 ```
 
+See [Contributing](CONTRIBUTING.md) before opening a pull request.
+
 | Path | Contents |
 | :-- | :-- |
 | `ios/` | The SwiftUI app, Live Activity extension and translations |
@@ -135,7 +163,7 @@ make sim    # a Simulator build
 | `altpair/` | AltLoad's own tools that install it with your Apple ID, no computer. See its [README](altpair/README.md) |
 | `site/` | The install page on GitHub Pages |
 | `signing/` | Scripts and certificate packs for the signed installs |
-| `docs/` | [How it works](docs/HOW-IT-WORKS.md) and release notes |
+| `docs/` | Guides, [How it works](docs/HOW-IT-WORKS.md) and release notes |
 
 ## License
 
