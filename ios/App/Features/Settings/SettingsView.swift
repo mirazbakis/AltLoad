@@ -30,6 +30,7 @@ struct SettingsView: View {
                 vpnCard
                 sourcesCard
                 keepAliveCard
+                logsCard
             }
             .navigationTitle(String(localized: "Settings"))
             .navigationBarTitleDisplayMode(.inline)
@@ -317,6 +318,19 @@ struct SettingsView: View {
             Toggle(String(localized: "Location"), systemImage: "location", isOn: $pairing.keepAliveLocation)
                 .frame(minHeight: 44)
             footnote(String(localized: "Turn one on if the Live Activity doesn't start while you pair from Settings."))
+        }
+    }
+
+    private var logsCard: some View {
+        CardSection(title: "Logs", symbol: "terminal.fill") {
+            NavigationLink {
+                LogsView()
+            } label: {
+                Label(String(localized: "Open Logs"), systemImage: "doc.text.magnifyingglass")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(AltLoadButtonStyle(prominent: false))
+            footnote(String(localized: "What AltLoad did, to share in a bug report"))
         }
     }
 

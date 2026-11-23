@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum ToolRoute: Hashable {
-    case altServer, pair, pairingToApps, entitlements, appIDs, certificates, jit, location, logs
+    case altServer, pair, pairingToApps, entitlements, appIDs, certificates, jit, location
 }
 
 /// Lets other screens open a tool (e.g. "Go to Pair" from Install).
@@ -59,12 +59,6 @@ struct ToolsView: View {
                     toolRow(.certificates, symbol: "checkmark.seal.fill", title: String(localized: "Certificates"),
                             detail: String(localized: "Your Apple ID's certificates, App IDs and devices"))
                 }
-
-                VStack(spacing: 10) {
-                    SectionLabel(title: "Support")
-                    toolRow(.logs, symbol: "doc.text.magnifyingglass", title: String(localized: "Logs"),
-                            detail: String(localized: "What AltLoad did, to share in a bug report"))
-                }
             }
             .navigationTitle(String(localized: "Tools"))
             .toolbarTitleDisplayMode(.inlineLarge)
@@ -79,7 +73,6 @@ struct ToolsView: View {
                 case .certificates: CertificatesView()
                 case .jit: JITView()
                 case .location: LocationView()
-                case .logs: LogsView()
                 }
             }
         }

@@ -2,7 +2,7 @@ import CoreTransferable
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Tools › Logs: what AltLoad did, for bug reports. Apple ID emails are masked
+/// Settings › Logs: what AltLoad did, for bug reports. Apple ID emails are masked
 /// and passwords, codes, tokens and pairing files are never written.
 struct LogsView: View {
     @State private var lines: [LogLine] = []
@@ -54,16 +54,7 @@ struct LogsView: View {
                             .foregroundStyle(Aurora.secondaryText)
                     }
                 } else {
-                    LazyVStack(alignment: .leading, spacing: 0) {
-                        // Newest first. Copy and Share include every line.
-                        ForEach(filtered.suffix(1000).reversed()) { line in
-                            row(line)
-                            Divider().overlay(Aurora.hairline)
-                        }
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 6)
-                    .cardSurface()
+                    terminal
                 }
             }
 
@@ -116,23 +107,47 @@ struct LogsView: View {
         .buttonStyle(.plain)
     }
 
-    private func row(_ line: LogLine) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            HStack(spacing: 6) {
-                Text(AppLog.timestamp(line.date))
-                Text(line.category.title)
-                    .foregroundStyle(line.level == .error ? Aurora.danger : Aurora.sky)
-            }
-            .font(.caption2.monospaced())
-            .foregroundStyle(Aurora.secondaryText)
-            Text(line.text)
-                .font(.caption.monospaced())
-                .foregroundStyle(line.level == .error ? Aurora.danger : Aurora.frost)
+    /// The log as a terminal: oldest at the top, scrolled to the newest line.
+    /// Copy and Share include every line; the view shows the last 1000.
+    private var terminal: some View {
+        let shown = Array(filtered.suffix(1000))
+        return ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 4) {
+                    Text(verbatim: "$ tail -n \(shown.count) altload.log")
+                        .foregroundStyle(Self.promptColor)
+                    ForEach(shown) { line in
+                        Text(Self.attributed(line))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .id(line.id)
+                    }
+                }
+                .font(.caption2.monospaced())
                 .textSelection(.enabled)
-                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(12)
+            }
+            .frame(height: 460)
+            .background(Color.black.opacity(0.85), in: .rect(cornerRadius: 14))
+            .overlay { RoundedRectangle(cornerRadius: 14).strokeBorder(Aurora.hairline, lineWidth: 1) }
+            .onAppear { if let id = shown.last?.id { proxy.scrollTo(id, anchor: .bottom) } }
+            .onChange(of: shown.last?.id) { _, id in if let id { proxy.scrollTo(id, anchor: .bottom) } }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 8)
+    }
+
+    private static let promptColor = Color(red: 0.45, green: 0.95, blue: 0.55)
+
+    /// "HH:mm:ss [category] text", colored like a terminal.
+    private static func attributed(_ line: LogLine) -> AttributedString {
+        let error = line.level == .error
+        // AppLog.timestamp is "yyyy-MM-dd HH:mm:ss.SSS".
+        var time = AttributedString(String(AppLog.timestamp(line.date).dropFirst(11).prefix(8)) + " ")
+        time.foregroundColor = Color.white.opacity(0.4)
+        var tag = AttributedString("[\(line.category.title.lowercased())] ")
+        tag.foregroundColor = error ? Aurora.danger : Aurora.sky
+        var text = AttributedString(line.text)
+        text.foregroundColor = error ? Aurora.danger : Color.white.opacity(0.88)
+        return time + tag + text
     }
 
     private var filtered: [LogLine] {

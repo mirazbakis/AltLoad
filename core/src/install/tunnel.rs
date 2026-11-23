@@ -92,6 +92,16 @@ pub(super) async fn open_tunnel_to(
 /// Where a scan last found remotepairingd. Kept until AltLoad quits.
 static SCANNED_PORT: Mutex<Option<u16>> = Mutex::new(None);
 
+/// Held while a tunnel is being set up. Each FFI call runs its own runtime, and a
+/// tokio mutex works across runtimes.
+static HANDSHAKE: AsyncMutex<()> = AsyncMutex::const_new(());
+
+/// Longest one tunnel setup may take (the timed steps alone add up to about 25 s).
+const HANDSHAKE_LIMIT: Duration = Duration::from_secs(45);
+
+/// Longest a caller waits for another setup to finish before it gives up.
+const HANDSHAKE_WAIT: Duration = Duration::from_secs(2 * 45 + 10);
+
 /// iOS hands out ports for its services from this range.
 const SCAN_PORTS: std::ops::RangeInclusive<u16> = 49152..=65535;
 
@@ -101,7 +111,7 @@ const NOT_PAIRING: [u16; 1] = [62078];
 /// True when an error from `connect_endpoint` came after pair-verify succeeded,
 /// so the port really was remotepairingd.
 fn past_pair_verify(e: &str) -> bool {
-    ["tunnel listener", "tunnel connect", "TLS-PSK", "tunnel client", "tunnel server", "RSD"]
+    ["tunnel listener", "tunnel connect", "tunnel setup", "TLS-PSK", "tunnel client", "tunnel server", "RSD"]
         .iter()
         .any(|step| e.contains(step))
 }
@@ -196,6 +206,24 @@ mod scan_tests {
 }
 
 pub(super) async fn connect_endpoint(
+    ep: &Endpoint,
+    host_name: &str,
+    rpf: &mut RpPairingFile,
+) -> Result<(AdapterHandle, RsdHandshake), String> {
+    // One handshake at a time: when an install and the JIT tab open tunnels together,
+    // their pair-verify and listener steps interleave on remotepairingd and both stall.
+    // The whole setup is time-limited so a stuck step can't hold the lock for good.
+    let _turn = match tokio::time::timeout(HANDSHAKE_WAIT, HANDSHAKE.lock()).await {
+        Ok(guard) => guard,
+        Err(_) => return Err("timed out waiting for another connection to this device".into()),
+    };
+    match tokio::time::timeout(HANDSHAKE_LIMIT, connect_endpoint_locked(ep, host_name, rpf)).await {
+        Ok(result) => result,
+        Err(_) => Err("tunnel setup timed out".into()),
+    }
+}
+
+async fn connect_endpoint_locked(
     ep: &Endpoint,
     host_name: &str,
     rpf: &mut RpPairingFile,

@@ -80,29 +80,44 @@ pub fn is_plist_dictionary(bytes: &[u8]) -> bool {
         .unwrap_or(false)
 }
 
-/// Sends the code and reads the reply, with 10 s timeouts on each part.
+/// Sends the code and reads the reply, giving up after `TIMEOUT`.
+///
+/// Open Minis doesn't support every socket option (SO_RCVTIMEO and friends fail
+/// with "Protocol not available"), so the exchange uses a plain blocking socket on
+/// its own thread and the deadline is kept here instead.
 pub fn fetch(code: &str) -> Result<Reply, String> {
-    let addr = SocketAddr::from(ADDR);
-    let mut stream = TcpStream::connect_timeout(&addr, TIMEOUT).map_err(|e| match e.kind() {
+    let line = request_line(code);
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let _ = tx.send(exchange(&line));
+    });
+    rx.recv_timeout(TIMEOUT).unwrap_or_else(|_| Err(timeout_message()))
+}
+
+fn exchange(line: &str) -> Result<Reply, String> {
+    let mut stream = TcpStream::connect(SocketAddr::from(ADDR)).map_err(|e| match e.kind() {
         std::io::ErrorKind::ConnectionRefused => {
             "The pairing tool isn't running. In rootshell run ./altpair.wasm and keep that tab open (rootshell stops in the background).".to_string()
         }
         _ => io_message(&e),
     })?;
-    stream.set_read_timeout(Some(TIMEOUT)).map_err(|e| io_message(&e))?;
-    stream.set_write_timeout(Some(TIMEOUT)).map_err(|e| io_message(&e))?;
     stream
-        .write_all(request_line(code).as_bytes())
+        .write_all(line.as_bytes())
         .and_then(|_| stream.flush())
         .map_err(|e| io_message(&e))?;
     read_reply(&mut stream)
 }
 
+fn timeout_message() -> String {
+    format!(
+        "The pairing tool didn't answer in {} s. rootshell may have gone to the background: open it and check the tab is still running.",
+        TIMEOUT.as_secs()
+    )
+}
+
 fn io_message(e: &std::io::Error) -> String {
     match e.kind() {
-        std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut => {
-            "The pairing tool didn't answer in 10 s. rootshell may have gone to the background: open it and check the tab is still running.".into()
-        }
+        std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut => timeout_message(),
         _ => e.to_string(),
     }
 }
