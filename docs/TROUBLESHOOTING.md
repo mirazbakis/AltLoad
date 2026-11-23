@@ -18,7 +18,7 @@ If it still fails, turn LocalDevVPN off and on, or pair again.
 The pairing service answered, but the connection after it stalled. This mostly happens right after LocalDevVPN connects.
 
 - Turn LocalDevVPN off and on, wait a few seconds, and try again.
-- Update AltLoad. Since 1.6.2, AltLoad sets up one connection to the iPhone at a time, so an install and the JIT tab no longer stall each other.
+- Update AltLoad. Since 1.8.0, AltLoad sets up one connection to the iPhone at a time, so an install and the JIT tab no longer stall each other.
 
 ### "This iPhone no longer accepts the pairing file"
 

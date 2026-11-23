@@ -17,6 +17,7 @@ struct SettingsView: View {
     @State private var vpnActive = LocalDevVPN.isActive
     @State private var showSignIn = false
     @State private var anisetteReset = false
+    @State private var certificateName = CertificateName.current
     @State private var sourceURLs: [StoreApp: String] = Dictionary(uniqueKeysWithValues: StoreApp.allCases.map {
         ($0, UserDefaults.standard.string(forKey: $0.sourceDefaultsKey) ?? $0.defaultSourceURL.absoluteString)
     })
@@ -25,6 +26,7 @@ struct SettingsView: View {
         NavigationStack {
             AuroraScreen {
                 appleIDCard
+                certificateCard
                 autoRefreshCard
                 anisetteCard
                 vpnCard
@@ -182,6 +184,32 @@ struct SettingsView: View {
                     .lineLimit(8)
             }
         }
+    }
+
+    // MARK: - Certificate name
+
+    private var certificateCard: some View {
+        CardSection(title: "Certificate Name", symbol: "checkmark.seal.fill") {
+            TextField(CertificateName.defaultName, text: $certificateName)
+                .font(.subheadline)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .submitLabel(.done)
+                .inputField()
+                .onChange(of: certificateName) { _, value in
+                    if value.count > CertificateName.maxLength {
+                        certificateName = String(value.prefix(CertificateName.maxLength))
+                    }
+                }
+                .onSubmit(saveCertificateName)
+                .onDisappear(perform: saveCertificateName)
+            footnote(String(localized: "The name your Apple ID shows for the development certificate AltLoad requests. Changing it makes AltLoad request a new certificate on the next install or refresh. Free Apple IDs only get a few, so AltLoad may ask you to revoke one."))
+        }
+    }
+
+    private func saveCertificateName() {
+        CertificateName.current = certificateName
+        certificateName = CertificateName.current
     }
 
     // MARK: - Anisette

@@ -10,6 +10,10 @@
         <string>it</string>
         <string>zh-Hans</string>
         <string>ru</string>
+        <string>es</string>
+        <string>ja</string>
+        <string>ko</string>
+        <string>pt-BR</string>
     </array>
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
