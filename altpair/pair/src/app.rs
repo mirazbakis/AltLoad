@@ -1,7 +1,7 @@
 //! The program itself: pair over Wi-Fi, save the pairing file, then serve it
 //! to the installer on the loopback interface.
 
-use std::io::{Read, Write};
+use std::io::Write;
 use std::net::Ipv4Addr;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -18,6 +18,8 @@ use crate::{bigdigits, dns, handoff, hints, ifconfig, plistfix};
 const HOST_NAME: &str = "AltLoad";
 const HOST_MODEL: &str = "Mac17,7";
 const PAIRING_FILE: &str = "rp_pairing_file.plist";
+/// Where the guide saves `ifconfig en0` output; read when no file is named.
+const IFCONFIG_FILE: &str = "if.txt";
 const MDNS_GROUP: Ipv4Addr = Ipv4Addr::new(224, 0, 0, 251);
 const MDNS_PORT: u16 = 5353;
 const ANNOUNCE_COUNT: usize = 3;
@@ -91,18 +93,33 @@ pub fn main() -> i32 {
     serve(&plist)
 }
 
-/// Finds the Wi-Fi address: `--ip`, then `ifconfig` output on stdin.
+/// Finds the Wi-Fi address: `--ip`, then an ifconfig file (the one named on the
+/// command line, or `if.txt` in this folder), then `ifconfig` output on stdin.
 fn wifi_address(opts: &Options) -> Result<Ipv4Addr, Fail> {
     if let Some(ip) = opts.ip {
         return Ok(ip);
     }
 
+    // Read the file directly: rootshell doesn't always end a `< if.txt` redirect,
+    // and reading stdin then waits forever.
+    let named = opts.file.is_some();
+    let path = opts.file.clone().unwrap_or_else(|| IFCONFIG_FILE.to_string());
+    match std::fs::read(&path) {
+        Ok(bytes) => {
+            debug!("read {} bytes of ifconfig output from {path}", bytes.len());
+            let text = String::from_utf8_lossy(&bytes);
+            return ifconfig::parse_inet(&text)
+                .ok_or_else(|| Fail::Usage(hints::no_address(text.trim().is_empty())));
+        }
+        Err(e) if named => return Err(Fail::Usage(format!("Couldn't read {path}: {e}"))),
+        Err(e) => debug!("no {path} ({e}); reading stdin"),
+    }
+
     eprintln!("Reading ifconfig from stdin...");
-    let mut text = String::new();
-    let _ = std::io::stdin().take(256 * 1024).read_to_string(&mut text);
-    debug!("read {} bytes of ifconfig output", text.len());
-    ifconfig::parse_inet(&text)
-        .ok_or_else(|| Fail::Usage(hints::no_address(text.trim().is_empty())))
+    eprintln!("(If this stays here, press Ctrl-C and run: ./altpair.wasm --ip A.B.C.D)");
+    let (ip, read) = ifconfig::read_until_address(&mut std::io::stdin(), 256 * 1024);
+    debug!("read {read} bytes of ifconfig output");
+    ip.ok_or_else(|| Fail::Usage(hints::no_address(read == 0)))
 }
 
 fn announce(a: &dns::Announcement, times: usize) -> Result<(), String> {

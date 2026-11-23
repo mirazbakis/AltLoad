@@ -464,6 +464,7 @@
                   <li><b>Pair with AltLoad doesn't appear.</b>Check Developer Mode is on and the iPhone is on Wi-Fi, then run the last two lines again and reopen Settings.</li>
                   <li><b>The PIN was rejected.</b>Run <code>./altpair.wasm &lt; if.txt</code> again for a new PIN; each one works once.</li>
                   <li><b>rootshell stopped.</b>Set Location Diary Mode to Session Only and allow Local Network access, then start again.</li>
+                  <li><b>It stays at <code>Reading ifconfig from stdin...</code></b>Press Ctrl-C, run the first line again to get the latest tool, then run the last two lines again. Or run <code>./altpair.wasm --ip</code> followed by your Wi-Fi address from Settings › Wi-Fi.</li>
                   <li><b>It says <code>wasm: command not found</code>.</b>rootshell can't pipe into a <code>.wasm</code> program. Use the three lines above (save to <code>if.txt</code>, then read it with <code>&lt;</code>), not <code>ifconfig en0 | ./altpair.wasm</code>.</li>
                 </ul>
               </details>

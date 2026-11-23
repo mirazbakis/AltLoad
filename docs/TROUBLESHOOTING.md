@@ -65,6 +65,10 @@ Trust your Apple ID in **Settings › General › VPN & Device Management**. If 
 
 rootshell can't pipe into a `.wasm` program. Save `ifconfig en0` to a file and read it with `<`, as the steps on [altload.org](https://altload.org/apple-id.html) show.
 
+### It stays at "Reading ifconfig from stdin..."
+
+Older copies of the pairing tool wait for rootshell to finish sending `if.txt`, which doesn't always happen. Press Ctrl-C, download the tool again with the `curl` line, and run it again: it now reads `if.txt` by itself. Or skip the file and give the address directly: `./altpair.wasm --ip A.B.C.D` (your Wi-Fi address from Settings › Wi-Fi › ⓘ).
+
 ### **Pair with AltLoad** doesn't appear
 
 Check Developer Mode is on and the iPhone is on Wi-Fi. The pairing tool needs rootshell 1.0.16-177 or later.

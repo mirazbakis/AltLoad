@@ -1,6 +1,6 @@
 [package]
 name = "altpair"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Pairs an iPhone with itself from rootshell's local shell and hands the pairing file to the installer"
 publish = false

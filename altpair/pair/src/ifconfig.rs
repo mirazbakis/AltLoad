@@ -1,5 +1,6 @@
 //! Picks this iPhone's Wi-Fi IPv4 address out of `ifconfig` output.
 
+use std::io::Read;
 use std::net::Ipv4Addr;
 
 /// True for an address another device on the Wi-Fi could reach us at.
@@ -31,9 +32,56 @@ pub fn parse_inet(text: &str) -> Option<Ipv4Addr> {
     None
 }
 
+/// Reads `ifconfig` text until it contains an address, then stops. Only whole
+/// lines are parsed, so an address split across two reads isn't cut short.
+/// rootshell doesn't always end a `<` redirect, so waiting for EOF can hang.
+/// Returns the address, if any, and how many bytes were read.
+pub fn read_until_address(r: &mut impl Read, limit: usize) -> (Option<Ipv4Addr>, usize) {
+    let mut text = Vec::new();
+    let mut buf = [0u8; 4096];
+    while text.len() < limit {
+        let n = match r.read(&mut buf) {
+            Ok(0) | Err(_) => break,
+            Ok(n) => n,
+        };
+        text.extend_from_slice(&buf[..n]);
+        if let Some(end) = text.iter().rposition(|&b| b == b'\n') {
+            if let Some(ip) = parse_inet(&String::from_utf8_lossy(&text[..end])) {
+                return (Some(ip), text.len());
+            }
+        }
+    }
+    (parse_inet(&String::from_utf8_lossy(&text)), text.len())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Gives its chunks, then fails the test if read again (like a stdin with no EOF).
+    struct NoEof(Vec<&'static [u8]>);
+    impl Read for NoEof {
+        fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+            assert!(!self.0.is_empty(), "read past the address: this would hang");
+            let chunk = self.0.remove(0);
+            buf[..chunk.len()].copy_from_slice(chunk);
+            Ok(chunk.len())
+        }
+    }
+
+    #[test]
+    fn stops_once_an_address_arrives() {
+        let mut r = NoEof(vec![b"en0: flags=8863<UP>\n\tinet 192.168.1.", b"42 netmask 0xffffff00\n"]);
+        assert_eq!(read_until_address(&mut r, 1 << 16).0, Some(Ipv4Addr::new(192, 168, 1, 42)));
+    }
+
+    #[test]
+    fn reads_to_eof_without_a_newline() {
+        let text: &[u8] = b"\tinet 10.0.0.7 netmask 0xffffff00";
+        assert_eq!(read_until_address(&mut &text[..], 1 << 16).0, Some(Ipv4Addr::new(10, 0, 0, 7)));
+        let empty: &[u8] = b"";
+        assert_eq!(read_until_address(&mut &empty[..], 1 << 16), (None, 0));
+    }
 
     const EN0: &str = "en0: flags=8863<UP,BROADCAST,SMART,RUNNING,SIMPLEX,MULTICAST> mtu 1500
 \toptions=6460<TSO4,TSO6,CHANNEL_IO,PARTIAL_CSUM,ZEROINVERT_CSUM>

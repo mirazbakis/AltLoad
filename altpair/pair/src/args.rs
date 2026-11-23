@@ -14,9 +14,12 @@ usage:
   ./altpair.wasm < if.txt
   ./altpair.wasm --ip 192.168.1.5
 
-Use < to read if.txt. Do not pipe
-(ifconfig | ./altpair.wasm): rootshell
-answers \"wasm: command not found\".
+altpair reads if.txt in this folder by
+itself, or the file you name:
+  ./altpair.wasm my-ifconfig.txt
+Do not pipe (ifconfig | ./altpair.wasm):
+rootshell answers \"wasm: command not
+found\".
 
 Needs rootshell 1.0.16-177 or later,
 Wi-Fi on, and rootshell in front
@@ -38,6 +41,8 @@ exit codes: 0 ok, 1 failure, 2 usage";
 #[derive(Debug, PartialEq, Eq)]
 pub struct Options {
     pub ip: Option<Ipv4Addr>,
+    /// A file with `ifconfig` output, named on the command line.
+    pub file: Option<String>,
     pub port: u16,
     pub repair: bool,
     pub help: bool,
@@ -46,7 +51,7 @@ pub struct Options {
 }
 
 pub fn parse<I: IntoIterator<Item = String>>(args: I) -> Result<Options, String> {
-    let mut o = Options { ip: None, port: DEFAULT_PORT, repair: false, help: false, version: false, verbose: false };
+    let mut o = Options { ip: None, file: None, port: DEFAULT_PORT, repair: false, help: false, version: false, verbose: false };
     let mut it = args.into_iter();
     while let Some(arg) = it.next() {
         let (flag, inline) = match arg.split_once('=') {
@@ -76,6 +81,7 @@ pub fn parse<I: IntoIterator<Item = String>>(args: I) -> Result<Options, String>
                     _ => return Err(format!("bad --port: {v}")),
                 };
             }
+            _ if !arg.starts_with('-') && o.file.is_none() => o.file = Some(arg),
             _ => return Err(format!("unknown option: {arg}")),
         }
     }
@@ -94,7 +100,7 @@ mod tests {
     fn defaults() {
         assert_eq!(
             p(&[]).unwrap(),
-            Options { ip: None, port: 49207, repair: false, help: false, version: false, verbose: false }
+            Options { ip: None, file: None, port: 49207, repair: false, help: false, version: false, verbose: false }
         );
     }
 
