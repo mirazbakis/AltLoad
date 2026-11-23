@@ -18,7 +18,7 @@ struct DevCertificate: Identifiable, Hashable, Decodable {
     var expiration: Date? { expires > 0 ? Date(timeIntervalSince1970: TimeInterval(expires)) : nil }
     var isExpired: Bool { (expiration ?? .distantFuture) < .now }
     /// Made by AltLoad itself (isideload names the machine after the app).
-    var isAltLoad: Bool { machineName.caseInsensitiveCompare("AltLoad") == .orderedSame }
+    var isAltLoad: Bool { CertificateName.isAltLoad(machineName) }
     var displayName: String { machineName.isEmpty ? (name.isEmpty ? String(localized: "Unnamed certificate") : name) : machineName }
 }
 

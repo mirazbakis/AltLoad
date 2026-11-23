@@ -747,7 +747,7 @@ final class InstallController: ObservableObject {
                     endpoint_count: endpoints.count,
                     ipa_path: c(ipa.path),
                     device_name: c(deviceName),
-                    machine_name: c("AltLoad"),
+                    machine_name: c(CertificateName.current),
                     server_id: c(serverID),
                     capabilities: c(capabilities),
                     extensions_mode: extensionsMode)

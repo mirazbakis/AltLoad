@@ -51,6 +51,12 @@
             "state": "translated",
             "value": "AltLoadはデバイスを検出してペアリングを完了するためにローカルネットワークを使用します。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad는 기기를 찾고 페어링을 완료하기 위해 로컬 네트워크를 사용합니다."
+          }
         }
       }
     },
@@ -104,6 +110,12 @@
             "state": "translated",
             "value": "AltLoadは、“設定”でペアリングを完了するあいだバックグラウンドで動作し続けるために位置情報を使用することがあります。"
           }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad는 설정에서 페어링을 완료하는 동안 백그라운드에서 계속 실행되도록 위치를 사용할 수 있습니다."
+          }
         }
       }
     },
@@ -156,6 +168,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "AltLoadは、“設定”でペアリングを完了するあいだバックグラウンドで動作し続けるために位置情報を使用することがあります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AltLoad는 설정에서 페어링을 완료하는 동안 백그라운드에서 계속 실행되도록 위치를 사용할 수 있습니다."
           }
         }
       }
