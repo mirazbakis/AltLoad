@@ -13,7 +13,7 @@
 
 [Installer](https://altload.org/) · [Télécharger l'IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [Ajouter la source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [Versions](https://github.com/mirazbakis/AltLoad/releases)
 
-[English](README.md) · [简体中文](README.zh-Hans.md) · [Русский](README.ru.md) · Français
+[English](README.md) · [简体中文](README.zh-Hans.md) · [Русский](README.ru.md) · Français · [한국어](README.ko.md)
 
 </div>
 
@@ -71,6 +71,7 @@ Vous avez aussi besoin de :
 - **Sources :** ajoutez des sources AltStore et SideStore, parcourez leurs apps, lisez les notes de version, installez d'anciennes versions et voyez quand une mise à jour est disponible
 - **Équipe de développement :** choisissez l'équipe qui signe, si votre identifiant Apple appartient à plusieurs équipes
 - **Plusieurs identifiants Apple :** enregistrez-en plusieurs et changez lors de la connexion. Chaque app mémorise l'identifiant Apple qui l'a signée
+- **Nom du certificat :** choisissez, dans les Réglages, le nom qu'AltLoad donne au certificat de développement qu'il demande
 - **Droits :** capacités par app, préréglages pour les émulateurs et les outils réseau, et ce que le dernier profil a réellement accordé
 
 **Jumelage et renouvellement**
@@ -85,7 +86,7 @@ Vous avez aussi besoin de :
 - **Outils supplémentaires :** simulation de position, certificats, App IDs et options d'extensions d'app
 - **Journaux :** dans les Réglages, voyez ce qu'AltLoad a fait et copiez un rapport en cas d'échec. Les adresses e-mail sont masquées et les mots de passe ne sont jamais journalisés
 
-**Langues :** anglais, chinois, français, allemand, italien, japonais, portugais (Brésil), russe et espagnol.
+**Langues :** anglais, chinois, français, allemand, italien, japonais, coréen, portugais (Brésil), russe et espagnol.
 
 ## Dépannage
 
@@ -102,7 +103,7 @@ LocalDevVPN doit être connecté, le Mode développeur activé et cet iPhone jum
 <summary><b>« Couldn't open a tunnel to this device »</b></summary>
 <br>
 
-Le service de jumelage a répondu, mais la connexion suivante s'est bloquée. Désactivez puis réactivez LocalDevVPN, attendez quelques secondes et réessayez. Depuis AltLoad 1.6.2, une seule connexion est établie à la fois, donc une installation et l'onglet JIT ne se bloquent plus mutuellement.
+Le service de jumelage a répondu, mais la connexion suivante s'est bloquée. Désactivez puis réactivez LocalDevVPN, attendez quelques secondes et réessayez. Depuis AltLoad 1.8.0, une seule connexion est établie à la fois, donc une installation et l'onglet JIT ne se bloquent plus mutuellement.
 </details>
 
 <details>

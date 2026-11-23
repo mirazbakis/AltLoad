@@ -13,7 +13,7 @@
 
 [Install](https://altload.org/) · [Download the IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [Add the source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [Releases](https://github.com/mirazbakis/AltLoad/releases)
 
-English · [简体中文](README.zh-Hans.md) · [Русский](README.ru.md) · [Français](README.fr.md)
+English · [简体中文](README.zh-Hans.md) · [Русский](README.ru.md) · [Français](README.fr.md) · [한국어](README.ko.md)
 
 </div>
 
@@ -71,6 +71,7 @@ You also need:
 - **Sources:** add AltStore and SideStore sources, browse their apps, read release notes, install older versions, and see when an update is out
 - **Developer team:** pick which team signs, if your Apple ID belongs to more than one
 - **Several Apple IDs:** save more than one and switch when you sign in. Each app remembers the Apple ID that signed it
+- **Certificate name:** choose the name AltLoad gives the development certificate it requests, in Settings
 - **Entitlements:** per-app capabilities, presets for emulators and network tools, and what the last profile actually granted
 
 **Pairing and refresh**
@@ -85,7 +86,7 @@ You also need:
 - **More tools:** location simulation, certificates, App IDs, and app extension options
 - **Logs:** in Settings, see what AltLoad did and copy a report when something fails. Emails are masked and passwords are never logged
 
-**Languages:** English, Chinese, French, German, Italian, Japanese, Portuguese (Brazil), Russian and Spanish.
+**Languages:** English, Chinese, French, German, Italian, Japanese, Korean, Portuguese (Brazil), Russian and Spanish.
 
 ## Troubleshooting
 
@@ -102,7 +103,7 @@ LocalDevVPN must be connected, Developer Mode on, and this iPhone paired in **To
 <summary><b>"Couldn't open a tunnel to this device"</b></summary>
 <br>
 
-The pairing service answered, but the next connection stalled. Turn LocalDevVPN off and on, wait a few seconds and try again. AltLoad 1.6.2 and later set up one connection at a time, so an install and the JIT tab no longer stall each other.
+The pairing service answered, but the next connection stalled. Turn LocalDevVPN off and on, wait a few seconds and try again. AltLoad 1.8.0 and later set up one connection at a time, so an install and the JIT tab no longer stall each other.
 </details>
 
 <details>

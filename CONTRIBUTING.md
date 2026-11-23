@@ -45,4 +45,4 @@ By submitting a contribution, you agree to the terms in [LICENSE.md](LICENSE.md)
 
 ## Translations
 
-AltLoad is in English, Chinese, French, German, Italian, Japanese, Portuguese (Brazil), Russian and Spanish. To fix or add a translation, edit `ios/Shared/Localizable.xcstrings` in Xcode, or the `README.*.md` files for the readme.
+AltLoad is in English, Chinese, French, German, Italian, Japanese, Korean, Portuguese (Brazil), Russian and Spanish. To fix or add a translation, edit `ios/Shared/Localizable.xcstrings` in Xcode, or the `README.*.md` files for the readme.

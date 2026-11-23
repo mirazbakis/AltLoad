@@ -13,7 +13,7 @@
 
 [安装](https://altload.org/) · [下载 IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [添加源](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [发布版本](https://github.com/mirazbakis/AltLoad/releases)
 
-[English](README.md) · 简体中文 · [Русский](README.ru.md) · [Français](README.fr.md)
+[English](README.md) · 简体中文 · [Русский](README.ru.md) · [Français](README.fr.md) · [한국어](README.ko.md)
 
 </div>
 
@@ -71,6 +71,7 @@
 - **源：** 添加 AltStore 和 SideStore 源，浏览其中的应用，阅读更新说明，安装旧版本，并在有更新时看到提示
 - **开发者团队：** 如果你的 Apple ID 属于多个团队，可选择由哪个团队签名
 - **多个 Apple ID：** 可保存多个，登录时切换。每个应用都会记住签名它的 Apple ID
+- **证书名称：** 在设置中选择 AltLoad 申请的开发证书使用的名称
 - **权限：** 按应用设置功能，提供模拟器和网络工具的预设，并显示上一个描述文件实际授予的权限
 
 **配对与刷新**
@@ -85,7 +86,7 @@
 - **更多工具：** 位置模拟、证书、App ID 以及 App 扩展选项
 - **日志：** 在设置中查看 AltLoad 执行的操作，失败时拷贝报告。邮箱会被遮蔽，密码从不记录
 
-**语言：** 英语、中文、法语、德语、意大利语、日语、葡萄牙语（巴西）、俄语和西班牙语。
+**语言：** 英语、中文、法语、德语、意大利语、日语、韩语、葡萄牙语（巴西）、俄语和西班牙语。
 
 ## 故障排除
 
@@ -102,7 +103,7 @@
 <summary><b>“Couldn't open a tunnel to this device”</b></summary>
 <br>
 
-配对服务已响应，但之后的连接卡住了。关闭再打开 LocalDevVPN，等几秒后重试。从 AltLoad 1.6.2 起，与 iPhone 的连接一次只建立一个，因此安装和 JIT 标签页不会再互相卡住。
+配对服务已响应，但之后的连接卡住了。关闭再打开 LocalDevVPN，等几秒后重试。从 AltLoad 1.8.0 起，与 iPhone 的连接一次只建立一个，因此安装和 JIT 标签页不会再互相卡住。
 </details>
 
 <details>
