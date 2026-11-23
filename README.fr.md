@@ -6,6 +6,11 @@
 
 **Installez AltStore, SideStore et LiveContainer depuis votre iPhone, signés avec votre propre identifiant Apple. Pas d'ordinateur, pas de certificat partagé.**
 
+[![Latest release](https://img.shields.io/github/v/release/mirazbakis/AltLoad?label=release)](https://github.com/mirazbakis/AltLoad/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/mirazbakis/AltLoad/total)](https://github.com/mirazbakis/AltLoad/releases)
+[![iOS](https://img.shields.io/badge/iOS-18%2B-blue)](#prérequis)
+[![Stars](https://img.shields.io/github/stars/mirazbakis/AltLoad)](https://github.com/mirazbakis/AltLoad/stargazers)
+
 [Installer](https://altload.org/) · [Télécharger l'IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [Ajouter la source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [Versions](https://github.com/mirazbakis/AltLoad/releases)
 
 [English](README.md) · [简体中文](README.zh-Hans.md) · [Русский](README.ru.md) · Français
@@ -56,11 +61,14 @@ Vous avez aussi besoin de :
 
 **3. Installer un store.** Activez LocalDevVPN, choisissez un store dans l'onglet **Installer** et connectez-vous.
 
+**4. Installer d'autres apps (facultatif).** Dans le menu **…** de l'onglet Installer, ouvrez **Sources** pour ajouter une source au format AltStore et installer ses apps, ou **Installer un IPA depuis Fichiers…** pour un IPA que vous avez déjà. Voir [Sources](docs/SOURCES.md) (en anglais).
+
 ## Fonctionnalités
 
 **Installation et signature**
 - **Stores :** AltStore Classic et Beta, SideStore et SideStore + LiveContainer, stable ou nightly. Aussi Husk, UTM, MeloNX et Madeira
 - **Vos propres apps :** signez et installez n'importe quelle IPA depuis Fichiers
+- **Sources :** ajoutez des sources AltStore et SideStore, parcourez leurs apps, lisez les notes de version, installez d'anciennes versions et voyez quand une mise à jour est disponible
 - **Équipe de développement :** choisissez l'équipe qui signe, si votre identifiant Apple appartient à plusieurs équipes
 - **Plusieurs identifiants Apple :** enregistrez-en plusieurs et changez lors de la connexion. Chaque app mémorise l'identifiant Apple qui l'a signée
 - **Droits :** capacités par app, préréglages pour les émulateurs et les outils réseau, et ce que le dernier profil a réellement accordé
@@ -75,19 +83,26 @@ Vous avez aussi besoin de :
 **JIT et outils**
 - **JIT :** ouvrez les apps avec JIT depuis Outils, Raccourcis, Siri ou l'écran d'accueil. Épinglez celles que vous utilisez, exécutez des scripts et acceptez des demandes depuis des liens
 - **Outils supplémentaires :** simulation de position, certificats, App IDs et options d'extensions d'app
-- **Journaux :** voyez ce qu'AltLoad a fait et copiez un rapport en cas d'échec. Les adresses e-mail sont masquées et les mots de passe ne sont jamais journalisés
+- **Journaux :** dans les Réglages, voyez ce qu'AltLoad a fait et copiez un rapport en cas d'échec. Les adresses e-mail sont masquées et les mots de passe ne sont jamais journalisés
 
 **Langues :** anglais, chinois, français, allemand, italien, japonais, portugais (Brésil), russe et espagnol.
 
 ## Dépannage
 
-Quand une opération échoue, ouvrez **Réglages › Journaux** et touchez **Copier**, ou touchez **Copier le journal** sur l'écran d'erreur. Collez-le dans un [ticket](https://github.com/mirazbakis/AltLoad/issues).
+Quand une opération échoue, ouvrez **Réglages › Journaux** et touchez **Copier**, ou touchez **Copier le journal** sur l'écran d'erreur. Collez-le dans un [ticket](https://github.com/mirazbakis/AltLoad/issues). Les problèmes les plus courants sont ci-dessous ; la liste complète est dans [Dépannage](docs/TROUBLESHOOTING.md) (en anglais).
 
 <details>
 <summary><b>« Impossible de se connecter à cet iPhone » ou « Connexion refusée »</b></summary>
 <br>
 
 LocalDevVPN doit être connecté, le Mode développeur activé et cet iPhone jumelé dans **Outils › Jumeler**. Autorisez l'accès au réseau local si AltLoad le demande. Désactivez toute autre app VPN ou proxy. Si l'échec persiste, désactivez puis réactivez LocalDevVPN, ou jumelez à nouveau.
+</details>
+
+<details>
+<summary><b>« Couldn't open a tunnel to this device »</b></summary>
+<br>
+
+Le service de jumelage a répondu, mais la connexion suivante s'est bloquée. Désactivez puis réactivez LocalDevVPN, attendez quelques secondes et réessayez. Depuis AltLoad 1.6.2, une seule connexion est établie à la fois, donc une installation et l'onglet JIT ne se bloquent plus mutuellement.
 </details>
 
 <details>
@@ -118,6 +133,19 @@ Les identifiants Apple gratuits n'obtiennent que quelques certificats de dévelo
 Si toutes les sources d'un store sont indisponibles, obtenez son IPA autrement et utilisez **Installer une IPA depuis Fichiers** dans le menu **…** de l'onglet Installer.
 </details>
 
+## Documentation
+
+Les guides sont en anglais.
+
+| Guide | Contenu |
+| :-- | :-- |
+| [FAQ](docs/FAQ.md) | Mots de passe, limites, révocation, et différences avec AltStore et SideStore |
+| [Sources](docs/SOURCES.md) | Ajouter des sources, les mises à jour et les champs qu'AltLoad lit |
+| [Dépannage](docs/TROUBLESHOOTING.md) | Les erreurs et que faire |
+| [Fonctionnement](docs/HOW-IT-WORKS.md) | Jumelage, tunnel, signature et installation, étape par étape |
+| [altpair](altpair/README.md) | Installer AltLoad avec votre identifiant Apple, sans ordinateur |
+| [Contribuer](CONTRIBUTING.md) | Compilation, organisation du projet et pull requests |
+
 ## Compilation
 
 Il vous faut Xcode, Rust avec les cibles `aarch64-apple-ios` et `aarch64-apple-ios-sim`, et XcodeGen.
@@ -128,6 +156,8 @@ make ipa    # build/AltLoad.ipa, signé ad hoc comme les versions publiées
 make sim    # un build pour le Simulator
 ```
 
+Lisez [Contribuer](CONTRIBUTING.md) avant d'ouvrir une pull request.
+
 | Chemin | Contenu |
 | :-- | :-- |
 | `ios/` | L'app SwiftUI, l'extension Live Activity et les traductions |
@@ -135,7 +165,7 @@ make sim    # un build pour le Simulator
 | `altpair/` | Les outils propres à AltLoad qui l'installent avec votre identifiant Apple, sans ordinateur. Voir son [README](altpair/README.md) |
 | `site/` | La page d'installation sur GitHub Pages |
 | `signing/` | Scripts et packs de certificats pour les installations signées |
-| `docs/` | [Fonctionnement](docs/HOW-IT-WORKS.md) et notes de version |
+| `docs/` | Guides, [Fonctionnement](docs/HOW-IT-WORKS.md) et notes de version |
 
 ## Licence
 

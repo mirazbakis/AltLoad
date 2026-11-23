@@ -6,6 +6,11 @@
 
 **直接用你自己的 Apple ID 在 iPhone 上安装 AltStore、SideStore 和 LiveContainer。无需电脑，不共享证书。**
 
+[![Latest release](https://img.shields.io/github/v/release/mirazbakis/AltLoad?label=release)](https://github.com/mirazbakis/AltLoad/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/mirazbakis/AltLoad/total)](https://github.com/mirazbakis/AltLoad/releases)
+[![iOS](https://img.shields.io/badge/iOS-18%2B-blue)](#系统要求)
+[![Stars](https://img.shields.io/github/stars/mirazbakis/AltLoad)](https://github.com/mirazbakis/AltLoad/stargazers)
+
 [安装](https://altload.org/) · [下载 IPA](https://github.com/mirazbakis/AltLoad/releases/latest/download/AltLoad.ipa) · [添加源](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) · [发布版本](https://github.com/mirazbakis/AltLoad/releases)
 
 [English](README.md) · 简体中文 · [Русский](README.ru.md) · [Français](README.fr.md)
@@ -56,11 +61,14 @@
 
 **3. 安装商店。** 打开 LocalDevVPN，在 **安装** 标签页中选择一个商店并登录。
 
+**4. 安装更多应用（可选）。** 在“安装”标签页的 **…** 菜单中，打开 **源** 添加 AltStore 格式的源并安装其中的应用，或用 **从文件安装 IPA…** 安装你已有的 IPA。参见 [Sources](docs/SOURCES.md)（英文）。
+
 ## 功能
 
 **安装与签名**
 - **商店：** AltStore Classic 与 Beta、SideStore 以及 SideStore + LiveContainer，可选稳定版或每夜版。还有 Husk、UTM、MeloNX 和 Madeira
 - **你自己的应用：** 签名并安装任何来自“文件”的 IPA
+- **源：** 添加 AltStore 和 SideStore 源，浏览其中的应用，阅读更新说明，安装旧版本，并在有更新时看到提示
 - **开发者团队：** 如果你的 Apple ID 属于多个团队，可选择由哪个团队签名
 - **多个 Apple ID：** 可保存多个，登录时切换。每个应用都会记住签名它的 Apple ID
 - **权限：** 按应用设置功能，提供模拟器和网络工具的预设，并显示上一个描述文件实际授予的权限
@@ -75,19 +83,26 @@
 **JIT 与工具**
 - **JIT：** 可从“工具”、快捷指令、Siri 或主屏幕以 JIT 打开应用。可固定常用应用、运行脚本，并接收来自链接的请求
 - **更多工具：** 位置模拟、证书、App ID 以及 App 扩展选项
-- **日志：** 查看 AltLoad 执行的操作，失败时拷贝报告。邮箱会被遮蔽，密码从不记录
+- **日志：** 在设置中查看 AltLoad 执行的操作，失败时拷贝报告。邮箱会被遮蔽，密码从不记录
 
 **语言：** 英语、中文、法语、德语、意大利语、日语、葡萄牙语（巴西）、俄语和西班牙语。
 
 ## 故障排除
 
-出现问题时，打开 **设置 › 日志** 并点按 **拷贝**，或在错误页面点按 **拷贝日志**。然后将其粘贴到[问题反馈](https://github.com/mirazbakis/AltLoad/issues)中。
+出现问题时，打开 **设置 › 日志** 并点按 **拷贝**，或在错误页面点按 **拷贝日志**。然后将其粘贴到[问题反馈](https://github.com/mirazbakis/AltLoad/issues)中。下面是最常见的问题，完整列表见 [Troubleshooting](docs/TROUBLESHOOTING.md)（英文）。
 
 <details>
 <summary><b>“无法连接到此 iPhone”或“连接被拒绝”</b></summary>
 <br>
 
 必须连接 LocalDevVPN，开启开发者模式，并且已在 **工具 › 配对** 中与此 iPhone 配对。如果 AltLoad 请求访问，请允许本地网络访问。关闭其他 VPN 或代理应用。如果仍然失败，请关闭再重新打开 LocalDevVPN，或重新配对。
+</details>
+
+<details>
+<summary><b>“Couldn't open a tunnel to this device”</b></summary>
+<br>
+
+配对服务已响应，但之后的连接卡住了。关闭再打开 LocalDevVPN，等几秒后重试。从 AltLoad 1.6.2 起，与 iPhone 的连接一次只建立一个，因此安装和 JIT 标签页不会再互相卡住。
 </details>
 
 <details>
@@ -118,6 +133,19 @@
 如果某个商店的所有源都无法访问，请通过其他途径获取它的 IPA，然后在“安装”标签页的 **…** 菜单中使用 **从文件安装 IPA**。
 </details>
 
+## 文档
+
+指南为英文。
+
+| 指南 | 内容 |
+| :-- | :-- |
+| [FAQ](docs/FAQ.md) | 密码、限制、证书撤销，以及 AltLoad 与 AltStore 和 SideStore 的区别 |
+| [Sources](docs/SOURCES.md) | 添加源、更新，以及 AltLoad 读取的源字段 |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | 各种错误及解决方法 |
+| [工作原理](docs/HOW-IT-WORKS.md) | 配对、隧道、签名和安装的每一步 |
+| [altpair](altpair/README.md) | 无需电脑，用你的 Apple ID 安装 AltLoad |
+| [Contributing](CONTRIBUTING.md) | 构建、项目结构和 pull request |
+
 ## 构建
 
 你需要 Xcode、安装了 `aarch64-apple-ios` 和 `aarch64-apple-ios-sim` 目标的 Rust，以及 XcodeGen。
@@ -128,6 +156,8 @@ make ipa    # 生成 build/AltLoad.ipa，采用与发布版本相同的 ad-hoc �
 make sim    # 构建模拟器版本
 ```
 
+提交 pull request 前请先阅读 [Contributing](CONTRIBUTING.md)。
+
 | 路径 | 内容 |
 | :-- | :-- |
 | `ios/` | SwiftUI 应用、实时活动扩展和翻译 |
@@ -135,7 +165,7 @@ make sim    # 构建模拟器版本
 | `altpair/` | AltLoad 自带的工具，用于在无需电脑的情况下使用你的 Apple ID 安装它。参见其 [README](altpair/README.md) |
 | `site/` | GitHub Pages 上的安装页面 |
 | `signing/` | 已签名安装所用的脚本和证书包 |
-| `docs/` | [工作原理](docs/HOW-IT-WORKS.md)和发布说明 |
+| `docs/` | 指南、[工作原理](docs/HOW-IT-WORKS.md)和发布说明 |
 
 ## 许可证
 
