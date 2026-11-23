@@ -43,6 +43,8 @@ rootshell stops when it goes to the background. Turn on Location Diary Mode › 
 
 If rootshell answers `wasm: command not found`, you piped into the tool (`ifconfig en0 | ./altpair.wasm`). rootshell can't pipe into a `.wasm` program, so save the output to `if.txt` and read it with `<` as shown above. The pairing tool also uses rootshell's newer network features (Bonjour and UDP from any sender, added in rootshell 1.0.16-177), so an older rootshell may start it but never show **Pair with AltLoad**.
 
+If the installer stops with `Protocol not available (os error 92)` after you enter the transfer code, it's an older copy that used socket options Open Minis doesn't support. Run `install.sh` again to get the latest one.
+
 Both tools print a one-line fix when something goes wrong, for example when LocalDevVPN isn't connected, when rootshell is too old (it needs 1.0.16-177 or later), or when the pairing tool has stopped. Add `--verbose` (`-v`) to either one to see what it is doing. `--version` and `--help` work on both.
 
 If the two-factor code doesn't arrive, type `r` at the code question to send it again, `s` to get it by text message, or `d` to send it to your devices.

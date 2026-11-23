@@ -42,7 +42,7 @@ body:
     id: log
     attributes:
       label: Log
-      description: In AltLoad, tap Copy Log on the error screen, or open Tools › Logs and tap Copy. Paste it here.
+      description: In AltLoad, tap Copy Log on the error screen, or open Settings › Logs and tap Copy. Paste it here.
       render: text
   - type: input
     id: altload

@@ -22,7 +22,7 @@ pub fn route_missing(kind: ErrorKind) -> bool {
 pub fn check_vpn() -> Result<(), String> {
     let addr = SocketAddr::from(ADDR);
     for attempt in 1..=TRIES {
-        match TcpStream::connect_timeout(&addr, Duration::from_secs(3)) {
+        match connect_within(addr, Duration::from_secs(3)) {
             Ok(_) => {
                 ui::debug("10.7.0.1 answers");
                 return Ok(());
@@ -40,6 +40,18 @@ pub fn check_vpn() -> Result<(), String> {
         }
     }
     Err("LocalDevVPN isn't connected. Open LocalDevVPN, tap Connect, then run altpair again.".into())
+}
+
+/// A plain blocking connect on its own thread, given up after `limit`.
+/// `TcpStream::connect_timeout` reads SO_ERROR, which some Linux shells on iOS
+/// don't support; a failure there would look like a missing route.
+fn connect_within(addr: SocketAddr, limit: Duration) -> std::io::Result<TcpStream> {
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let _ = tx.send(TcpStream::connect(addr));
+    });
+    rx.recv_timeout(limit)
+        .unwrap_or_else(|_| Err(std::io::Error::new(ErrorKind::TimedOut, "timed out")))
 }
 
 #[cfg(test)]

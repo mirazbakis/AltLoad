@@ -81,7 +81,7 @@ You also need:
 
 ## Troubleshooting
 
-When something fails, open **Tools › Support › Logs** and tap **Copy**, or tap **Copy Log** on the error screen. Paste it into an [issue](https://github.com/mirazbakis/AltLoad/issues).
+When something fails, open **Settings › Logs** and tap **Copy**, or tap **Copy Log** on the error screen. Paste it into an [issue](https://github.com/mirazbakis/AltLoad/issues).
 
 <details>
 <summary><b>"Can't connect to this iPhone" or "Connection refused"</b></summary>

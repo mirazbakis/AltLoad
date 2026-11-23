@@ -265,6 +265,12 @@ struct JITView: View {
         loadError = nil
         stage = nil
         defer { loading = false; stage = nil }
+        // An install holds the device link; listing now would only queue behind it.
+        while InstallController.shared.isBusy {
+            stage = String(localized: "Waiting…")
+            do { try await Task.sleep(for: .seconds(1)) } catch { return }
+        }
+        stage = nil
         do {
             apps = try await DeviceOps.listApps { text, _ in stage = text }
             favorites.remember(apps)
