@@ -52,7 +52,7 @@
 
 | Путь | Подходит для | Как |
 | :-- | :-- | :-- |
-| **Установка через Apple ID** (рекомендуется) | Подпись вашим Apple ID, без компьютера и без профиля DNS | Установите три бесплатных приложения из App Store и следуйте шагам на [altload.org](https://altload.org/). См. [altpair/README.md](altpair/README.md) |
+| **Установка через Apple ID** (рекомендуется) | Подпись вашим Apple ID, без компьютера и без профиля DNS | Установите три бесплатных приложения из App Store и следуйте шагам на [altload.org](https://altload.org/). См. [AltPair](https://github.com/mirazbakis/AltPair) |
 | **Прямая установка** | Самый быстрый путь. Использует общий сертификат, поэтому может быть отозван | Откройте [altload.org](https://altload.org/) в Safari, примите условия, добавьте профиль DNS и нажмите подписанную установку |
 | **AltStore или SideStore** | Вы уже используете один из них | [Добавьте источник](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) и получайте обновления там |
 | **Собственный подписывающий инструмент** | Вы подписываете IPA сами | Скачайте `AltLoad.ipa` из [Релизов](https://github.com/mirazbakis/AltLoad/releases) |
@@ -144,7 +144,7 @@ LocalDevVPN должен быть подключен, Режим разрабо�
 | [Sources](docs/SOURCES.md) | Добавление источников, обновления и поля источника, которые читает AltLoad |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Ошибки и что с ними делать |
 | [Как это работает](docs/HOW-IT-WORKS.md) | Создание пары, туннель, подпись и установка, шаг за шагом |
-| [altpair](altpair/README.md) | Установка AltLoad с вашим Apple ID без компьютера |
+| [altpair](https://github.com/mirazbakis/AltPair) | Установка AltLoad с вашим Apple ID без компьютера |
 | [Contributing](CONTRIBUTING.md) | Сборка, структура проекта и pull request |
 
 ## Сборка
@@ -163,7 +163,7 @@ make sim    # сборка для Simulator
 | :-- | :-- |
 | `ios/` | Приложение на SwiftUI, расширение Live Activity и переводы |
 | `core/` | Ядро на Rust для сопряжения, туннеля к устройству, входа, подписи и установки |
-| `altpair/` | Собственные инструменты AltLoad для установки с вашим Apple ID без компьютера. См. его [README](altpair/README.md) |
+| `altpair/` | Собственные инструменты AltLoad для установки с вашим Apple ID без компьютера. См. его [README](https://github.com/mirazbakis/AltPair) |
 | `site/` | Страница установки на GitHub Pages |
 | `signing/` | Скрипты и наборы сертификатов для подписанных установок |
 | `docs/` | Руководства, [Как это работает](docs/HOW-IT-WORKS.md) и примечания к релизам |

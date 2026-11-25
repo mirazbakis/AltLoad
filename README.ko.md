@@ -52,7 +52,7 @@
 
 | 방법 | 적합한 경우 | 방법 설명 |
 | :-- | :-- | :-- |
-| **Apple ID 설치** (권장) | 컴퓨터와 DNS 프로파일 없이 자신의 Apple ID로 서명하려는 경우 | App Store의 무료 앱 3개를 설치하고 [altload.org](https://altload.org/)의 단계를 따르십시오. [altpair/README.md](altpair/README.md)를 참고하십시오 |
+| **Apple ID 설치** (권장) | 컴퓨터와 DNS 프로파일 없이 자신의 Apple ID로 서명하려는 경우 | App Store의 무료 앱 3개를 설치하고 [altload.org](https://altload.org/)의 단계를 따르십시오. [AltPair](https://github.com/mirazbakis/AltPair)를 참고하십시오 |
 | **직접 설치** | 가장 빠른 방법. 공유 인증서를 사용하므로 폐기될 수 있습니다 | Safari에서 [altload.org](https://altload.org/)를 열고 약관에 동의한 뒤 DNS 프로파일을 추가하고 서명된 설치를 탭하십시오 |
 | **AltStore 또는 SideStore** | 이미 사용 중인 경우 | [소스를 추가](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json)하고 거기서 업데이트를 받으십시오 |
 | **직접 서명** | IPA에 직접 서명하는 경우 | [릴리스](https://github.com/mirazbakis/AltLoad/releases)에서 `AltLoad.ipa`를 다운로드하십시오 |
@@ -144,7 +144,7 @@ LocalDevVPN이 연결되어 있고, 개발자 모드가 켜져 있으며, 이 iP
 | [Sources](docs/SOURCES.md) | 소스 추가, 업데이트, AltLoad가 읽는 소스 필드 |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | 오류와 해결 방법 |
 | [How it works](docs/HOW-IT-WORKS.md) | 페어링, 터널, 서명 및 설치를 단계별로 설명 |
-| [altpair](altpair/README.md) | 컴퓨터 없이 자신의 Apple ID로 AltLoad 설치 |
+| [altpair](https://github.com/mirazbakis/AltPair) | 컴퓨터 없이 자신의 Apple ID로 AltLoad 설치 |
 | [Contributing](CONTRIBUTING.md) | 빌드, 프로젝트 구조, pull request |
 
 ## 빌드
@@ -163,7 +163,7 @@ pull request를 열기 전에 [Contributing](CONTRIBUTING.md)을 읽어 주십�
 | :-- | :-- |
 | `ios/` | SwiftUI 앱, 실시간 현황 확장 및 번역 |
 | `core/` | 페어링, 기기 터널, 로그인, 서명 및 설치를 담당하는 Rust 코어 |
-| `altpair/` | 컴퓨터 없이 Apple ID로 AltLoad를 설치하는 AltLoad 자체 도구. [README](altpair/README.md)를 참고하십시오 |
+| `altpair/` | 컴퓨터 없이 Apple ID로 AltLoad를 설치하는 AltLoad 자체 도구. [README](https://github.com/mirazbakis/AltPair)를 참고하십시오 |
 | `site/` | GitHub Pages의 설치 페이지 |
 | `signing/` | 서명된 설치용 스크립트 및 인증서 팩 |
 | `docs/` | 가이드, [How it works](docs/HOW-IT-WORKS.md) 및 릴리스 노트 |

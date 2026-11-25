@@ -52,7 +52,7 @@ Vous avez aussi besoin de :
 
 | Méthode | Idéal pour | Comment |
 | :-- | :-- | :-- |
-| **Installation avec identifiant Apple** (recommandée) | Signer avec votre propre identifiant Apple, sans ordinateur et sans profil DNS | Installez trois apps gratuites de l'App Store et suivez les étapes sur [altload.org](https://altload.org/). Voir [altpair/README.md](altpair/README.md) |
+| **Installation avec identifiant Apple** (recommandée) | Signer avec votre propre identifiant Apple, sans ordinateur et sans profil DNS | Installez trois apps gratuites de l'App Store et suivez les étapes sur [altload.org](https://altload.org/). Voir [AltPair](https://github.com/mirazbakis/AltPair) |
 | **Installation directe** | La méthode la plus rapide. Utilise un certificat partagé, donc révocable | Ouvrez [altload.org](https://altload.org/) dans Safari, acceptez les Conditions, ajoutez le profil DNS et touchez une installation signée |
 | **AltStore ou SideStore** | Vous en utilisez déjà un | [Ajoutez la source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) et recevez les mises à jour depuis là |
 | **Votre propre outil de signature** | Vous signez vous-même les IPA | Téléchargez `AltLoad.ipa` depuis les [Versions](https://github.com/mirazbakis/AltLoad/releases) |
@@ -144,7 +144,7 @@ Les guides sont en anglais.
 | [Sources](docs/SOURCES.md) | Ajouter des sources, les mises à jour et les champs qu'AltLoad lit |
 | [Dépannage](docs/TROUBLESHOOTING.md) | Les erreurs et que faire |
 | [Fonctionnement](docs/HOW-IT-WORKS.md) | Jumelage, tunnel, signature et installation, étape par étape |
-| [altpair](altpair/README.md) | Installer AltLoad avec votre identifiant Apple, sans ordinateur |
+| [altpair](https://github.com/mirazbakis/AltPair) | Installer AltLoad avec votre identifiant Apple, sans ordinateur |
 | [Contribuer](CONTRIBUTING.md) | Compilation, organisation du projet et pull requests |
 
 ## Compilation
@@ -163,7 +163,7 @@ Lisez [Contribuer](CONTRIBUTING.md) avant d'ouvrir une pull request.
 | :-- | :-- |
 | `ios/` | L'app SwiftUI, l'extension Live Activity et les traductions |
 | `core/` | Le cœur Rust pour le jumelage, le tunnel vers l'appareil, la connexion, la signature et l'installation |
-| `altpair/` | Les outils propres à AltLoad qui l'installent avec votre identifiant Apple, sans ordinateur. Voir son [README](altpair/README.md) |
+| `altpair/` | Les outils propres à AltLoad qui l'installent avec votre identifiant Apple, sans ordinateur. Voir son [README](https://github.com/mirazbakis/AltPair) |
 | `site/` | La page d'installation sur GitHub Pages |
 | `signing/` | Scripts et packs de certificats pour les installations signées |
 | `docs/` | Guides, [Fonctionnement](docs/HOW-IT-WORKS.md) et notes de version |
