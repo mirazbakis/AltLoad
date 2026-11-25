@@ -96,7 +96,7 @@ pub unsafe extern "C" fn altload_device_run(
         Err(e) => return fail(format!("failed to start runtime: {e}")),
     };
 
-    match rt.block_on(run(pairing, host_name, endpoints, request, cbs)) {
+    match crate::block_on(&rt, run(pairing, host_name, endpoints, request, cbs)) {
         Ok(json) => {
             *out_json = cstr(json.to_string());
             0

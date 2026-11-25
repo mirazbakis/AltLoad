@@ -7,6 +7,35 @@
 
 mod install;
 
+/// Stack for the thread that drives a call's top-level future. The FFI entry points
+/// are called on GCD queue threads, whose 512 KB stack is too small for the tunnel
+/// and install futures (EXC_BAD_ACCESS in the stack guard on altload.device-ops).
+const DRIVER_STACK: usize = 16 * 1024 * 1024;
+
+struct AssertSend<T>(T);
+// Sound here: the value moves to one thread and the caller blocks until it is back.
+unsafe impl<T> Send for AssertSend<T> {}
+
+/// `rt.block_on(fut)`, but on a fresh thread with a large stack. The caller waits.
+pub(crate) fn block_on<F: std::future::Future>(rt: &tokio::runtime::Runtime, fut: F) -> F::Output {
+    let fut = AssertSend(fut);
+    let out = std::thread::scope(|s| {
+        std::thread::Builder::new()
+            .name("altload-driver".into())
+            .stack_size(DRIVER_STACK)
+            .spawn_scoped(s, move || {
+                let fut = fut;
+                AssertSend(rt.block_on(fut.0))
+            })
+            .expect("failed to start driver thread")
+            .join()
+    });
+    match out {
+        Ok(v) => v.0,
+        Err(panic) => std::panic::resume_unwind(panic),
+    }
+}
+
 // The install API, for Rust callers that link this crate as an rlib (altpair/installer).
 pub use install::{
     altload_account_session_run, altload_install_result_free, altload_install_session_cancel,
@@ -120,7 +149,7 @@ pub unsafe extern "C" fn altload_run_host(
         }
     };
 
-    match rt.block_on(run(bind_addr, port, name, model, out_path, cbs)) {
+    match block_on(&rt, run(bind_addr, port, name, model, out_path, cbs)) {
         Ok(res) => {
             (*out).device_name = cstr(res.name);
             (*out).device_model = cstr(res.model);
