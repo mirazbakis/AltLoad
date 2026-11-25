@@ -52,7 +52,7 @@ You also need:
 
 | Route | Best for | How |
 | :-- | :-- | :-- |
-| **Apple ID Install** (recommended) | Signing with your own Apple ID, no computer and no DNS profile | Install three free App Store apps and follow the steps on [altload.org](https://altload.org/). See [altpair/README.md](altpair/README.md) |
+| **Apple ID Install** (recommended) | Signing with your own Apple ID, no computer and no DNS profile | Install three free App Store apps and follow the steps on [altload.org](https://altload.org/). See [AltPair](https://github.com/mirazbakis/AltPair) |
 | **Direct Install** | The fastest route. Uses a shared certificate, so it can be revoked | Open [altload.org](https://altload.org/) in Safari, accept the Terms, add the DNS profile and tap a signed install |
 | **AltStore or SideStore** | You already run one | [Add the source](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json) and get updates there |
 | **Your own signer** | You sign IPAs yourself | Download `AltLoad.ipa` from [Releases](https://github.com/mirazbakis/AltLoad/releases) |
@@ -142,7 +142,7 @@ If a store's sources are all down, get its IPA another way and use **Install IPA
 | [Sources](docs/SOURCES.md) | Adding sources, updates, and the source fields AltLoad reads |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Errors and what to do about them |
 | [How it works](docs/HOW-IT-WORKS.md) | Pairing, the tunnel, signing and installing, step by step |
-| [altpair](altpair/README.md) | Installing AltLoad with your Apple ID, without a computer |
+| [altpair](https://github.com/mirazbakis/AltPair) | Installing AltLoad with your Apple ID, without a computer |
 | [Contributing](CONTRIBUTING.md) | Building, the project layout and pull requests |
 
 ## Building
@@ -161,7 +161,7 @@ See [Contributing](CONTRIBUTING.md) before opening a pull request.
 | :-- | :-- |
 | `ios/` | The SwiftUI app, Live Activity extension and translations |
 | `core/` | The Rust core for pairing, the device tunnel, sign-in, signing and installing |
-| `altpair/` | AltLoad's own tools that install it with your Apple ID, no computer. See its [README](altpair/README.md) |
+| `altpair/` | AltLoad's own tools that install it with your Apple ID, no computer. See its [README](https://github.com/mirazbakis/AltPair) |
 | `site/` | The install page on GitHub Pages |
 | `signing/` | Scripts and certificate packs for the signed installs |
 | `docs/` | Guides, [How it works](docs/HOW-IT-WORKS.md) and release notes |

@@ -52,7 +52,7 @@
 
 | 方式 | 适用场景 | 做法 |
 | :-- | :-- | :-- |
-| **Apple ID 安装**（推荐） | 使用你自己的 Apple ID 签名，无需电脑，也无需 DNS 描述文件 | 安装三款免费的 App Store 应用，并按照 [altload.org](https://altload.org/) 上的步骤操作。参见 [altpair/README.md](altpair/README.md) |
+| **Apple ID 安装**（推荐） | 使用你自己的 Apple ID 签名，无需电脑，也无需 DNS 描述文件 | 安装三款免费的 App Store 应用，并按照 [altload.org](https://altload.org/) 上的步骤操作。参见 [AltPair](https://github.com/mirazbakis/AltPair) |
 | **直接安装** | 最快的方式。使用共享证书，因此可能被吊销 | 在 Safari 中打开 [altload.org](https://altload.org/)，接受条款，添加 DNS 描述文件，然后点按已签名的安装 |
 | **AltStore 或 SideStore** | 你已经在使用其中之一 | [添加源](https://altdirect.app/?url=https://raw.githubusercontent.com/mirazbakis/AltLoad/main/source.json)并在那里获取更新 |
 | **你自己的签名工具** | 你自己为 IPA 签名 | 从[发布版本](https://github.com/mirazbakis/AltLoad/releases)下载 `AltLoad.ipa` |
@@ -144,7 +144,7 @@
 | [Sources](docs/SOURCES.md) | 添加源、更新，以及 AltLoad 读取的源字段 |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | 各种错误及解决方法 |
 | [工作原理](docs/HOW-IT-WORKS.md) | 配对、隧道、签名和安装的每一步 |
-| [altpair](altpair/README.md) | 无需电脑，用你的 Apple ID 安装 AltLoad |
+| [altpair](https://github.com/mirazbakis/AltPair) | 无需电脑，用你的 Apple ID 安装 AltLoad |
 | [Contributing](CONTRIBUTING.md) | 构建、项目结构和 pull request |
 
 ## 构建
@@ -163,7 +163,7 @@ make sim    # 构建模拟器版本
 | :-- | :-- |
 | `ios/` | SwiftUI 应用、实时活动扩展和翻译 |
 | `core/` | 用于配对、设备隧道、登录、签名和安装的 Rust 核心 |
-| `altpair/` | AltLoad 自带的工具，用于在无需电脑的情况下使用你的 Apple ID 安装它。参见其 [README](altpair/README.md) |
+| `altpair/` | AltLoad 自带的工具，用于在无需电脑的情况下使用你的 Apple ID 安装它。参见其 [README](https://github.com/mirazbakis/AltPair) |
 | `site/` | GitHub Pages 上的安装页面 |
 | `signing/` | 已签名安装所用的脚本和证书包 |
 | `docs/` | 指南、[工作原理](docs/HOW-IT-WORKS.md)和发布说明 |

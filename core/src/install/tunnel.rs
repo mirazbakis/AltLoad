@@ -45,7 +45,7 @@ pub(super) async fn open_tunnel_to(
                 Err(e) => {
                     // A rejected pairing file won't fix itself; stop right away.
                     if e.contains("no longer accepts the pairing file") {
-                        return Err(format!("Couldn't open a tunnel to this device ({e})."));
+                        return Err(format!("Couldn't open a tunnel to this device ({e}).\n\n{REPAIR_STEPS}"));
                     }
                     reached_service |= past_pair_verify(&e);
                     // Keep the most telling error: a refused port only means nothing listens there.
@@ -73,7 +73,10 @@ pub(super) async fn open_tunnel_to(
                             SCAN_PORTS.end()
                         );
                     }
-                    Err(e) => return Err(format!("Couldn't open a tunnel to this device ({e}).")),
+                    Err(e) => {
+                        let steps = if e.contains("no longer accepts the pairing file") { REPAIR_STEPS } else { TUNNEL_STEPS };
+                        return Err(format!("Couldn't open a tunnel to this device ({e}).\n\n{steps}"));
+                    }
                 }
             }
         }
@@ -83,11 +86,24 @@ pub(super) async fn open_tunnel_to(
         }
     }
     Err(format!(
-        "Couldn't open a tunnel to this device after {ATTEMPTS} tries ({last_error}). Turn \
-         LocalDevVPN off and on again, turn off any other VPN or proxy app, and make sure \
-         Developer Mode is on."
+        "Couldn't open a tunnel to this device after {ATTEMPTS} tries ({last_error}).\n\n{TUNNEL_STEPS}"
     ))
 }
+
+/// What to try, in order, when the tunnel can't be opened.
+const TUNNEL_STEPS: &str = "Try these in order:\n\
+    1. Turn LocalDevVPN off and on again, then try again.\n\
+    2. Turn off any other VPN, proxy or DNS-filter app.\n\
+    3. Connect to Wi-Fi. On mobile data the tunnel often can't connect.\n\
+    4. Check that Developer Mode is on (Settings › Privacy & Security).\n\
+    5. Close AltLoad from the app switcher and open it again.\n\
+    6. If it still fails, create a new pairing file in the Pair tab.";
+
+/// What to try when the iPhone rejects the pairing file.
+const REPAIR_STEPS: &str = "Try these in order:\n\
+    1. Create a new pairing file in the Pair tab.\n\
+    2. If Pair with AltLoad doesn't show up, restart the iPhone and try again.\n\
+    3. Or make one with altpair.wasm --repair in rootshell and import it.";
 
 /// Where a scan last found remotepairingd. Kept until AltLoad quits.
 static SCANNED_PORT: Mutex<Option<u16>> = Mutex::new(None);
@@ -215,7 +231,7 @@ pub(super) async fn connect_endpoint(
     // The whole setup is time-limited so a stuck step can't hold the lock for good.
     let _turn = match tokio::time::timeout(HANDSHAKE_WAIT, HANDSHAKE.lock()).await {
         Ok(guard) => guard,
-        Err(_) => return Err("timed out waiting for another connection to this device".into()),
+        Err(_) => return Err("timed out waiting for another connection to this device. Wait a moment and try again; if it keeps happening, close AltLoad from the app switcher and open it again".into()),
     };
     match tokio::time::timeout(HANDSHAKE_LIMIT, connect_endpoint_locked(ep, host_name, rpf)).await {
         Ok(result) => result,
@@ -256,7 +272,7 @@ async fn connect_endpoint_locked(
         }
         // Only verify: never fall back to a fresh pair-setup here.
         rpc.validate_pairing(rpf).await.map_err(|_| {
-            "this iPhone no longer accepts the pairing file. Create a new one in the Pair tab.".to_string()
+            "this iPhone no longer accepts the pairing file".to_string()
         })?;
 
         let tunnel_port = rpc

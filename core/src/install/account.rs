@@ -53,7 +53,7 @@ pub unsafe extern "C" fn altload_account_session_run(
         Ok(rt) => rt,
         Err(e) => return fail(format!("failed to start runtime: {e}")),
     };
-    let result = rt.block_on(run_account(
+    let result = crate::block_on(&rt, run_account(
         apple_id,
         password,
         anisette,

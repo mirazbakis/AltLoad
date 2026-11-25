@@ -74,7 +74,7 @@ impl AltLoadDebugSession {
         let mut guard = self.inner.lock().map_err(|_| "The JIT session is broken.".to_string())?;
         let inner = guard.as_mut().ok_or("The JIT session is closed.")?;
         let mut stop = self.stop_tx.subscribe();
-        self.rt.block_on(async {
+        crate::block_on(&self.rt, async {
             tokio::select! {
                 r = f(&mut inner.debug) => r,
                 _ = stop.wait_for(|v| *v) => Err("The JIT session was stopped.".into()),
@@ -201,7 +201,7 @@ pub unsafe extern "C" fn altload_debug_open(
         Ok(rt) => rt,
         Err(e) => return fail(format!("failed to start runtime: {e}")),
     };
-    let opened = rt.block_on(async {
+    let opened = crate::block_on(&rt, async {
         cbs.progress("Opening device link…", -1.0);
         let (mut adapter, mut handshake) = open_tunnel_to(&pairing, &host_name, &endpoints).await?;
         if !ddi_dir.is_empty() {
@@ -325,7 +325,7 @@ pub unsafe extern "C" fn altload_debug_close(session: *mut AltLoadDebugSession) 
     let session = Box::from_raw(session);
     let inner = session.inner.lock().ok().and_then(|mut g| g.take());
     if let Some(mut inner) = inner {
-        session.rt.block_on(async {
+        crate::block_on(&session.rt, async {
             // An app left running needs pausing first; one already detached just
             // answers with an error, which is fine.
             let _ = inner.debug.send_raw(&[0x03]).await;

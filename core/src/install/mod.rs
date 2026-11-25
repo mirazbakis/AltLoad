@@ -387,7 +387,7 @@ pub unsafe extern "C" fn altload_install_session_run(
         }
     };
 
-    let result = rt.block_on(run_install(
+    let result = crate::block_on(&rt, run_install(
         cfg,
         team_id,
         cbs,

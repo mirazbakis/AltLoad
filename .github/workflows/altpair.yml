@@ -1,6 +1,7 @@
 name: Build altpair
 
-# Builds altpair (altpair/installer), the static Linux installer that runs in Open Minis
+# Builds altpair from the altpair submodule (github.com/mirazbakis/AltPair):
+# altpair/installer, the static Linux installer that runs in Open Minis
 # on the iPhone, and altpair.wasm (altpair/pair). Runs by hand
 # (Actions › Build altpair › Run workflow) and when a release is published; on a
 # release the four files are attached to it, so install.sh finds them under
@@ -31,6 +32,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          submodules: true
 
       # musl-tools gives musl-gcc for ring's C and assembly code; nothing else
       # in the tree builds C on Linux.
@@ -102,6 +105,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          submodules: true
 
       - name: Install tools
         run: rustup target add wasm32-wasip1
